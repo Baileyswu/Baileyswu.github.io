@@ -175,7 +175,7 @@
 <p></p><h1>目录<span class="tocSkip"></span></h1><p></p>
 <div class="toc"><ul class="toc-item"><li><span><a href="#基本概念" data-toc-modified-id="基本概念-1">基本概念</a></span><ul class="toc-item"><li><span><a href="#生成观测序列" data-toc-modified-id="生成观测序列-1.1">生成观测序列</a></span></li></ul></li><li><span><a href="#概率计算问题" data-toc-modified-id="概率计算问题-2">概率计算问题</a></span><ul class="toc-item"><li><span><a href="#前向概率" data-toc-modified-id="前向概率-2.1">前向概率</a></span></li><li><span><a href="#后向概率" data-toc-modified-id="后向概率-2.2">后向概率</a></span></li><li><span><a href="#前后向算法" data-toc-modified-id="前后向算法-2.3">前后向算法</a></span></li><li><span><a href="#有什么用" data-toc-modified-id="有什么用-2.4">有什么用</a></span></li></ul></li><li><span><a href="#预测问题" data-toc-modified-id="预测问题-3">预测问题</a></span><ul class="toc-item"><li><span><a href="#Viterbi算法" data-toc-modified-id="Viterbi算法-3.1">Viterbi算法</a></span></li><li><span><a href="#预测缺失" data-toc-modified-id="预测缺失-3.2">预测缺失</a></span></li></ul></li><li><span><a href="#学习问题" data-toc-modified-id="学习问题-4">学习问题</a></span><ul class="toc-item"><li><span><a href="#Baum-Welch模型" data-toc-modified-id="Baum-Welch模型-4.1">Baum-Welch模型</a></span></li></ul></li><li><span><a href="#展望" data-toc-modified-id="展望-5">展望</a></span></li></ul></div>
 
-<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>HMM是一种时序数据模型。<br>设序列长度为 $T$ ，具有<strong>观测序列</strong> $\vec X={\vec x<em>1,\dots,\vec x_T}$ 和<strong>隐变量序列</strong> $\vec Z={\vec z_1,\dots,\vec z_T}$ 。<br>这里认为每一个观测都由对应的隐变量生成。隐变量序列是Markov链，$\vec z_t$只依赖于$\vec z</em>{t-1}$<br><img src="hmm-1.jpg" alt=""></p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>HMM是一种时序数据模型。<br>设序列长度为 $T$ ，具有<strong>观测序列</strong> $\vec X={\vec x<em>1,\dots,\vec x_T}$ 和<strong>隐变量序列</strong> $\vec Z={\vec z_1,\dots,\vec z_T}$ 。<br>这里认为每一个观测都由对应的隐变量生成。隐变量序列是Markov链，$\vec z_t$只依赖于$\vec z</em>{t-1}$<br><img src="/2018/09/hidden-markov-model/hmm-1.jpg" alt=""></p>
 <p>变量都在有限的状态集里变化，<strong>观测的状态集</strong>为 $\vec S={\vec s_1,\dots,\vec s_M}$ ，<strong>隐变量的状态集</strong>为 $\vec H={\vec h_1,\dots,\vec h_N}$ 。<br>因此 $\vec x_t\in \vec S,\vec z_t\in \vec H,t=1,\dots,T$ 。<br>有时需要反向找到某状态是状态集里的第几个，定义 $findindex(\vec z_t)=i$ ，表示 $\vec z_t = \vec h_i$ 。<br>同理也有 $findindex(\vec x_t)=i$ ，表示 $\vec x_t = \vec s_i$ 。  </p>
 <p>隐状态间的<strong>转移矩阵</strong>为 $\vec A=[a<em>{ij}]</em>{N\times N}$ ， $a<em>{ij}$ 是从状态 $\vec h_i$ 转移到 $\vec h_j$ 的概率。<br>从隐状态到观测的<strong>发射矩阵</strong> $\vec B=[b</em>{ij}]<em>{N\times M}$ ， $b</em>{ij}$ 是从状态 $\vec h_i$ 转移到观测 $\vec s_j$ 的概率。<br><strong>初始状态概率</strong>向量为 $\vec \Pi=[\pi_1,\dots,\pi_N]$ 。鉴于初始时没有其他时刻转移到 $t=0$ ，设 $\vec z_0$ 有 $\pi_i$ 的概率属于 $\vec h_i$ 。  </p>
 <p>记 $\lambda=(\vec A, \vec B, \vec \Pi)$ ，为HMM中的参数的集合。  </p>
@@ -196,7 +196,7 @@
 <p>暴力不可解，借用DP的思想，一层一层算，引入<strong>前后向算法</strong>。</p>
 <h3 id="前向概率"><a href="#前向概率" class="headerlink" title="前向概率"></a>前向概率</h3><p>从第 $t$ 层算第 $t+1$ 层，经典的DP的想法。  </p>
 <p><strong>第一层是边界，特判。</strong></p>
-<p><img src="hmm-2.jpg" alt=""></p>
+<p><img src="/2018/09/hidden-markov-model/hmm-2.jpg" alt=""></p>
 <script type="math/tex; mode=display">\begin{align}
 \alpha_t(i)&=P(\vec x_1,\dots,\vec x_t,\vec z_t=\vec h_i|\lambda)\\
 &=\sum_{j=1}^N P(\vec x_1,\dots,\vec x_t,\vec z_{t-1}=\vec h_j,\vec z_t=\vec h_i|\lambda)\\
@@ -221,7 +221,7 @@
 0.000027415470919 0.000273727373458 0.000167754631803 0.000331684138201 
 </code></pre><h3 id="后向概率"><a href="#后向概率" class="headerlink" title="后向概率"></a>后向概率</h3><p>从第 $t$ 层算第 $t-1$ 层，可以认为是 $x<em>t$ 按照概率 $a</em>{ij}$ 枚举了所有的可能。  </p>
 <p><strong>最后一层是边界，特判。</strong></p>
-<p><img src="hmm-3.jpg" alt=""></p>
+<p><img src="/2018/09/hidden-markov-model/hmm-3.jpg" alt=""></p>
 <script type="math/tex; mode=display">\begin{align}
 \beta_t(i)=&P(\vec x_{t+1},\dots,\vec x_T|\vec z_t=\vec h_i,\lambda)\\
 =&\sum_{j=1}^N P(\vec x_{t+1},\dots,\vec x_T,\vec z_{t+1}=\vec h_j|\vec z_t=\vec h_i,\lambda)\\
