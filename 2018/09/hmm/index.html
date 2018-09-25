@@ -16,11 +16,7 @@
   
   
   
-    <meta name="description" content="title: 隐马尔可夫模型（HMM）date:categories: PRMLtags: 
-
-HMMmathjax: true
-
-学习目标：
+    <meta name="description" content="学习目标：
 
 介绍HMM的定义与符号
 讨论HMM的三个基本问题
@@ -30,12 +26,15 @@ HMMmathjax: true
 
 
 每种算法用代码实现
-参考李航的《统计学习方法》（在这里吐槽一下HMM那章下标 $i$...">
+参考李航的《统计学习方法》（在这里吐槽一下HMM那章下标 $i$ 乱用，有些算法不是很ok）
+
+目录
+基本概念生成观测序列概率计算问题前向概率后向概率前后向算法有什么用预测问题Viterbi算法预...">
   
-  <title> [ Ugly Gardon ]</title>
+  <title>隐马尔可夫模型（HMM） [ Ugly Gardon ]</title>
   
   
-    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/bear.ico">
   
   
   <link rel="stylesheet" href="/css/random.css">
@@ -132,21 +131,36 @@ HMMmathjax: true
       
       
   <article id="post">
-    <h1>空标题</h1>
+    <h1>隐马尔可夫模型（HMM）</h1>
     <p class="page-title-sub">
       <span id = "post-title-date">撰写于 2018-09-25</span>
       
         <span id = "post-title-updated">修改于 2018-09-25</span>
       
       
+      <span id = "post-title-categories">分类
+      
+      
+        
+        
+        <a href="/categories/PRML/">PRML</a>
+      
+      </span>
+      
+      
+      <span id = "post-title-tags">
+      标签
+      
+      
+        
+        
+        <a href="/tags/HMM/">HMM</a>
+      
+      </span>
       
     </p>
     
-    <p>title: 隐马尔可夫模型（HMM）<br>date:<br>categories: PRML<br>tags: </p>
-<ul>
-<li>HMM<br>mathjax: true</li>
-</ul>
-<p><strong>学习目标：</strong></p>
+    <p><strong>学习目标：</strong></p>
 <ul>
 <li>介绍HMM的定义与符号</li>
 <li>讨论HMM的三个基本问题<ul>
@@ -161,9 +175,9 @@ HMMmathjax: true
 <p></p><h1>目录<span class="tocSkip"></span></h1><p></p>
 <div class="toc"><ul class="toc-item"><li><span><a href="#基本概念" data-toc-modified-id="基本概念-1">基本概念</a></span><ul class="toc-item"><li><span><a href="#生成观测序列" data-toc-modified-id="生成观测序列-1.1">生成观测序列</a></span></li></ul></li><li><span><a href="#概率计算问题" data-toc-modified-id="概率计算问题-2">概率计算问题</a></span><ul class="toc-item"><li><span><a href="#前向概率" data-toc-modified-id="前向概率-2.1">前向概率</a></span></li><li><span><a href="#后向概率" data-toc-modified-id="后向概率-2.2">后向概率</a></span></li><li><span><a href="#前后向算法" data-toc-modified-id="前后向算法-2.3">前后向算法</a></span></li><li><span><a href="#有什么用" data-toc-modified-id="有什么用-2.4">有什么用</a></span></li></ul></li><li><span><a href="#预测问题" data-toc-modified-id="预测问题-3">预测问题</a></span><ul class="toc-item"><li><span><a href="#Viterbi算法" data-toc-modified-id="Viterbi算法-3.1">Viterbi算法</a></span></li><li><span><a href="#预测缺失" data-toc-modified-id="预测缺失-3.2">预测缺失</a></span></li></ul></li><li><span><a href="#学习问题" data-toc-modified-id="学习问题-4">学习问题</a></span><ul class="toc-item"><li><span><a href="#Baum-Welch模型" data-toc-modified-id="Baum-Welch模型-4.1">Baum-Welch模型</a></span></li></ul></li><li><span><a href="#展望" data-toc-modified-id="展望-5">展望</a></span></li></ul></div>
 
-<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>HMM是一种时序数据模型。<br>设序列长度为 $T$ ，具有<strong>观测序列</strong> $\vec X=\{\vec x_1,\dots,\vec x_T\}$ 和<strong>隐变量序列</strong> $\vec Z=\{\vec z_1,\dots,\vec z_T\}$ 。<br>这里认为每一个观测都由对应的隐变量生成。隐变量序列是Markov链，$\vec z_t$只依赖于$\vec z_{t-1}$<br><img src="https://wx2.sinaimg.cn/mw690/006aIx0Cly1fvbssj51pwj30qw0i4wg1.jpg" alt=""></p>
-<p>变量都在有限的状态集里变化，<strong>观测的状态集</strong>为 $\vec S=\{\vec s_1,\dots,\vec s_M\}$ ，<strong>隐变量的状态集</strong>为 $\vec H=\{\vec h_1,\dots,\vec h_N\}$ 。<br>因此 $\vec x_t\in \vec S,\vec z_t\in \vec H,t=1,\dots,T$ 。<br>有时需要反向找到某状态是状态集里的第几个，定义 $findindex(\vec z_t)=i$ ，表示 $\vec z_t = \vec h_i$ 。<br>同理也有 $findindex(\vec x_t)=i$ ，表示 $\vec x_t = \vec s_i$ 。  </p>
-<p>隐状态间的<strong>转移矩阵</strong>为 $\vec A=[a_{ij}]_{N\times N}$ ， $a_{ij}$ 是从状态 $\vec h_i$ 转移到 $\vec h_j$ 的概率。<br>从隐状态到观测的<strong>发射矩阵</strong> $\vec B=[b_{ij}]_{N\times M}$ ， $b_{ij}$ 是从状态 $\vec h_i$ 转移到观测 $\vec s_j$ 的概率。<br><strong>初始状态概率</strong>向量为 $\vec \Pi=[\pi_1,\dots,\pi_N]$ 。鉴于初始时没有其他时刻转移到 $t=0$ ，设 $\vec z_0$ 有 $\pi_i$ 的概率属于 $\vec h_i$ 。  </p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>HMM是一种时序数据模型。<br>设序列长度为 $T$ ，具有<strong>观测序列</strong> $\vec X={\vec x<em>1,\dots,\vec x_T}$ 和<strong>隐变量序列</strong> $\vec Z={\vec z_1,\dots,\vec z_T}$ 。<br>这里认为每一个观测都由对应的隐变量生成。隐变量序列是Markov链，$\vec z_t$只依赖于$\vec z</em>{t-1}$<br><img src="https://wx2.sinaimg.cn/mw690/006aIx0Cly1fvbssj51pwj30qw0i4wg1.jpg" alt=""></p>
+<p>变量都在有限的状态集里变化，<strong>观测的状态集</strong>为 $\vec S={\vec s_1,\dots,\vec s_M}$ ，<strong>隐变量的状态集</strong>为 $\vec H={\vec h_1,\dots,\vec h_N}$ 。<br>因此 $\vec x_t\in \vec S,\vec z_t\in \vec H,t=1,\dots,T$ 。<br>有时需要反向找到某状态是状态集里的第几个，定义 $findindex(\vec z_t)=i$ ，表示 $\vec z_t = \vec h_i$ 。<br>同理也有 $findindex(\vec x_t)=i$ ，表示 $\vec x_t = \vec s_i$ 。  </p>
+<p>隐状态间的<strong>转移矩阵</strong>为 $\vec A=[a<em>{ij}]</em>{N\times N}$ ， $a<em>{ij}$ 是从状态 $\vec h_i$ 转移到 $\vec h_j$ 的概率。<br>从隐状态到观测的<strong>发射矩阵</strong> $\vec B=[b</em>{ij}]<em>{N\times M}$ ， $b</em>{ij}$ 是从状态 $\vec h_i$ 转移到观测 $\vec s_j$ 的概率。<br><strong>初始状态概率</strong>向量为 $\vec \Pi=[\pi_1,\dots,\pi_N]$ 。鉴于初始时没有其他时刻转移到 $t=0$ ，设 $\vec z_0$ 有 $\pi_i$ 的概率属于 $\vec h_i$ 。  </p>
 <p>记 $\lambda=(\vec A, \vec B, \vec \Pi)$ ，为HMM中的参数的集合。  </p>
 <h3 id="生成观测序列"><a href="#生成观测序列" class="headerlink" title="生成观测序列"></a>生成观测序列</h3><p>输入：$T,\vec S, \vec H, \lambda=(\vec A, \vec B, \vec \Pi)$<br>输出：$\vec X$</p>
 <p>例如：有4个盒子，每个盒子里有若干红球和白球。每次从某盒子抽某色的球，求该序列的颜色。  </p>
@@ -205,7 +219,7 @@ HMMmathjax: true
 0.000069957490644 0.001013556609878 0.000477855580982 0.001307159095334 
 0.000152033491482 0.000182769806126 0.000597514033646 0.000485746192034 
 0.000027415470919 0.000273727373458 0.000167754631803 0.000331684138201 
-</code></pre><h3 id="后向概率"><a href="#后向概率" class="headerlink" title="后向概率"></a>后向概率</h3><p>从第 $t$ 层算第 $t-1$ 层，可以认为是 $x_t$ 按照概率 $a_{ij}$ 枚举了所有的可能。  </p>
+</code></pre><h3 id="后向概率"><a href="#后向概率" class="headerlink" title="后向概率"></a>后向概率</h3><p>从第 $t$ 层算第 $t-1$ 层，可以认为是 $x<em>t$ 按照概率 $a</em>{ij}$ 枚举了所有的可能。  </p>
 <p><strong>最后一层是边界，特判。</strong></p>
 <p><img src="https://wx3.sinaimg.cn/mw690/006aIx0Cly1fvbssjlrywj30tm0kktb1.jpg" alt=""></p>
 <script type="math/tex; mode=display">\begin{align}
@@ -264,7 +278,7 @@ true Z:  [&#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;b
 viterbi: [&#39;box1&#39;, &#39;box2&#39;, &#39;box1&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;]
 YES:  7    NO:  3
 </code></pre><p>错误率很高，准不准看心情。看来生成同一个观测的隐序列有好多条，概率大的那条和真实的那条，并不能保证更加重合。</p>
-<h3 id="预测缺失"><a href="#预测缺失" class="headerlink" title="预测缺失"></a>预测缺失</h3><p>输入：$\vec x_1,\dots,\vec x_{t-1},\vec x_{t+1},\dots,\vec x_{T},\lambda=(\vec A, \vec B, \vec \Pi)$<br>输出：$\vec x_t$</p>
+<h3 id="预测缺失"><a href="#预测缺失" class="headerlink" title="预测缺失"></a>预测缺失</h3><p>输入：$\vec x<em>1,\dots,\vec x</em>{t-1},\vec x<em>{t+1},\dots,\vec x</em>{T},\lambda=(\vec A, \vec B, \vec \Pi)$<br>输出：$\vec x_t$</p>
 <script type="math/tex; mode=display">\begin{align}
 \theta=&\arg\max_k P(\vec x_t=\vec s_k|\vec x_1,\dots,\vec x_{t-1},\vec x_{t+1},\dots,\vec x_{T},\lambda)\\
 =&\arg\max_k {P(\vec X|\lambda)\over P(\vec x_1,\dots,\vec x_{t-1},\vec x_{t+1},\dots,\vec x_{T}|\lambda)}~~~~~~~~\vec x_t=\vec s_k\\
@@ -292,7 +306,7 @@ Truth:  white        Result:  white
 <p>借助：$P(\vec X|\lambda)$用最大似然估计参数，EM算法计算参数。</p>
 <h3 id="Baum-Welch模型"><a href="#Baum-Welch模型" class="headerlink" title="Baum-Welch模型"></a>Baum-Welch模型</h3><p>记给定观测和参数下的 $\vec z_t=\vec h_i$ 的概率</p>
 <script type="math/tex; mode=display">\gamma_t(i)=P(\vec z_t=\vec h_i|\vec X, \lambda)={P(\vec z_t=\vec h_i,\vec X|\lambda)\over P(\vec X|\lambda)}=
-{\alpha_t(i)\beta_{t}(i)\over \sum_{i=1}^N \alpha_t(i)\beta_{t}(i) }</script><p>记给定观测和参数下的 $\vec z_t=\vec h_i,\vec z_{t+1}=\vec h_j$ 的概率</p>
+{\alpha_t(i)\beta_{t}(i)\over \sum_{i=1}^N \alpha_t(i)\beta_{t}(i) }</script><p>记给定观测和参数下的 $\vec z<em>t=\vec h_i,\vec z</em>{t+1}=\vec h_j$ 的概率</p>
 <script type="math/tex; mode=display">\xi_t(i,j)=P(\vec z_t=\vec h_i,\vec z_{t+1}=\vec h_j|\vec X, \lambda)={P(\vec z_t=\vec h_i,\vec z_{t+1}=\vec h_j,\vec X|\lambda)\over P(\vec X|\lambda)}=
 {\alpha_t(i)a_{ij}b_{jk}\beta_{t+1}(j)\over \sum_{i=1}^N \alpha_t(i)\beta_{t}(i) }~~~~~~~~k=findindex(\vec x_{t+1})</script><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cal_gamma</span><span class="params">(T, S, H, A, B, pi, alpha, beta)</span>:</span></span><br><span class="line">    N = len(H)</span><br><span class="line">    gamma = []</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> range(T):</span><br><span class="line">        d = forword_backword(alpha, beta, t, T, S, H, A, B, pi)</span><br><span class="line">        gm = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(N):</span><br><span class="line">            gm.append(alpha[t][i]*beta[t][i]/d)</span><br><span class="line">        gamma.append(gm)</span><br><span class="line">    <span class="keyword">return</span> gamma</span><br></pre></td></tr></table></figure>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cal_xi</span><span class="params">(T, S, H, A, B, pi, alpha, beta)</span>:</span></span><br><span class="line">    N = len(H)</span><br><span class="line">    xi = []</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> range(T<span class="number">-1</span>):</span><br><span class="line">        d = forword_backword(alpha, beta, t, T, S, H, A, B, pi)</span><br><span class="line">        tx = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(N):</span><br><span class="line">            ty = []</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> range(N):</span><br><span class="line">                ty.append(alpha[t][i]*A[i][j]*B[j][S.index(X[t+<span class="number">1</span>])]*beta[t+<span class="number">1</span>][j]/d)</span><br><span class="line">            tx.append(ty)</span><br><span class="line">        xi.append(tx)</span><br><span class="line">    <span class="keyword">return</span> xi</span><br></pre></td></tr></table></figure>
