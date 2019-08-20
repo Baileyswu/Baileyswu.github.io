@@ -75,6 +75,8 @@ script:
 
 ![After Commit](commit-log.png)
 
+---
+
 ## Debug Travis CI Failure
 
 ### travis.com != travis.org
