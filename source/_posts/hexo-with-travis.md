@@ -86,7 +86,7 @@ script:
 git clone --branch master https://github.com/Baileyswu/Baileyswu.github.io.git .deploy_git
 ```
 
-如果你又不小心选择了Tra下的这两个选项
+如果你又不小心选择了 Travis CI 下的这两个选项
 
 General
 - Build pushed branches   
