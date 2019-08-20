@@ -10,8 +10,8 @@ cache:
   - node_modules
 
 branches:
-  only:
-  - blog_source
+  except:
+  - master
 
 before_install:
 - git config --global user.name "Baileyswu"
