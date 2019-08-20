@@ -1,0 +1,6 @@
+[submodule "themes/hexo-theme-random"]
+	path = themes/hexo-theme-random
+	url = git@github.com:Baileyswu/hexo-theme-random.git
+[submodule "themes/hexo-theme-random-master"]
+	path = themes/hexo-theme-random-master
+	url = git@github.com:Baileyswu/hexo-theme-random.git
