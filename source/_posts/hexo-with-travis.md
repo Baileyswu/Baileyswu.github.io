@@ -24,7 +24,7 @@ author:
 
 ## Operating Mechanism 
 
-详细的说明借用 [这个说明](https://github.com/gymgle/g2ex.github.io/blob/d105dc258a9184b667578d9196c223a567fe2269/source/_posts/2019-06-28-hexo-with-travis-ci.md) 里的图片 ![Operating Mechanism](operating.png)
+借用 [这个说明](https://github.com/gymgle/g2ex.github.io/blob/d105dc258a9184b667578d9196c223a567fe2269/source/_posts/2019-06-28-hexo-with-travis-ci.md) 里的图片 ![Operating Mechanism](operating.png)
 
 可以发现 Travis CI 给我们提供了一个跑 Hexo 的地方，使得我们的编辑更加轻松。
 
