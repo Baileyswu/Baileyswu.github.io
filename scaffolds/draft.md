@@ -1,4 +1,8 @@
 ---
 title: {{ title }}
+date: {{ date }}
+categories:
 tags:
+photos:
+author: 
 ---
