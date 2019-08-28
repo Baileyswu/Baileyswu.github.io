@@ -63,73 +63,73 @@ using namespace std;
 std::vector<int> v[N], w[N];
 int vis[N], a[2*N], flag[N], clk, tuan[N], out[N], fn, n, m;
 void dfs(int x){
-	vis[x] = 1;
-	a[clk++] = x;
-	for(int j = 0;j < v[x].size();j++)
-		if(!vis[v[x][j]])
-			dfs(v[x][j]);
-	a[clk++] = x;
+    vis[x] = 1;
+    a[clk++] = x;
+    for(int j = 0;j < v[x].size();j++)
+        if(!vis[v[x][j]])
+            dfs(v[x][j]);
+    a[clk++] = x;
 }
 void strong(int x, int f){
-	vis[x] = 1;
-	flag[x] = f;
-	tuan[f]++;
-	for(int j = 0;j < w[x].size();j++)
-		if(!vis[w[x][j]])
-			strong(w[x][j], f);
+    vis[x] = 1;
+    flag[x] = f;
+    tuan[f]++;
+    for(int j = 0;j < w[x].size();j++)
+        if(!vis[w[x][j]])
+            strong(w[x][j], f);
 }
 void solve(){
-	if(fn == 1){
-		printf("%d\n", n);
-		return;
-	}
-	memset(out, 0, sizeof(out));
-	for(int i = 0;i < n;i++)
-		for(int j = 0;j < v[i].size();j++)
-			if(flag[i] != flag[v[i][j]])
-				out[flag[i]]++;
-	int ans = 0, cc = 0;
-	for(int i = 1;i <= fn;i++){
-		if(out[i] == 0){
-			ans = i;
-			cc++;
-		}
-	}
-	if(cc > 1) ans = 0;
-	else ans = tuan[ans];
-	printf("%d\n", ans);
+    if(fn == 1){
+        printf("%d\n", n);
+        return;
+    }
+    memset(out, 0, sizeof(out));
+    for(int i = 0;i < n;i++)
+        for(int j = 0;j < v[i].size();j++)
+            if(flag[i] != flag[v[i][j]])
+                out[flag[i]]++;
+    int ans = 0, cc = 0;
+    for(int i = 1;i <= fn;i++){
+        if(out[i] == 0){
+            ans = i;
+            cc++;
+        }
+    }
+    if(cc > 1) ans = 0;
+    else ans = tuan[ans];
+    printf("%d\n", ans);
 }
 int main()
 {
-	while(~scanf("%d%d", &n, &m)){
-		for(int i = 0;i < n;i++){
-			v[i].clear();
-			w[i].clear();
-		}
-		memset(a, 0, sizeof(a));
-		memset(vis, 0, sizeof(vis));
-		memset(flag, 0, sizeof(flag));
-		memset(tuan, 0, sizeof(tuan));
-		while(m--){
-			int x, y;
-			scanf("%d%d", &x, &y);
-			x--; y--;
-			v[x].push_back(y);
-			w[y].push_back(x);
-		}
-		clk = 0;
-		for(int i = 0;i < n;i++){
-			if(vis[i]) continue;
-			dfs(i);
-		}
-		memset(vis, 0, sizeof(vis));
-		fn = 0;
-		for(int i = 2*n-1;i >= 0;i--) 
-			if(!vis[a[i]])
-				strong(a[i], ++fn);
-		solve();
-	}
-	return 0;
+    while(~scanf("%d%d", &n, &m)){
+        for(int i = 0;i < n;i++){
+            v[i].clear();
+            w[i].clear();
+        }
+        memset(a, 0, sizeof(a));
+        memset(vis, 0, sizeof(vis));
+        memset(flag, 0, sizeof(flag));
+        memset(tuan, 0, sizeof(tuan));
+        while(m--){
+            int x, y;
+            scanf("%d%d", &x, &y);
+            x--; y--;
+            v[x].push_back(y);
+            w[y].push_back(x);
+        }
+        clk = 0;
+        for(int i = 0;i < n;i++){
+            if(vis[i]) continue;
+            dfs(i);
+        }
+        memset(vis, 0, sizeof(vis));
+        fn = 0;
+        for(int i = 2*n-1;i >= 0;i--) 
+            if(!vis[a[i]])
+                strong(a[i], ++fn);
+        solve();
+    }
+    return 0;
 }
 ```
 
@@ -153,22 +153,22 @@ int main()
 
 ```cpp
 void Tarjan(u) {
-	dfn[u]=low[u]=++index
-	stack.push(u)
-	for each (u, v) in E {
-		if (v is not visted) { 
-			tarjan(v) 
-			low[u] = min(low[u], low[v]) 
-		} else if (v in stack) { 
-			low[u] = min(low[u], dfn[v]) //low[u] = min(low[u], low[v])
-		} 
-	} 
-	if (dfn[u] == low[u]) { //u是一个强连通分量的根 
-		repeat 
-			v = stack.pop 
-			print v 
-		until (u == v) 
-	} //退栈，把整个强连通分量都弹出来 
+    dfn[u]=low[u]=++index
+    stack.push(u)
+    for each (u, v) in E {
+        if (v is not visted) { 
+            tarjan(v) 
+            low[u] = min(low[u], low[v]) 
+        } else if (v in stack) { 
+            low[u] = min(low[u], dfn[v]) //low[u] = min(low[u], low[v])
+        } 
+    } 
+    if (dfn[u] == low[u]) { //u是一个强连通分量的根 
+        repeat 
+            v = stack.pop 
+            print v 
+        until (u == v) 
+    } //退栈，把整个强连通分量都弹出来 
 } //复杂度是O(E+V)的
 ```
 若有一个子图的`low[i]`值相同，则这个子图即为一个强连通分量。可以考虑该子图中的任何一点j，设`low[j]=a=dfn[i]`，则`j`可以到达`i`点；同时`dfn[i]=a<=dfn[j]`，即`j`是经`i`点dfs得到的，则`i`可以到达`j`点。`i`点可以到达子图中的任意一点并返回至`i`点。因此该子图是强连通的。且有`low[i]=dfn[i]`。
@@ -208,45 +208,45 @@ int n, m, ans;
 std::vector<int> v[N];
 int vis[N], dfn[N], low[N], stk[N], top, ins[N], clk;
 void Tarjon(int x){
-	dfn[x] = low[x] = clk++;
-	stk[top++] = x;
-	vis[x] = ins[x] = 1;
-	for(int j = 0;j < v[x].size();j++){
-		int y = v[x][j];
-		if(!vis[y]){
-			Tarjon(y);
-			low[x] = min(low[x], low[y]);
-		} else if(ins[y]){
-			low[x] = min(low[x], dfn[y]);
-		}
-	}
-	if(low[x] == dfn[x]){
-		int sz = 0;
-		do {
-			ins[stk[top-1]] = 0;
-			top--;
-			sz++;
-		} while(stk[top] != x);
-		if(sz > 1) ans++;
-	}
+    dfn[x] = low[x] = clk++;
+    stk[top++] = x;
+    vis[x] = ins[x] = 1;
+    for(int j = 0;j < v[x].size();j++){
+        int y = v[x][j];
+        if(!vis[y]){
+            Tarjon(y);
+            low[x] = min(low[x], low[y]);
+        } else if(ins[y]){
+            low[x] = min(low[x], dfn[y]);
+        }
+    }
+    if(low[x] == dfn[x]){
+        int sz = 0;
+        do {
+            ins[stk[top-1]] = 0;
+            top--;
+            sz++;
+        } while(stk[top] != x);
+        if(sz > 1) ans++;
+    }
 }
 int main()
 {
-	while(~scanf("%d%d", &n, &m)){
-		memset(v, 0, sizeof(v));
-		for(int i = 0;i < m;i++){
-			int x, y;scanf("%d%d", &x, &y);
-			x--; y--;
-			v[x].push_back(y);
-		}
-		memset(vis, 0, sizeof(vis));
-		memset(ins, 0, sizeof(ins));
-		top = ans = clk = 0;
-		for(int i = 0;i < n;i++) if(!vis[i])
-			Tarjon(i);
-		printf("%d\n", ans);
-	}
-	return 0;
+    while(~scanf("%d%d", &n, &m)){
+        memset(v, 0, sizeof(v));
+        for(int i = 0;i < m;i++){
+            int x, y;scanf("%d%d", &x, &y);
+            x--; y--;
+            v[x].push_back(y);
+        }
+        memset(vis, 0, sizeof(vis));
+        memset(ins, 0, sizeof(ins));
+        top = ans = clk = 0;
+        for(int i = 0;i < n;i++) if(!vis[i])
+            Tarjon(i);
+        printf("%d\n", ans);
+    }
+    return 0;
 }
 ```
 ####[POJ 2762](http://poj.org/problem?id=2762) Going from u to v or from v to u?

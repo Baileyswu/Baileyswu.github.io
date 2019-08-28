@@ -5,6 +5,7 @@ categories: 技术
 tags: 
 - K8S
 - pod
+- Docker
 photos:
 author:
 ---
