@@ -4,7 +4,7 @@ date: 2019-03-21 19:28:16
 categories: PRML
 tags: 
  - sampling
- - Bayesian
+ - "Bayesian Inference"
 author:
 ---
 
