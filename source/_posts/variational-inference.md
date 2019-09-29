@@ -95,8 +95,8 @@ $$
 
 > black box criteria  
 -  sample from $ q(\beta, \mathbf{z}) $ 
--  evaluate $q(\beta, \mathbf{z})} $  
--  evaluate $\log p(\beta, \mathbf{z}, \mathbf{x})}$  
+-  evaluate $q(\beta, \mathbf{z})$  
+-  evaluate $\log p(\beta, \mathbf{z}, \mathbf{x})$  
 
 有以下两种策略：
 - Score gradients
@@ -117,7 +117,7 @@ $$
 $$
 
 需要做的步骤：  
--  Sampling from $ q(\mathbf{z})}$
+-  Sampling from $ q(\mathbf{z})$
 -  Evaluating $ \nabla_{v} \log q(\mathbf{z} ; v) $
 -  Evaluating $ \log p(\mathbf{x}, \mathbf{z})$ and $ \log q(\mathbf{z}) $
 
