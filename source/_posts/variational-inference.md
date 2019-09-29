@@ -39,17 +39,17 @@ $$
 KL 不易计算，因此 VI 优化 **证据下界（ELBO）** 来求解。
 
 $$
-\mathscr{L}(v)=\mathbb{E}_{q}[\log p(\beta, \mathbf{z}, \mathbf{x})]-\mathbb{E}_{q}[\log q(\beta, \mathbf{z} ; v)]
+\mathscr{L}(\nu)=\underbrace{\mathbb{E}_{q}[\log p(\beta, \mathbf{z}, \mathbf{x})]}_{\text {Expected complete log likelihood }}-\underbrace{\mathbb{E}_{q}[\log q(\beta, \mathbf{z} ; \boldsymbol{v})]}_{\text {Negative entropy }}
 $$
 
-第一项相当于联合似然，要尽可能大。第二项则相当于变分分布的熵，使其 diffuse.
+第一项相当于联合似然，要尽可能大。第二项则相当于变分分布的熵取反，使 q 分布 diffuse.
 
 还有一种分解 ELBO 的方式：
 $$
-\mathscr{L}(v)=\mathbb{E}_{q}[\log p(\mathbf{x} | \beta, \mathbf{z})]-\operatorname{KL}(q(\beta, \mathbf{z} ; v) \| p(\beta, \mathbf{z}))
+\mathscr{L}(\nu)=\underbrace{\mathbb{E}_{q}[\log p(\mathbf{x} | \beta, \mathbf{z})]}_{\text {Expected log likelihood of data }}-\underbrace{\operatorname{KL}(q(\beta, \mathbf{z} ; \boldsymbol{v}) \| p(\beta, \mathbf{z}))}_{\text {KL between variational and prior }}
 $$
 
-第一项相当于似然，第二项是变分分布和先验的 KL 散度。
+第一项相当于似然，第二项是变分分布和真实分布的 KL 散度。
 
 注意 ELBO 不一定是凸的。
 
@@ -57,9 +57,9 @@ $$
 
 ![](variational-inference/Mean-field.png)
 
-隐变量之间相互独立，则可以假设各自的分布。在优化其中一个参数时，固定住其他参数，进行优化。再迭代优化出所有参数。与 Gibbs Sampling 具有一些关联。
+平均场近似是指隐变量之间相互独立，则可以假设各自的分布。在优化其中一个变量时，固定住其他变量，进行优化。再迭代优化出所有变量。与 Gibbs Sampling 具有一些关联。
 
-与 EM 类似，比较依赖于初始化参数。由于非凸，只能取到局部最优值。
+与 EM 类似，比较依赖于初始化设置，不同的初始化会得到截然不同的结果。由于非凸，只能取到局部最优值。
 
 ### Stochastic VI
 
@@ -80,6 +80,69 @@ $$
 
 ## Black box VI
 
+在推导模型时，求似然、后验、梯度等工作往往是费时费力的。能否将这些推理都放入黑盒中，我们最后只要输出后验？
+
+Define
+$$
+g(\mathbf{z}, v)=\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v)
+$$
+可以推导出
+$$
+\nabla_{\nu} \mathscr{L}=\mathbb{E}_{q(\mathbf{z} ; \nu)}\left[\nabla_{\nu} \log q(\mathbf{z} ; \nu) g(\mathbf{z}, \nu)+\nabla_{\nu} g(z, \nu)\right]
+$$
+
+黑盒 VI 的主要目标是写出 ELBO 的梯度的期望，从变分分布 q 中采样，用 Monte Carlo 估计出梯度的值，并进行随机优化，更新 q，迭代至收敛。
+
+> black box criteria  
+-  sample from $ q(\beta, \mathbf{z}) $ 
+-  evaluate $q(\beta, \mathbf{z})} $  
+-  evaluate $\log p(\beta, \mathbf{z}, \mathbf{x})}$  
+
+有以下两种策略：
+- Score gradients
+- Reparameterization gradients
+
+### Score Function Gradients
+
+See [score function](http://mathworld.wolfram.com/ScoreFunction.html), it is called *likelihood ratio* or *REINFORCE gradient*.
+
+ELBO 的梯度可写为：  
+$$
+\nabla_{v} \mathscr{L}=\mathbb{E}_{q(\mathbf{z} ; v)}[\underbrace{\nabla_{v} \log q(\mathbf{z} ; v)}_{\text {score function }}(\underbrace{\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v))}_{\text {instantaneous ELBO }}]
+$$
+
+它的 noisy unbiased gradient 可以用 MC 得到：
+$$
+\begin{array}{r}{\frac{1}{S} \sum_{s=1}^{S} \nabla_{v} \log q\left(\mathbf{z}_{s} ; v\right)\left(\log p\left(\mathbf{x}, \mathbf{z}_{s}\right)-\log q\left(\mathbf{z}_{s} ; v\right)\right)} \\ {\text { where } \mathbf{z}_{s} \sim q(\mathbf{z} ; v)}\end{array}
+$$
+
+需要做的步骤：  
+-  Sampling from $ q(\mathbf{z})}$
+-  Evaluating $ \nabla_{v} \log q(\mathbf{z} ; v) $
+-  Evaluating $ \log p(\mathbf{x}, \mathbf{z})$ and $ \log q(\mathbf{z}) $
+
+这个方法适用于离散或连续的模型，但是 noisy gradient 的方差可能会很大。
+
+### Reparameterization gradients
+
+假设 $ \log p(\mathbf{x}, \mathbf{z})$ 和 $ \log q(\mathbf{z}) $ 关于 z 可微，可以将 z 分解成如下形式：
+
+$$
+\begin{aligned} \epsilon & \sim \operatorname{Normal}(0,1) \\ z &=\epsilon \sigma+\mu \\ & \rightarrow z \sim \operatorname{Normal}\left(\mu, \sigma^{2}\right) \end{aligned}
+$$
+
+这样不确定性就被转移到了 $\epsilon$.
+
+$$
+\nabla_{v} \mathscr{L}=\mathbb{E}_{s(e)}[\underbrace{\nabla_{z}[\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v)]}_{\text {gradient of instanneous ELBO }} \underbrace{\nabla_{v} t(\epsilon, v)}_{\text {gradient of transformation }}]
+$$
+
+它的 noisy gradient 可以写成：
+$$
+\begin{array}\tilde{g}_{t}=\frac{1}{S} \sum_{s=1}^{S} \nabla_{z}\left[\log p\left(\mathbf{x}, t\left(\epsilon_{s}, v_{n}\right)\right)-\log q\left(t\left(\epsilon_{s}, v_{n}\right) ; v_{n}\right)\right] \nabla_{v} t\left(\epsilon_{s}, v_{n}\right) \\ {\text { where } \epsilon_{s} \sim s(\epsilon) \quad s=1 \ldots S}\end{array}
+$$
+
+这个方法要求模型必须可微。但是 noisy gradient 的方差是可控的。
 
 ## Reference
 - [Variational Inference: Foundations and Modern Methods PDF](https://media.nips.cc/Conferences/2016/Slides/6199-Slides.pdf)
