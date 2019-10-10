@@ -1,10 +1,13 @@
 ---
-title: 变分推理
+title: 变分推理与黑盒推理
 date: 2019-09-28 23:19:10
 categories: PRML
 tags:
  - VI
+ - BBVI
  - 指数族分布
+ - ELBO
+ - Reparameterization
 
 ---
 
@@ -76,9 +79,27 @@ $$
 \begin{aligned} j & \sim \text { Uniform }(1, \ldots, n) \\ \hat{\nabla}_{\lambda}^{\text {nat }} \mathscr{L}(\lambda) &=\alpha+n \mathbb{E}_{\phi_{j}^{*}}\left[t\left(Z_{j}, x_{j}\right)\right]-\lambda \end{aligned}
 $$
 
-这样一个数据点就可以更新整个自然梯度。需要满足的前提是 noisy natural gradient 是无偏的。
+这样一个数据点就可以更新整个自然梯度。需要满足的前提是 noisy natural gradient 是无偏的，即$\mathbb{E}\left[\hat{\nabla}_{v} \mathscr{L}(v)\right]=\nabla_{v} \mathscr{L}(v)$。
+
+### Recipe
+
+一般的分布遵循以下步骤即可近似出后验分布：
+
+1. Start with a model 
+    $p(\mathbf{z}, \mathbf{x})$
+2. 选择合适的变分分布
+    $q(\mathbf{z} ; v)$
+3. 根据两种拆分方式写出 ELBO，如
+    $\mathscr{L}(v)=\mathbb{E}_{q(\mathbf{z} ; v)}[\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v)]$
+4. 积分得到 ELBO
+    Example: $\mathscr{L}(v)=x v^{2}+\log v$
+5. 关于变分参数求梯度，优化 ELBO
+    Example: $\nabla_{v} \mathscr{L}(v)=2 x v+\frac{1}{v}$
+    $v_{t+1}=\nu_{t}+\rho_{t} \nabla_{\nu} \mathscr{L}$
 
 ## Black box VI
+
+先积分 ELBO 再求梯度往往是比较困难的。是否可以先求梯度再积分，最后进行优化？
 
 在推导模型时，求似然、后验、梯度等工作往往是费时费力的。能否将这些推理都放入黑盒中，我们最后只要输出后验？
 
@@ -91,14 +112,17 @@ $$
 \nabla_{\nu} \mathscr{L}=\mathbb{E}_{q(\mathbf{z} ; \nu)}\left[\nabla_{\nu} \log q(\mathbf{z} ; \nu) g(\mathbf{z}, \nu)+\nabla_{\nu} g(z, \nu)\right]
 $$
 
-黑盒 VI 的主要目标是写出 ELBO 的梯度的期望，从变分分布 q 中采样，用 Monte Carlo 估计出梯度的值，并进行随机优化，更新 q，迭代至收敛。
+这样就把求梯度放在了积分里面。这样就可以从变分分布 q 中采样，用 Monte Carlo 估计出 q 的梯度，并进行随机优化，更新 q；迭代至收敛。
 
-> black box criteria  
+黑盒 VI 的主要目标是不论模型如何，我们只要做下面这三件事，其余的不用推理。最后黑盒可以输出近似的变分分布作为后验分布。
+
+> Black Box Criteria  
 -  sample from $ q(\beta, \mathbf{z}) $ 
--  evaluate $q(\beta, \mathbf{z})$  
+-  evaluate $q(\beta, \mathbf{z})$ or function of $q$  
 -  evaluate $\log p(\beta, \mathbf{z}, \mathbf{x})$  
 
-有以下两种策略：
+有以下两种策略都符合 BBC：
+
 - Score gradients
 - Reparameterization gradients
 
@@ -106,24 +130,29 @@ $$
 
 See [score function](http://mathworld.wolfram.com/ScoreFunction.html), it is called *likelihood ratio* or *REINFORCE gradient*.
 
-ELBO 的梯度可写为：  
+当$\mathbb{E}_{q}\left[\nabla_{v} g(\mathbf{z}, v)\right]=\mathbb{E}_{q}\left[\nabla_{v} \log q(\mathbf{z} ; v)\right]=0$，则 ELBO 的梯度可写为：  
 $$
 \nabla_{v} \mathscr{L}=\mathbb{E}_{q(\mathbf{z} ; v)}[\underbrace{\nabla_{v} \log q(\mathbf{z} ; v)}_{\text {score function }}(\underbrace{\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v))}_{\text {instantaneous ELBO }}]
 $$
 
 它的 noisy unbiased gradient 可以用 MC 得到：
 $$
-\begin{array}{r}{\frac{1}{S} \sum_{s=1}^{S} \nabla_{v} \log q\left(\mathbf{z}_{s} ; v\right)\left(\log p\left(\mathbf{x}, \mathbf{z}_{s}\right)-\log q\left(\mathbf{z}_{s} ; v\right)\right)} \\ {\text { where } \mathbf{z}_{s} \sim q(\mathbf{z} ; v)}\end{array}
+\begin{array}{r}{\nabla_{\nu}^{\mathrm{nat} \mathscr{L}=\frac{1}{S} \sum_{s=1}^{S} \nabla_{v} \log q\left(\mathbf{z}_{s} ; v\right)\left(\log p\left(\mathbf{x}, \mathbf{z}_{s}\right)-\log q\left(\mathbf{z}_{s} ; v\right)\right)} \\ {\text { where } \mathbf{z}_{s} \sim q(\mathbf{z} ; v)}\end{array}
 $$
 
-需要做的步骤：  
+更新 $q$ 时，有
+$$
+\nu=\nu+\rho\nabla_{\nu}^{\mathrm{nat} \mathscr{L}
+$$
+
+因此实际上需要做的步骤：  
 -  Sampling from $ q(\mathbf{z})$
 -  Evaluating $ \nabla_{v} \log q(\mathbf{z} ; v) $
 -  Evaluating $ \log p(\mathbf{x}, \mathbf{z})$ and $ \log q(\mathbf{z}) $
 
 这个方法适用于离散或连续的模型，但是 noisy gradient 的方差可能会很大。
 
-### Reparameterization gradients
+### Reparameterization gradients (Pathwise Gradients of the ELBO)
 
 假设 $ \log p(\mathbf{x}, \mathbf{z})$ 和 $ \log q(\mathbf{z}) $ 关于 z 可微，可以将 z 分解成如下形式：
 
@@ -134,7 +163,7 @@ $$
 这样不确定性就被转移到了 $\epsilon$.
 
 $$
-\nabla_{v} \mathscr{L}=\mathbb{E}_{s(e)}[\underbrace{\nabla_{z}[\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v)]}_{\text {gradient of instanneous ELBO }} \underbrace{\nabla_{v} t(\epsilon, v)}_{\text {gradient of transformation }}]
+\nabla_{v} \mathscr{L}=\mathbb{E}_{s(\epsilon_)}[\underbrace{\nabla_{z}[\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v)]}_{\text {gradient of instanneous ELBO }} \underbrace{\nabla_{v} t(\epsilon, v)}_{\text {gradient of transformation }}]
 $$
 
 它的 noisy gradient 可以写成：
