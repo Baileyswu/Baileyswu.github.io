@@ -137,12 +137,12 @@ $$
 
 它的 noisy unbiased gradient 可以用 MC 得到：
 $$
-\begin{array}{r}{\nabla_{\nu}^{\mathrm{nat} \mathscr{L}=\frac{1}{S} \sum_{s=1}^{S} \nabla_{v} \log q\left(\mathbf{z}_{s} ; v\right)\left(\log p\left(\mathbf{x}, \mathbf{z}_{s}\right)-\log q\left(\mathbf{z}_{s} ; v\right)\right)} \\ {\text { where } \mathbf{z}_{s} \sim q(\mathbf{z} ; v)}\end{array}
+\begin{array}{r}{\hat{\nabla}_{\nu} \mathscr{L}=\frac{1}{S} \sum_{s=1}^{S} \nabla_{v} \log q\left(\mathbf{z}_{s} ; v\right)\left(\log p\left(\mathbf{x}, \mathbf{z}_{s}\right)-\log q\left(\mathbf{z}_{s} ; v\right)\right)} \\ {\text { where } \mathbf{z}_{s} \sim q(\mathbf{z} ; v)}\end{array}
 $$
 
 更新 $q$ 时，有
 $$
-\nu=\nu+\rho\nabla_{\nu}^{\mathrm{nat} \mathscr{L}
+\nu=\nu+\rho\hat{\nabla}_{\nu} \mathscr{L}
 $$
 
 因此实际上需要做的步骤：  
