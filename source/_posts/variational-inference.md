@@ -18,15 +18,9 @@ tags:
 
 流程一般是提出假设，挖掘出特征，得到预测，修改模型，提出假设……迭代进行。
 
-**概率机器学习**的目标是学习出后验，即$p(z|x)={p(z,x) \over p(x)}$。其中联合概率可以用生成式得到，关于分母则需要边缘化隐变量，因此不易求得。
+**概率机器学习**的目标是学习出后验，即 $p(z|x)={p(z,x) \over p(x)}$。其中联合概率可以用生成式得到，关于分母则需要边缘化隐变量，因此不易求得。
 
 ## Variational Inference
-
-![](variational-inference/VI-family.png)
-
-找到一个后验的近似分布 $q(z;v)$ 使得它们的 KL 散度尽量小。
-
-先选择一个**分布族**，再在该分布族里优化参数 $v$，使得 KL 散度最小，此时是最优的后验分布 $q(z;v^*)$.
 
 > 指数族分布  
 $$
@@ -37,24 +31,42 @@ $$
 - $a(\eta)$ the log normalizer
 - $h(x)$ the base density
 
+![](variational-inference/VI-family.png)
+
+找到一个后验的近似分布 $q(z;\nu)$ 使得它们的 KL 散度尽量小。
+
+先选择一个**分布族**，如指数分布族，再在该分布族里优化参数 $\nu$，使得 KL 散度最小，此时是最优的后验分布 $q(z;\nu^*)$，即
+$$
+q_{\nu}^{*}(z | x)=\arg \min _{\nu} \mathbb{K} \mathbb{L}\left(q_{\nu}(z | x) \| p(z | x)\right)
+$$
+但由于真实后验为
+$$
+p(z | x)=\frac{p(x, z)}{p(x)}
+$$
+无从计算，因此很难从优化 KL 散度的角度入手。
+
+由于
+$$
+\log p(x)=\mathscr{L}(\nu)+\mathbb{K} \mathbb{L}\left(q_{\nu}(z | x) \| p(z | x)\right)
+$$
+可以最大化 **证据下界（ELBO）** 进行优化。
+
 ### ELBO
 
-KL 不易计算，因此 VI 优化 **证据下界（ELBO）** 来求解。
-
 $$
-\mathscr{L}(\nu)=\underbrace{\mathbb{E}_{q}[\log p(\beta, \mathbf{z}, \mathbf{x})]}_{\text {Expected complete log likelihood }}-\underbrace{\mathbb{E}_{q}[\log q(\beta, \mathbf{z} ; \boldsymbol{v})]}_{\text {Negative entropy }}
+\mathscr{L}(\nu)=\underbrace{\mathbb{E}_{q}[\log p(\beta, \mathbf{z}, \mathbf{x})]}_{\text {Expected complete log likelihood }}-\underbrace{\mathbb{E}_{q}[\log q(\beta, \mathbf{z} ; \boldsymbol{\nu})]}_{\text {Negative entropy }}
 $$
 
 第一项相当于联合似然，要尽可能大。第二项则相当于变分分布的熵取反，使 q 分布 diffuse.
 
 还有一种分解 ELBO 的方式：
 $$
-\mathscr{L}(\nu)=\underbrace{\mathbb{E}_{q}[\log p(\mathbf{x} | \beta, \mathbf{z})]}_{\text {Expected log likelihood of data }}-\underbrace{\operatorname{KL}(q(\beta, \mathbf{z} ; \boldsymbol{v}) \| p(\beta, \mathbf{z}))}_{\text {KL between variational and prior }}
+\mathscr{L}(\nu)=\underbrace{\mathbb{E}_{q}[\log p(\mathbf{x} | \beta, \mathbf{z})]}_{\text {Expected log likelihood of data }}-\underbrace{\operatorname{KL}(q(\beta, \mathbf{z} ; \boldsymbol{\nu}) \| p(\beta, \mathbf{z}))}_{\text {KL between variational and prior }}
 $$
 
 第一项相当于似然，第二项是变分分布和真实分布的 KL 散度。
 
-注意 ELBO 不一定是凸的。
+> 注意： ELBO 不一定是凸的。
 
 ### Mean-filed VI
 
@@ -79,7 +91,7 @@ $$
 \begin{aligned} j & \sim \text { Uniform }(1, \ldots, n) \\ \hat{\nabla}_{\lambda}^{\text {nat }} \mathscr{L}(\lambda) &=\alpha+n \mathbb{E}_{\phi_{j}^{*}}\left[t\left(Z_{j}, x_{j}\right)\right]-\lambda \end{aligned}
 $$
 
-这样一个数据点就可以更新整个自然梯度。需要满足的前提是 noisy natural gradient 是无偏的，即$\mathbb{E}\left[\hat{\nabla}_{v} \mathscr{L}(v)\right]=\nabla_{v} \mathscr{L}(v)$。
+这样一个数据点就可以更新整个自然梯度。需要满足的前提是 noisy natural gradient 是无偏的，即$\mathbb{E}\left[\hat{\nabla}_{\nu} \mathscr{L}(\nu)\right]=\nabla_{\nu} \mathscr{L}(\nu)$。
 
 ### Recipe
 
@@ -88,14 +100,14 @@ $$
 1. Start with a model 
     $p(\mathbf{z}, \mathbf{x})$
 2. 选择合适的变分分布
-    $q(\mathbf{z} ; v)$
+    $q(\mathbf{z} ; \nu)$
 3. 根据两种拆分方式写出 ELBO，如
-    $\mathscr{L}(v)=\mathbb{E}_{q(\mathbf{z} ; v)}[\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v)]$
+    $\mathscr{L}(\nu)=\mathbb{E}_{q(\mathbf{z} ; \nu)}[\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; \nu)]$
 4. 积分得到 ELBO
-    Example: $\mathscr{L}(v)=x v^{2}+\log v$
+    Example: $\mathscr{L}(\nu)=x \nu^{2}+\log \nu$
 5. 关于变分参数求梯度，优化 ELBO
-    Example: $\nabla_{v} \mathscr{L}(v)=2 x v+\frac{1}{v}$
-    $v_{t+1}=\nu_{t}+\rho_{t} \nabla_{\nu} \mathscr{L}$
+    Example: $\nabla_{\nu} \mathscr{L}(\nu)=2 x \nu+\frac{1}{\nu}$
+    $nu_{t+1}=\nu_{t}+\rho_{t} \nabla_{\nu} \mathscr{L}$
 
 ## Black box VI
 
@@ -105,7 +117,7 @@ $$
 
 Define
 $$
-g(\mathbf{z}, v)=\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v)
+g(\mathbf{z}, \nu)=\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; \nu)
 $$
 可以推导出
 $$
@@ -117,7 +129,7 @@ $$
 黑盒 VI 的主要目标是不论模型如何，我们只要做下面这三件事，其余的不用推理。最后黑盒可以输出近似的变分分布作为后验分布。
 
 > Black Box Criteria  
--  sample from $ q(\beta, \mathbf{z}) $ 
+-  sample from $q(\beta, \mathbf{z})$ 
 -  evaluate $q(\beta, \mathbf{z})$ or function of $q$  
 -  evaluate $\log p(\beta, \mathbf{z}, \mathbf{x})$  
 
@@ -130,14 +142,14 @@ $$
 
 See [score function](http://mathworld.wolfram.com/ScoreFunction.html), it is called *likelihood ratio* or *REINFORCE gradient*.
 
-当$\mathbb{E}_{q}\left[\nabla_{v} g(\mathbf{z}, v)\right]=\mathbb{E}_{q}\left[\nabla_{v} \log q(\mathbf{z} ; v)\right]=0$，则 ELBO 的梯度可写为：  
+当$\mathbb{E}_{q}\left[\nabla_{\nu} g(\mathbf{z}, \nu)\right]=\mathbb{E}_{q}\left[\nabla_{\nu} \log q(\mathbf{z} ; \nu)\right]=0$，则 ELBO 的梯度可写为：  
 $$
-\nabla_{v} \mathscr{L}=\mathbb{E}_{q(\mathbf{z} ; v)}[\underbrace{\nabla_{v} \log q(\mathbf{z} ; v)}_{\text {score function }}(\underbrace{\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v))}_{\text {instantaneous ELBO }}]
+\nabla_{\nu} \mathscr{L}=\mathbb{E}_{q(\mathbf{z} ; \nu)}[\underbrace{\nabla_{\nu} \log q(\mathbf{z} ; \nu)}_{\text {score function }}(\underbrace{\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; \nu))}_{\text {instantaneous ELBO }}]
 $$
 
 它的 noisy unbiased gradient 可以用 MC 得到：
 $$
-\begin{array}{r}{\hat{\nabla}_{\nu} \mathscr{L}=\frac{1}{S} \sum_{s=1}^{S} \nabla_{v} \log q\left(\mathbf{z}_{s} ; v\right)\left(\log p\left(\mathbf{x}, \mathbf{z}_{s}\right)-\log q\left(\mathbf{z}_{s} ; v\right)\right)} \\ {\text { where } \mathbf{z}_{s} \sim q(\mathbf{z} ; v)}\end{array}
+\begin{array}{r}{\hat{\nabla}_{\nu} \mathscr{L}=\frac{1}{S} \sum_{s=1}^{S} \nabla_{\nu} \log q\left(\mathbf{z}_{s} ; \nu\right)\left(\log p\left(\mathbf{x}, \mathbf{z}_{s}\right)-\log q\left(\mathbf{z}_{s} ; \nu\right)\right)} \\ {\text { where } \mathbf{z}_{s} \sim q(\mathbf{z} ; \nu)}\end{array}
 $$
 
 更新 $q$ 时，有
@@ -146,15 +158,15 @@ $$
 $$
 
 因此实际上需要做的步骤：  
--  Sampling from $ q(\mathbf{z})$
--  Evaluating $ \nabla_{v} \log q(\mathbf{z} ; v) $
--  Evaluating $ \log p(\mathbf{x}, \mathbf{z})$ and $ \log q(\mathbf{z}) $
+-  Sampling from $q(\mathbf{z})$
+-  Evaluating $\nabla_{\nu} \log q(\mathbf{z} ; \nu)$
+-  Evaluating $\log p(\mathbf{x}, \mathbf{z})$ and $\log q(\mathbf{z})$
 
 这个方法适用于离散或连续的模型，但是 noisy gradient 的方差可能会很大。
 
 ### Reparameterization gradients (Pathwise Gradients of the ELBO)
 
-假设 $ \log p(\mathbf{x}, \mathbf{z})$ 和 $ \log q(\mathbf{z}) $ 关于 z 可微，可以将 z 分解成如下形式：
+假设 $\log p(\mathbf{x}, \mathbf{z})$ 和 $\log q(\mathbf{z})$ 关于 z 可微，可以将 z 分解成如下形式：
 
 $$
 \begin{aligned} \epsilon & \sim \operatorname{Normal}(0,1) \\ z &=\epsilon \sigma+\mu \\ & \rightarrow z \sim \operatorname{Normal}\left(\mu, \sigma^{2}\right) \end{aligned}
@@ -163,16 +175,20 @@ $$
 这样不确定性就被转移到了 $\epsilon$.
 
 $$
-\nabla_{v} \mathscr{L}=\mathbb{E}_{s(\epsilon_)}[\underbrace{\nabla_{z}[\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; v)]}_{\text {gradient of instanneous ELBO }} \underbrace{\nabla_{v} t(\epsilon, v)}_{\text {gradient of transformation }}]
+\nabla_{\nu} \mathscr{L}=\mathbb{E}_{s(\epsilon_)}[\underbrace{\nabla_{z}[\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; \nu)]}_{\text {gradient of instanneous ELBO }} \underbrace{\nabla_{\nu} t(\epsilon, \nu)}_{\text {gradient of transformation }}]
 $$
 
 它的 noisy gradient 可以写成：
 $$
-\begin{array}\tilde{g}_{t}=\frac{1}{S} \sum_{s=1}^{S} \nabla_{z}\left[\log p\left(\mathbf{x}, t\left(\epsilon_{s}, v_{n}\right)\right)-\log q\left(t\left(\epsilon_{s}, v_{n}\right) ; v_{n}\right)\right] \nabla_{v} t\left(\epsilon_{s}, v_{n}\right) \\ {\text { where } \epsilon_{s} \sim s(\epsilon) \quad s=1 \ldots S}\end{array}
+\begin{array}{r}
+\tilde{g}_{t}=\frac{1}{S} \sum_{s=1}^{S} \nabla_{z}\left[\log p\left(\mathbf{x}, t\left(\epsilon_{s}, \nu_{n}\right)\right)-\log q\left(t\left(\epsilon_{s}, \nu_{n}\right) ; \nu_{n}\right)\right] \nabla_{\nu} t\left(\epsilon_{s}, \nu_{n}\right) \\ 
+{\text { where } \epsilon_{s} \sim s(\epsilon) \quad s=1 \ldots S}
+\end{array}
 $$
 
 这个方法要求模型必须可微。但是 noisy gradient 的方差是可控的。
 
 ## Reference
-- [Variational Inference: Foundations and Modern Methods PDF](https://media.nips.cc/Conferences/2016/Slides/6199-Slides.pdf)
-- [Variational Inference: Foundations and Modern Methods VIDEO](https://www.bilibili.com/video/av43405716/)
+- [Variational Inference: Foundations and Modern Methods [PDF]](https://media.nips.cc/Conferences/2016/Slides/6199-Slides.pdf)
+- [Variational Inference: Foundations and Modern Methods [VIDEO]](https://www.bilibili.com/video/av43405716/)
+- [Variational Inference [Notes]](https://www.cs.princeton.edu/courses/archive/fall11/cos597C/lectures/variational-inference-i.pdf)
