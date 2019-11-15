@@ -1,0 +1,30 @@
+# .travis.yml
+language: node_js
+node_js:
+  - "10"
+dist: trusty
+sudo: required
+
+cache:
+  directories:
+    - node_modules
+
+branches:
+  except:
+  - master
+
+before_install:
+  - git config --global user.name "Baileyswu"
+  - git config --global user.email "wulidan0530@live.com"
+  - sed -i'' "s~git@github.com:~https://${ACCESS_TOKEN}@github.com/~" _config.yml
+
+install:
+  - cat ./npm-init.sh
+  - chmod 755 ./npm-init.sh
+  - source ./npm-init.sh
+  - ls
+  - cp -f ./kramed-inline.js node_modules/kramed/lib/rules/inline.js
+
+script:
+  - git fetch
+  - npm run deploy

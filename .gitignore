@@ -1,0 +1,9 @@
+.deploy*/
+node_modules/
+public/
+.DS_Store
+Thumbs.db
+db.json
+*.log
+.vscode
+package-lock.json
