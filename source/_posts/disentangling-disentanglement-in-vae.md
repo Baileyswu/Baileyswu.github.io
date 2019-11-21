@@ -17,9 +17,9 @@ categories: PRML
 
 这篇论文主要提出了以下几个观点：
 
-- 分解（decomposition）得好需要满足两个方面
+- 分解（decomposition）得好需要满足两个方面：overlap, structure
 - 理论分析了 $\beta$-VAE 可以满足第一个方面，但不能满足第二个方面
-- 一种新的 $\beta$-VAE 的构造可以同时满足这两个方面
+- 给 $\beta$-VAE 的再增加一个约束项可以同时满足这两个方面
 
 ## Decomposition: A Generalisation of Disentanglement
 
@@ -105,6 +105,7 @@ $$
 1. 变分分布避免设置为各向同性的高斯分布。
 2. 调节 $\beta$ 避免过多的 overlap.
 3. 可以尝试增加 $\alpha$ 带的约束项，但实际上是比较难算的。
+4. 理论分析得深入也可以中顶会ヽ(￣ω￣(￣ω￣〃)ゝ
 
 ## Reference 
 
