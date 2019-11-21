@@ -4,6 +4,7 @@ date: 2019-11-20 20:08:04
 tags: 
  - VAE
  - disentanglement
+ - 论文阅读
 categories: PRML
 ---
 
@@ -46,7 +47,7 @@ categories: PRML
 
 $\beta$-VAE 的改动在于在 ELBO 式中给 KL 散度设定了一个正系数 $\beta$，
 $$
-\mathcal{L}_{\beta}(\boldsymbol{x})=\mathbb{E}_{q_{\phi}(\boldsymbol{z} | \boldsymbol{x})}\left[\log p_{\theta}(\boldsymbol{x} | \boldsymbol{z})\right]-\beta \operatorname{KL}\left(q_{\phi}(\boldsymbol{z} | \boldsymbol{x}) \| p(\boldsymbol{z})\right).
+\mathcal{L}_{\beta}({x})=\mathbb{E}_{q_{\phi}({z} | {x})}\left[\log p_{\theta}({x} | {z})\right]-\beta \operatorname{KL}\left(q_{\phi}({z} | {x}) \| p({z})\right).
 $$
 通过后面的理论分析，将要说明 $\beta$-VAE 可以学出好的 overlap，但不能有 structure 的表示。
 
@@ -58,25 +59,25 @@ $$
 
 加入了 $\beta$ 这个系数以后，使得 $\mathcal{L}_{\beta}$ 并不是 $\log p(x)$ 真正意义上的下界。将 $\mathcal{L}_{\beta}$ 拆分，
 $$
-\mathcal{L}_{\beta}=\mathcal{L}\left(\boldsymbol{x} ; \pi_{\theta, \beta}, q_{\phi}\right)+(\beta-1) H_{q_{\phi}}+\log F_{\beta}
+\mathcal{L}_{\beta}=\mathcal{L}\left({x} ; \pi_{\theta, \beta}, q_{\phi}\right)+(\beta-1) H_{q_{\phi}}+\log F_{\beta}
 $$
-可以得到符合形式的下界 $\mathcal{L}\left(\boldsymbol{x} ; \pi_{\theta, \beta}, q_{\phi}\right)$，以及为了凑出这个下界而产生的多余项。
+可以得到符合形式的下界 $\mathcal{L}\left({x} ; \pi_{\theta, \beta}, q_{\phi}\right)$，以及为了凑出这个下界而产生的多余项。
 $$
-\mathcal{L}\left(\boldsymbol{x} ; \pi_{\theta, \beta}, q_{\phi}\right)=\mathbb{E}_{q_{\phi}(\boldsymbol{z} | \boldsymbol{x})}\left[\log p_{\theta}(\boldsymbol{x} | \boldsymbol{z})\right]-\mathrm{KL}\left(q_{\phi}(\boldsymbol{z} | \boldsymbol{x}) \| f_{\beta}(\boldsymbol{z})\right)
+\mathcal{L}\left({x} ; \pi_{\theta, \beta}, q_{\phi}\right)=\mathbb{E}_{q_{\phi}({z} | {x})}\left[\log p_{\theta}({x} | {z})\right]-\mathrm{KL}\left(q_{\phi}({z} | {x}) \| f_{\beta}({z})\right)
 $$
-这个下界的先验（annealed prior）为 $f_{\beta}(\boldsymbol{z}) \triangleq p(\boldsymbol{z})^{\beta} / F_{\beta}$，它的分母 $F_{\beta} \triangleq \int_{z} p(z)^{\beta} d z$ 在给定 $\beta$ 以后是一个常数。$\beta$ 出现在指数上，它可以调整 $\boldsymbol z$ 的尺度。
+这个下界的先验（annealed prior）为 $f_{\beta}({z}) \triangleq p({z})^{\beta} / F_{\beta}$，它的分母 $F_{\beta} \triangleq \int_{z} p(z)^{\beta} d z$ 在给定 $\beta$ 以后是一个常数。$\beta$ 出现在指数上，它可以调整 $ z$ 的尺度。
 
-$H_{q_{\phi}}$ 是变分分布 $q_{\phi}(\boldsymbol{z} | \boldsymbol{x})$ 的熵，熵越小，则变分分布的方差越小，其 overlap 就可以变小。因此这一项在调整 $\beta$ 以后可以控制 overlap. 但是 $H_{q_{\phi}}$ 对于隐层的旋转不敏感，因此它不能控制隐层的形状，即不影响 structure，也不鼓励学出一个更好的 structure.
+$H_{q_{\phi}}$ 是变分分布 $q_{\phi}({z} | {x})$ 的熵，熵越小，则变分分布的方差越小，其 overlap 就可以变小。因此这一项在调整 $\beta$ 以后可以控制 overlap. 但是 $H_{q_{\phi}}$ 对于隐层的旋转不敏感，因此它不能控制隐层的形状，即不影响 structure，也不鼓励学出一个更好的 structure.
 
 $\log F_{\beta}$ 是一个常数项，因此优化时只需要优化前两项之和，得到的极值点与 $\mathcal{L}_{\beta}$ 一致。
 
 ### $\beta$ 的作用
 
-$\beta$ 出现在 $f_{\beta}(\boldsymbol{z})$ 和 $(\beta-1) H_{q_{\phi}}$ 两处。当 $\beta$ 增大时，将出现两个方面的作用：  
-1. $f_{\beta}(\boldsymbol{z})$ 使得 $\boldsymbol{z}$ 的尺度变小，$\mathrm{KL}\left(q_{\phi}(\boldsymbol{z} | \boldsymbol{x}) \| f_{\beta}(\boldsymbol{z})\right)$ 约束变分分布跟着变陡。
+$\beta$ 出现在 $f_{\beta}({z})$ 和 $(\beta-1) H_{q_{\phi}}$ 两处。当 $\beta$ 增大时，将出现两个方面的作用：  
+1. $f_{\beta}({z})$ 使得 ${z}$ 的尺度变小，$\mathrm{KL}\left(q_{\phi}({z} | {x}) \| f_{\beta}({z})\right)$ 约束变分分布跟着变陡。
 2. $(\beta-1) H_{q_{\phi}}$ 使得 $H_{q_{\phi}}$ 增大，使得变分分布变平坦。
 
-这两者相互协调使得编码出来的边缘分布 $q_{\phi}(\boldsymbol{z})$ 和先验 $p(\boldsymbol{z})$ 的尺度相匹配。
+这两者相互协调使得编码出来的边缘分布 $q_{\phi}({z})$ 和先验 $p({z})$ 的尺度相匹配。
 
 但是当 $\beta$ 太大的时候，$H_{q_{\phi}}$ 过大，变分分布过于平坦，造成过多的 overlap，不利于解纠缠。
 
@@ -89,10 +90,10 @@ $\beta$ 出现在 $f_{\beta}(\boldsymbol{z})$ 和 $(\beta-1) H_{q_{\phi}}$ 两�
 
 本论文新加了一个约束项在最后，表示变分边缘分布和先验的距离，
 $$
-\mathcal{L}_{\alpha, \beta}(\boldsymbol{x})=\mathbb{E}_{q_{\phi}(\boldsymbol{z} | \boldsymbol{x})}\left[\log p_{\theta}(\boldsymbol{x} | \boldsymbol{z})\right]
--\beta \operatorname{KL}\left(q_{\phi}(\boldsymbol{z} | \boldsymbol{x}) \| p(\boldsymbol{z})\right)-\alpha \mathbb{D}\left(q_{\phi}(\boldsymbol{z}), p(\boldsymbol{z})\right)
+\mathcal{L}_{\alpha, \beta}({x})=\mathbb{E}_{q_{\phi}({z} | {x})}\left[\log p_{\theta}({x} | {z})\right]
+-\beta \operatorname{KL}\left(q_{\phi}({z} | {x}) \| p({z})\right)-\alpha \mathbb{D}\left(q_{\phi}({z}), p({z})\right)
 $$
-增加了这一项，有助于学得一个更好的 structure. 它的选项是开放性的，可以用 $\mathrm{KL}\left(q_{\phi}(\boldsymbol{z}) \| p(\boldsymbol{z})\right)$、maximum mean discrepancy (MMD)、a variational formulation of the Jensen-Shannon divergence 等多种距离或熵来约束。
+增加了这一项，有助于学得一个更好的 structure. 它的选项是开放性的，可以用 $\mathrm{KL}\left(q_{\phi}({z}) \| p({z})\right)$、maximum mean discrepancy (MMD)、a variational formulation of the Jensen-Shannon divergence 等多种距离或熵来约束。
 
 ![](disentangling-disentanglement-in-vae/clustered-prior.png)
 
