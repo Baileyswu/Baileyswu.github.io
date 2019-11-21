@@ -7,9 +7,11 @@ tags:
 categories: PRML
 ---
 
-对于深度生成模型而言，数据的可解释性具有重要的意义。
-如果可以解释 VAE 在编码以后的成分，那么有选择性地改变隐层的部分数据，就可以指导性地生成不同的观测（图片、音频等）。
-由于在隐层中的表示并不是我们想象中那么独立的，实际上需要做一些变换，使得不同的特征可以解开纠缠（Disentangling Disentanglement）。
+对于深度生成模型而言，数据的可解释性具有重要的意义。如果可以解释 VAE 在编码以后的成分，那么有选择性地改变隐层的部分数据，就可以指导性地生成不同的观测（图片、音频等）。由于在隐层中的表示并不是我们想象中那么独立的，实际上需要做一些变换，使得不同的特征可以解开纠缠（Disentangling Disentanglement）。
+
+![](disentangling-disentanglement-in-vae/disentanglement.png)
+
+如图可以看到衣服的特征在隐层被提取出 49 维特征。若干个特征组合可以控制一个实质的衣服的特性（裤腿宽度、袖子长度等）。
 
 ## Main Points
 
@@ -42,8 +44,69 @@ categories: PRML
 
 ## Decomposition Analysis of $\beta$-VAE
 
-## Deconstruct $\beta$-VAE in a new way
+$\beta$-VAE 的改动在于在 ELBO 式中给 KL 散度设定了一个正系数 $\beta$，
+$$
+\mathcal{L}_{\beta}(\boldsymbol{x})=\mathbb{E}_{q_{\phi}(\boldsymbol{z} | \boldsymbol{x})}\left[\log p_{\theta}(\boldsymbol{x} | \boldsymbol{z})\right]-\beta \operatorname{KL}\left(q_{\phi}(\boldsymbol{z} | \boldsymbol{x}) \| p(\boldsymbol{z})\right).
+$$
+通过后面的理论分析，将要说明 $\beta$-VAE 可以学出好的 overlap，但不能有 structure 的表示。
+
+
+### ELBO 的定义
+$$
+\log p(x)=\log \int_{z} p(x, z) d z \geq \mathbb{E}_{q}[\log p(x | z)]-\operatorname{KL}(q(z | x) \| p(z)) \triangleq \mathcal{L}
+$$
+
+加入了 $\beta$ 这个系数以后，使得 $\mathcal{L}_{\beta}$ 并不是 $\log p(x)$ 真正意义上的下界。将 $\mathcal{L}_{\beta}$ 拆分，
+$$
+\mathcal{L}_{\beta}=\mathcal{L}\left(\boldsymbol{x} ; \pi_{\theta, \beta}, q_{\phi}\right)+(\beta-1) H_{q_{\phi}}+\log F_{\beta}
+$$
+可以得到符合形式的下界 $\mathcal{L}\left(\boldsymbol{x} ; \pi_{\theta, \beta}, q_{\phi}\right)$，以及为了凑出这个下界而产生的多余项。
+$$
+\mathcal{L}\left(\boldsymbol{x} ; \pi_{\theta, \beta}, q_{\phi}\right)=\mathbb{E}_{q_{\phi}(\boldsymbol{z} | \boldsymbol{x})}\left[\log p_{\theta}(\boldsymbol{x} | \boldsymbol{z})\right]-\mathrm{KL}\left(q_{\phi}(\boldsymbol{z} | \boldsymbol{x}) \| f_{\beta}(\boldsymbol{z})\right)
+$$
+这个下界的先验（annealed prior）为 $f_{\beta}(\boldsymbol{z}) \triangleq p(\boldsymbol{z})^{\beta} / F_{\beta}$，它的分母 $F_{\beta} \triangleq \int_{z} p(z)^{\beta} d z$ 在给定 $\beta$ 以后是一个常数。$\beta$ 出现在指数上，它可以调整 $\boldsymbol z$ 的尺度。
+
+$H_{q_{\phi}}$ 是变分分布 $q_{\phi}(\boldsymbol{z} | \boldsymbol{x})$ 的熵，熵越小，则变分分布的方差越小，其 overlap 就可以变小。因此这一项在调整 $\beta$ 以后可以控制 overlap. 但是 $H_{q_{\phi}}$ 对于隐层的旋转不敏感，因此它不能控制隐层的形状，即不影响 structure，也不鼓励学出一个更好的 structure.
+
+$\log F_{\beta}$ 是一个常数项，因此优化时只需要优化前两项之和，得到的极值点与 $\mathcal{L}_{\beta}$ 一致。
+
+### $\beta$ 的作用
+
+$\beta$ 出现在 $f_{\beta}(\boldsymbol{z})$ 和 $(\beta-1) H_{q_{\phi}}$ 两处。当 $\beta$ 增大时，将出现两个方面的作用：  
+1. $f_{\beta}(\boldsymbol{z})$ 使得 $\boldsymbol{z}$ 的尺度变小，$\mathrm{KL}\left(q_{\phi}(\boldsymbol{z} | \boldsymbol{x}) \| f_{\beta}(\boldsymbol{z})\right)$ 约束变分分布跟着变陡。
+2. $(\beta-1) H_{q_{\phi}}$ 使得 $H_{q_{\phi}}$ 增大，使得变分分布变平坦。
+
+这两者相互协调使得编码出来的边缘分布 $q_{\phi}(\boldsymbol{z})$ 和先验 $p(\boldsymbol{z})$ 的尺度相匹配。
+
+但是当 $\beta$ 太大的时候，$H_{q_{\phi}}$ 过大，变分分布过于平坦，造成过多的 overlap，不利于解纠缠。
+
+### 先验选择
+
+当用各向同性的高斯作为先验时，不能鼓励隐变量得到有意义的隐表示。
+换句话说，它可以鼓励隐表示去匹配factor，但不能去匹配旋转后的factor。但旋转以后的factor可能与隐变量强相关。这样的信息就被隐去了。
+
+## An Objective for Enforcing Decomposition
+
+本论文新加了一个约束项在最后，表示变分边缘分布和先验的距离，
+$$
+\mathcal{L}_{\alpha, \beta}(\boldsymbol{x})=\mathbb{E}_{q_{\phi}(\boldsymbol{z} | \boldsymbol{x})}\left[\log p_{\theta}(\boldsymbol{x} | \boldsymbol{z})\right]
+-\beta \operatorname{KL}\left(q_{\phi}(\boldsymbol{z} | \boldsymbol{x}) \| p(\boldsymbol{z})\right)-\alpha \mathbb{D}\left(q_{\phi}(\boldsymbol{z}), p(\boldsymbol{z})\right)
+$$
+增加了这一项，有助于学得一个更好的 structure. 它的选项是开放性的，可以用 $\mathrm{KL}\left(q_{\phi}(\boldsymbol{z}) \| p(\boldsymbol{z})\right)$、maximum mean discrepancy (MMD)、a variational formulation of the Jensen-Shannon divergence 等多种距离或熵来约束。
+
+![](disentangling-disentanglement-in-vae/clustered-prior.png)
+
+第一行可以看到，随着 $\beta$ 增大，解纠缠的效果逐渐变差，最后聚类也减少至两个。
+
+而第二行中，随着 $\alpha$ 增大，其仍旧能保持较好的 structure.
+
+## Inspiration
+
+1. 变分分布避免设置为各向同性的高斯分布。
+2. 调节 $\beta$ 避免过多的 overlap.
+3. 可以尝试增加 $\alpha$ 带的约束项，但实际上是比较难算的。
 
 ## Reference 
 
 - [Disentangling Disentanglement in Variational Autoencoders, ICML 2019](http://proceedings.mlr.press/v97/mathieu19a.html)
+- [The $\beta$-VAE's Implicit Prior, NIPS 2017](http://bayesiandeeplearning.org/2017/papers/66.pdf)
