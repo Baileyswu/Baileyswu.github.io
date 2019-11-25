@@ -78,5 +78,4 @@ $$p(x | \eta) = h(x)g(\eta) \exp \{\eta^T u(x)\}$$
 
 ## Reference
 
-Bishop CM (2006) In: Pattern Recognition and Machine Learning, Springer,
-chap 2.
+Bishop CM (2006) In: Pattern Recognition and Machine Learning, Springer, chap 2.
