@@ -24,19 +24,19 @@ $$g(\eta) \int h(x) \exp \{\eta^T u(x)\} dx = 1~~~~~~~~(2)$$
 ### 例子：一元高斯分布
 
 $$
-\begin{array}{l}
-p\left(x | \mu, \sigma^{2}\right)&=&\frac{1}{\left(2 \pi \sigma^{2}\right)^{\frac{1}{2}}} \exp \left\{-\frac{1}{2 \sigma^{2}}(x-\mu)^{2}\right\} \\ 
-&=&\frac{1}{\left(2 \pi \sigma^{2}\right)^{\frac{1}{2}}} \exp \left\{-\frac{1}{2 \sigma^{2}} x^{2}+\frac{\mu}{\sigma^{2}} x-\frac{1}{2 \sigma^{2}} \mu^{2}\right\}
-\end{array}
+\begin{aligned}
+p\left(x | \mu, \sigma^{2}\right)&=\frac{1}{\left(2 \pi \sigma^{2}\right)^{\frac{1}{2}}} \exp \left\{-\frac{1}{2 \sigma^{2}}(x-\mu)^{2}\right\} \\ 
+&=\frac{1}{\left(2 \pi \sigma^{2}\right)^{\frac{1}{2}}} \exp \left\{-\frac{1}{2 \sigma^{2}} x^{2}+\frac{\mu}{\sigma^{2}} x-\frac{1}{2 \sigma^{2}} \mu^{2}\right\}
+\end{aligned}
 $$
 
 $$
-\begin{array}{c}
-\eta&=&\left(\begin{array}{c}{\frac{\mu}{\sigma^{2}}} \\ \frac{-1}{2\sigma^{2}}\end{array}\right) \\
-u(x)&=&\left(\begin{array}{c}{x} \\ {x^{2}}\end{array}\right) \\
-h(x)&=&(2 \pi)^{-\frac{1}{2}} \\
-g({\eta})&=&\left(-2 \eta_{2}\right)^{\frac{1}{2}} \exp \left(\frac{\eta_{1}^{2}}{4 \eta_{2}}\right)
-\end{array}
+\begin{cases}
+\eta&=\left(\begin{array}{c}{\frac{\mu}{\sigma^{2}}} \\ \frac{-1}{2\sigma^{2}}\end{array}\right) \\
+u(x)&=\left(\begin{array}{c}{x} \\ {x^{2}}\end{array}\right) \\
+h(x)&=(2 \pi)^{-\frac{1}{2}} \\
+g({\eta})&=\left(-2 \eta_{2}\right)^{\frac{1}{2}} \exp \left(\frac{\eta_{1}^{2}}{4 \eta_{2}}\right)
+\end{cases}
 $$
 
 凑参数的顺序一般是：
@@ -73,7 +73,16 @@ $$p_l(x | \eta) = \exp \{\lambda^T u(x)\}$$
 $$p(x | \eta) = h(x)g(\eta) \exp \{\eta^T u(x)\}$$
 其中 $\eta=\eta_0+\lambda$，$g(\eta)$ 为凑出来的归一化项。
 
+### 求 KL 散度
 
+当要计算 ELBO 时，其中有一项为后验与先验的 KL 散度。由于共轭先验形式一致，容易得到
+$$
+\begin{aligned}
+    \mathbf{KL}(p(x) || p_0(x))&=\mathbb{E}_{p(x)}\left[\ln {p(x)\over p_0(x)}\right]\\
+    &=\mathbb{E}_{p(x)}\left[\ln {g(\eta)\over g_0(\eta_0)} + (\eta^T-\eta_0^T)u(x)\right]\\
+    &=\ln g(\eta)-\ln g_0(\eta_0) + (\eta^T-\eta_0^T)\mathbb{E}_{p(x)}\left[u(x)\right]
+\end{aligned}
+$$
 
 
 ## Reference
