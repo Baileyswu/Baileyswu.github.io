@@ -1,10 +1,13 @@
 ---
 title: "Latent Normalizing Flows for Discrete Sequences"
 date: 2019-12-19 17:31:54
+categories: PRML
+tags:
  - 规范化流
  - 论文阅读
  - ICML
-categories: PRML
+ - Autoregressive
+ - 序列模型
 ---
 
 规范化流 （Normalizing Flows, NF）在连续随机变量的建模上是个非常有用的一类模型，优点有：较强的模型灵活性；可用于非自回归（non-autoregressive）生成任务中。但是要把连续变量换成离散变量，仍有一些挑战。
@@ -25,7 +28,7 @@ $$
 
 ![](latent-normalizing-flows-for-discrete-sequences/fig1_block.png)
 
-#### Autoregressive Flow (AF)
+- Autoregressive Flow (AF)
 
 $z_t$ 与 $z_{<t}$ 之间有依赖关系（自回归模型，`autoregressive`），导致 $z$ 的产生必须是串行的。这导致在采样（`sampling`）的过程中计算比较缓慢。而反之，在估计（`evaluation`）的过程中，$\epsilon$ 之间并没有相互依赖的关系，因此可以并行计算。
 
@@ -37,7 +40,7 @@ f_{\theta}^{-1}(\boldsymbol{z})_{d} &=\epsilon_{d}=\frac{z_{d}-a(\boldsymbol{z}<
 \end{aligned}
 $$
 
-#### Inverse Autoregressive Flow (IAF)
+- Inverse Autoregressive Flow (IAF)
 
 有一种简单的想法，就是把依赖关系搬到 $\epsilon$ 上，那么和 AF 相反，在采样时可以并行，而在估计时需要串行。
 
@@ -45,7 +48,7 @@ $$
 \begin{aligned} f_{\theta}(\epsilon)_{d}=z_{d} &=a\left(\epsilon_{<d} ; \theta\right)+b\left(\epsilon_{<d} ; \theta\right) \cdot \epsilon_{d} \\ f_{\theta}^{-1}(z)_{d} &=\epsilon_{d}=\frac{z_{d}-a\left(\epsilon_{<d} ; \theta\right)}{b\left(\epsilon_{<d} ; \theta\right)} \end{aligned}
 $$
 
-#### Split Coupling Flow
+- Split Coupling Flow
 
 为了更好的并行化，可以抽出一部分 $z$ 形成一个集合 $S$，未被抽到的组成集合 $\bar S$，并让 $S$ 中的所有变量去影响 $\bar S$ 中的每一个变量形成，而 $\bar S$ 之间并不相互影响。那么对于所有 $\bar S$ 中的元素而言，其采样是可以并行的。与此同时，反向的估计也是并行的。
 $$
@@ -55,7 +58,7 @@ $$
 
 但是它的缺点也很明显。$z_t$ 不必再依赖于 $z_{<t}$，即此时的模型不再是一个自回归模型（ `non-autoregressive` ）。由于没用建模时序之间的依赖关系，最终的损失也会比较高。
 
-#### Layers Flows
+- Layers Flows
 
 组合 `SCF`，使得每一层使用的子集 $S$ 都有所不同。这样做使得多层之后 $z$ 之间可以相互关联。
 
@@ -69,7 +72,7 @@ $$
 
 这三种方案将作为 Block 被用于隐层的构建，简写为 $f_{\mathrm{AF}}(\boldsymbol{\epsilon} ; \theta), f_{\mathrm{IAF}}(\boldsymbol{\epsilon} ; \theta),$ and $f_{\mathrm{SCF}}(\boldsymbol{\epsilon} ; \theta)$.
 
-### Generating Discrete  Sequences
+### Generating Discrete Sequences
 
 Latent NF 用到的模型如下，其中 `Flow Prior` 的内容将在后面展开。该图模型假设了观测之间是条件独立的。其时序关系用 $z$ 来建模。最后可以得到
 

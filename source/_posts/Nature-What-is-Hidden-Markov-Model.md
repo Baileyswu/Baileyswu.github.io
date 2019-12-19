@@ -9,6 +9,7 @@ tags:
  - Viterbi
  - 论文阅读
  - Nature Science
+ - 序列模型
 ---
 
 # Nature: What is Hidden Markov Model

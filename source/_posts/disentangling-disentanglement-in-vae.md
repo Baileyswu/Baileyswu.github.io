@@ -1,5 +1,5 @@
 ---
-title: "论文学习 - Disentangling Disentanglement in Variational Autoencoders"
+title: "Disentangling Disentanglement in Variational Autoencoders"
 date: 2019-11-20 20:08:04
 tags: 
  - VAE
