@@ -25,28 +25,28 @@ mathjax: true
 ## 基本概念
 
 HMM是一种时序数据模型。  
-设序列长度为 $T$ ，具有**观测序列** $\vec X=\{\vec x_1,\dots,\vec x_T\}$ 和**隐变量序列** $\vec Z=\{\vec z_1,\dots,\vec z_T\}$ 。  
-这里认为每一个观测都由对应的隐变量生成。隐变量序列是Markov链，$\vec z_t$只依赖于$\vec z_{t-1}$  
+设序列长度为 $T$ ，具有**观测序列** $\mathbf X=\{\mathbf x_1,\dots,\mathbf x_T\}$ 和**隐变量序列** $\mathbf Z=\{\mathbf z_1,\dots,\mathbf z_T\}$ 。  
+这里认为每一个观测都由对应的隐变量生成。隐变量序列是Markov链，$\mathbf z_t$只依赖于$\mathbf z_{t-1}$  
 ![](hmm-1.jpg)
 
-变量都在有限的状态集里变化，**观测的状态集**为 $\vec S=\{\vec s_1,\dots,\vec s_M\}$ ，**隐变量的状态集**为 $\vec H=\{\vec h_1,\dots,\vec h_N\}$ 。  
-因此 $\vec x_t\in \vec S,\vec z_t\in \vec H,t=1,\dots,T$ 。  
-有时需要反向找到某状态是状态集里的第几个，定义 $findindex(\vec z_t)=i$ ，表示 $\vec z_t = \vec h_i$ 。  
-同理也有 $findindex(\vec x_t)=i$ ，表示 $\vec x_t = \vec s_i$ 。  
+变量都在有限的状态集里变化，**观测的状态集**为 $\mathbf S=\{\mathbf s_1,\dots,\mathbf s_M\}$ ，**隐变量的状态集**为 $\mathbf H=\{\mathbf h_1,\dots,\mathbf h_N\}$ 。  
+因此 $\mathbf x_t\in \mathbf S,\mathbf z_t\in \mathbf H,t=1,\dots,T$ 。  
+有时需要反向找到某状态是状态集里的第几个，定义 $findindex(\mathbf z_t)=i$ ，表示 $\mathbf z_t = \mathbf h_i$ 。  
+同理也有 $findindex(\mathbf x_t)=i$ ，表示 $\mathbf x_t = \mathbf s_i$ 。  
 
-隐状态间的**转移矩阵**为 $\vec A=[a_{ij}]_{N\times N}$ ， $a_{ij}$ 是从状态 $\vec h_i$ 转移到 $\vec h_j$ 的概率。  
-从隐状态到观测的**发射矩阵** $\vec B=[b_{ij}]_{N\times M}$ ， $b_{ij}$ 是从状态 $\vec h_i$ 转移到观测 $\vec s_j$ 的概率。  
-**初始状态概率**向量为 $\vec \Pi=[\pi_1,\dots,\pi_N]$ 。鉴于初始时没有其他时刻转移到 $t=0$ ，设 $\vec z_0$ 有 $\pi_i$ 的概率属于 $\vec h_i$ 。  
+隐状态间的**转移矩阵**为 $\mathbf A=[a_{ij}]_{N\times N}$ ， $a_{ij}$ 是从状态 $\mathbf h_i$ 转移到 $\mathbf h_j$ 的概率。  
+从隐状态到观测的**发射矩阵** $\mathbf B=[b_{ij}]_{N\times M}$ ， $b_{ij}$ 是从状态 $\mathbf h_i$ 转移到观测 $\mathbf s_j$ 的概率。  
+**初始状态概率**向量为 $\mathbf \Pi=[\pi_1,\dots,\pi_N]$ 。鉴于初始时没有其他时刻转移到 $t=0$ ，设 $\mathbf z_0$ 有 $\pi_i$ 的概率属于 $\mathbf h_i$ 。  
 
-记 $\lambda=(\vec A, \vec B, \vec \Pi)$ ，为HMM中的参数的集合。  
+记 $\lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$ ，为HMM中的参数的集合。  
 
 
 
 ### 生成观测序列
 
 
-输入：$T,\vec S, \vec H, \lambda=(\vec A, \vec B, \vec \Pi)$  
-输出：$\vec X$
+输入：$T,\mathbf S, \mathbf H, \lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$  
+输出：$\mathbf X$
 
 
 例如：有4个盒子，每个盒子里有若干红球和白球。每次从某盒子抽某色的球，求该序列的颜色。  
@@ -133,9 +133,9 @@ print(X)
 
 ## 概率计算问题
 
-输入：$\vec X,\lambda=(\vec A, \vec B, \vec \Pi)$  
+输入：$\mathbf X,\lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$  
 
-输出：$P(\vec X|\lambda)$  
+输出：$P(\mathbf X|\lambda)$  
 
 
 暴力不可解，借用DP的思想，一层一层算，引入**前后向算法**。
@@ -148,18 +148,18 @@ print(X)
 
 ![](hmm-2.jpg)
 
-$$\begin{align}
-\alpha_t(i)&=P(\vec x_1,\dots,\vec x_t,\vec z_t=\vec h_i|\lambda)\\
-&=\sum_{j=1}^N P(\vec x_1,\dots,\vec x_t,\vec z_{t-1}=\vec h_j,\vec z_t=\vec h_i|\lambda)\\
-&=\sum_{j=1}^N P(\vec x_1,\dots,\vec x_{t-1},\vec z_{t-1}=\vec h_j|\lambda)P(\vec z_t=\vec h_i|\vec z_{t-1}=\vec h_j)P(\vec x_t|\vec z_t=\vec h_i)\\
-&=\sum_{j=1}^N \alpha_{t-1}(j)a_{ji}b_{ik} ~~~~~~~~k=findindex(\vec x_{t})\\
-&=\left(\sum_{j=1}^N \alpha_{t-1}(j)a_{ji}\right)b_{ik} ~~~~~~~~k=findindex(\vec x_{t})
-\end{align}$$
+$$\begin{aligned}
+\alpha_t(i)&=P(\mathbf x_1,\dots,\mathbf x_t,\mathbf z_t=\mathbf h_i|\lambda)\\
+&=\sum_{j=1}^N P(\mathbf x_1,\dots,\mathbf x_t,\mathbf z_{t-1}=\mathbf h_j,\mathbf z_t=\mathbf h_i|\lambda)\\
+&=\sum_{j=1}^N P(\mathbf x_1,\dots,\mathbf x_{t-1},\mathbf z_{t-1}=\mathbf h_j|\lambda)P(\mathbf z_t=\mathbf h_i|\mathbf z_{t-1}=\mathbf h_j)P(\mathbf x_t|\mathbf z_t=\mathbf h_i)\\
+&=\sum_{j=1}^N \alpha_{t-1}(j)a_{ji}b_{ik} ~~~~~~~~k=findindex(\mathbf x_{t})\\
+&=\left(\sum_{j=1}^N \alpha_{t-1}(j)a_{ji}\right)b_{ik} ~~~~~~~~k=findindex(\mathbf x_{t})
+\end{aligned}$$
 
 $$\alpha_t(i)=\begin{cases}
 &\pi_i b_{ik}&\text{t=1}\\
 &\left(\sum_{j=1}^N \alpha_{t-1}(j)a_{ji}\right)b_{ik} &\text{t>1}
-\end{cases} ~~~~~~~~k=findindex(\vec x_{t})$$
+\end{cases} ~~~~~~~~k=findindex(\mathbf x_{t})$$
 
 
 ```python
@@ -208,15 +208,15 @@ for t in range(T):
 **最后一层是边界，特判。**
 
 ![](hmm-3.jpg)
-$$\begin{align}
-\beta_t(i)=&P(\vec x_{t+1},\dots,\vec x_T|\vec z_t=\vec h_i,\lambda)\\
-=&\sum_{j=1}^N P(\vec x_{t+1},\dots,\vec x_T,\vec z_{t+1}=\vec h_j|\vec z_t=\vec h_i,\lambda)\\
-=&\sum_{j=1}^N P(\vec z_{t+1}=\vec h_j|\vec z_t=\vec h_i)P(\vec x_{t+1}|\vec z_{t+1}=\vec h_j)P(\vec x_{t+2},\dots,\vec x_T|\vec z_{t+1}=\vec h_j,\lambda)\\
-=&\sum_{j=1}^N a_{ij}b_{jk}\beta_{t+1}(j)~~~~~~~~k=findindex(\vec x_{t+1})\\
-\end{align}$$
+$$\begin{aligned}
+\beta_t(i)=&P(\mathbf x_{t+1},\dots,\mathbf x_T|\mathbf z_t=\mathbf h_i,\lambda)\\
+=&\sum_{j=1}^N P(\mathbf x_{t+1},\dots,\mathbf x_T,\mathbf z_{t+1}=\mathbf h_j|\mathbf z_t=\mathbf h_i,\lambda)\\
+=&\sum_{j=1}^N P(\mathbf z_{t+1}=\mathbf h_j|\mathbf z_t=\mathbf h_i)P(\mathbf x_{t+1}|\mathbf z_{t+1}=\mathbf h_j)P(\mathbf x_{t+2},\dots,\mathbf x_T|\mathbf z_{t+1}=\mathbf h_j,\lambda)\\
+=&\sum_{j=1}^N a_{ij}b_{jk}\beta_{t+1}(j)~~~~~~~~k=findindex(\mathbf x_{t+1})\\
+\end{aligned}$$
 $$\beta_t(i)=\begin{cases}
 &1&\text{t=T}\\
-&\sum_{j=1}^N a_{ij}b_{jk}\beta_{t+1}(j) &\text{t<T} \end{cases} ~~~~~~~~k=findindex(\vec x_{t+1})$$
+&\sum_{j=1}^N a_{ij}b_{jk}\beta_{t+1}(j) &\text{t<T} \end{cases} ~~~~~~~~k=findindex(\mathbf x_{t+1})$$
 
 
 ```python
@@ -258,14 +258,14 @@ for t in range(T):
 
 ### 前后向算法
 
-结合前向和后向概率，对于中间的 $\vec x_t$ 前面用前向算法，后面用后向算法。
+结合前向和后向概率，对于中间的 $\mathbf x_t$ 前面用前向算法，后面用后向算法。
 
-$$\begin{align}
-P(\vec X|\lambda)=&P(\vec x_1,\dots,\vec x_t,\vec x_{t+1},\dots,\vec x_T|\lambda)\\
-=&\sum_{i=1}^N P(\vec x_1,\dots,\vec x_t,\vec x_{t+1},\dots,\vec x_T,\vec z_t=\vec h_i|\lambda)\\
-=&\sum_{i=1}^N P(\vec x_1,\dots,\vec x_t,\vec z_t=\vec h_i|\lambda)P(\vec x_{t+1},\dots,\vec x_T|\vec z_{t}=\vec h_i,\lambda)\\
+$$\begin{aligned}
+P(\mathbf X|\lambda)=&P(\mathbf x_1,\dots,\mathbf x_t,\mathbf x_{t+1},\dots,\mathbf x_T|\lambda)\\
+=&\sum_{i=1}^N P(\mathbf x_1,\dots,\mathbf x_t,\mathbf x_{t+1},\dots,\mathbf x_T,\mathbf z_t=\mathbf h_i|\lambda)\\
+=&\sum_{i=1}^N P(\mathbf x_1,\dots,\mathbf x_t,\mathbf z_t=\mathbf h_i|\lambda)P(\mathbf x_{t+1},\dots,\mathbf x_T|\mathbf z_{t}=\mathbf h_i,\lambda)\\
 =&\sum_{i=1}^N \alpha_t(i)\beta_{t}(i) 
-\end{align}$$
+\end{aligned}$$
 
 
 ```python
@@ -303,8 +303,8 @@ for t in range(T):
 
 ## 预测问题
 
-输入：$\vec X,\lambda=(\vec A, \vec B, \vec \Pi)$
-输出：$\vec Z$
+输入：$\mathbf X,\lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$
+输出：$\mathbf Z$
 
 在上面DP的过程中，记录第 $t$ 层的第 $i$ 个状态是前一层哪一个转移过来的，可以得到最优路径。
 
@@ -312,16 +312,16 @@ for t in range(T):
 
 一开始我以为 Viterbi 算法和前向算法是一个东西，第 $t$ 层的每个节点都计算了从第 $t-1$ 层过来的所有概率之和。  
 实际上 Viterbi 算的不是和，而是从 $t-1$ 层过来的 $N$ 个概率的最大值。  
-前向算法好比是算最大流，$\alpha_t(i)$ 是第 $t$ 个时刻经过节点 $\vec h_i$ 的所有的可能。  
-Viterbi算法好比是求最短路，第 $t$ 个时刻经过节点 $\vec h_i$ 的路径有好多条，只需要选择其中概率最大的一条。  
+前向算法好比是算最大流，$\alpha_t(i)$ 是第 $t$ 个时刻经过节点 $\mathbf h_i$ 的所有的可能。  
+Viterbi算法好比是求最短路，第 $t$ 个时刻经过节点 $\mathbf h_i$ 的路径有好多条，只需要选择其中概率最大的一条。  
 
 
 $$\sigma_t(i)=\begin{cases}
 &\pi_i b_{ik}&\text{t=1}\\
 &\left(\max\limits_{1\leq j\leq N} \sigma_{t-1}(j)a_{ji}\right)b_{ik} &\text{t>1}
-\end{cases} ~~~~~~~~k=findindex(\vec x_{t})$$
+\end{cases} ~~~~~~~~k=findindex(\mathbf x_{t})$$
 
-在计算最值的过程中，同时记录了转移到第 $t$ 个时刻节点 $\vec h_i$ 的上一层节点的标号。
+在计算最值的过程中，同时记录了转移到第 $t$ 个时刻节点 $\mathbf h_i$ 的上一层节点的标号。
 
 
 ```python
@@ -389,19 +389,19 @@ print('YES: ', y, '   NO: ', len(Z)-y)
 
 ### 预测缺失
 
-输入：$\vec x_1,\dots,\vec x_{t-1},\vec x_{t+1},\dots,\vec x_{T},\lambda=(\vec A, \vec B, \vec \Pi)$
-输出：$\vec x_t$
+输入：$\mathbf x_1,\dots,\mathbf x_{t-1},\mathbf x_{t+1},\dots,\mathbf x_{T},\lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$
+输出：$\mathbf x_t$
 
-$$\begin{align}
-\theta=&\arg\max_k P(\vec x_t=\vec s_k|\vec x_1,\dots,\vec x_{t-1},\vec x_{t+1},\dots,\vec x_{T},\lambda)\\
-=&\arg\max_k {P(\vec X|\lambda)\over P(\vec x_1,\dots,\vec x_{t-1},\vec x_{t+1},\dots,\vec x_{T}|\lambda)}~~~~~~~~\vec x_t=\vec s_k\\
-=&\arg\max_k {P(\vec X|\lambda)\over \sum_{i=1}^N \sum_{j=1}^N P(\vec x_1,\dots,\vec x_{t-1},\vec z_{t-1}=\vec h_i)P(\vec z_t=\vec h_j|\vec z_{t-1}=\vec h_i)P(\vec x_{t+1},\dots,\vec x_{T}|\vec z_t=\vec h_j,\lambda)}~~~~~~~~\vec x_t=\vec s_k\\
-=&\arg\max_k {\sum_{i=1}^N \alpha_t(i)\beta_{t}(i)\over \sum_{i=1}^N \sum_{j=1}^N \alpha_{t-1}(i)a_{ij}\beta_t(j)}~~~~~~~~\vec x_t=\vec s_k\\
-=&\arg\max_k \sum_{i=1}^N \alpha_t(i)\beta_{t}(i)~~~~~~~~\vec x_t=\vec s_k\\
-\vec x_t=&\vec s_\theta
-\end{align}$$
+$$\begin{aligned}
+\theta=&\arg\max_k P(\mathbf x_t=\mathbf s_k|\mathbf x_1,\dots,\mathbf x_{t-1},\mathbf x_{t+1},\dots,\mathbf x_{T},\lambda)\\
+=&\arg\max_k {P(\mathbf X|\lambda)\over P(\mathbf x_1,\dots,\mathbf x_{t-1},\mathbf x_{t+1},\dots,\mathbf x_{T}|\lambda)}~~~~~~~~\mathbf x_t=\mathbf s_k\\
+=&\arg\max_k {P(\mathbf X|\lambda)\over \sum_{i=1}^N \sum_{j=1}^N P(\mathbf x_1,\dots,\mathbf x_{t-1},\mathbf z_{t-1}=\mathbf h_i)P(\mathbf z_t=\mathbf h_j|\mathbf z_{t-1}=\mathbf h_i)P(\mathbf x_{t+1},\dots,\mathbf x_{T}|\mathbf z_t=\mathbf h_j,\lambda)}\\
+=&\arg\max_k {\sum_{i=1}^N \alpha_t(i)\beta_{t}(i)\over \sum_{i=1}^N \sum_{j=1}^N \alpha_{t-1}(i)a_{ij}\beta_t(j)}~~~~~~~~\mathbf x_t=\mathbf s_k\\
+=&\arg\max_k \sum_{i=1}^N \alpha_t(i)\beta_{t}(i)~~~~~~~~\mathbf x_t=\mathbf s_k\\
+\mathbf x_t=&\mathbf s_\theta
+\end{aligned}$$
 
-先计算出所有的 $\alpha,\beta,$复杂度为$O(TN^2)$，再根据 $\vec x_t=\vec s_k$ 更新出 $\alpha_t(i)$，复杂度为$O(N^2)$。$\beta_t(i)$ 不受 $\vec x_t$ 的影响，故不用更新。
+先计算出所有的 $\alpha,\beta,$复杂度为$O(TN^2)$，再根据 $\mathbf x_t=\mathbf s_k$ 更新出 $\alpha_t(i)$，复杂度为$O(N^2)$。$\beta_t(i)$ 不受 $\mathbf x_t$ 的影响，故不用更新。
 
 分母是对两个隐变量进行积分。隐变量多一个，复杂度就要乘 $N$，尽量让隐变量越少越好。
 
@@ -476,26 +476,27 @@ print('Truth: ', X[t], '       Result: ', xt)
 
 ## 学习问题
 
-输入：$\vec X$  
-输出：$\lambda=(\vec A, \vec B, \vec \Pi)$
+输入：$\mathbf X$  
+输出：$\lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$
 
 
 常规用监督学习的样本来估计出参数，但标注费用比较高，因此用非监督的学习方法来做。  
 
-借助：$P(\vec X|\lambda)$用最大似然估计参数，EM算法计算参数。
+借助：$P(\mathbf X|\lambda)$用最大似然估计参数，EM算法计算参数。
 
 
 ### Baum-Welch模型
 
 
-记给定观测和参数下的 $\vec z_t=\vec h_i$ 的概率
-$$\gamma_t(i)=P(\vec z_t=\vec h_i|\vec X, \lambda)={P(\vec z_t=\vec h_i,\vec X|\lambda)\over P(\vec X|\lambda)}=
+记给定观测和参数下的 $\mathbf z_t=\mathbf h_i$ 的概率
+$$\gamma_t(i)=P(\mathbf z_t=\mathbf h_i|\mathbf X, \lambda)={P(\mathbf z_t=\mathbf h_i,\mathbf X|\lambda)\over P(\mathbf X|\lambda)}=
 {\alpha_t(i)\beta_{t}(i)\over \sum_{i=1}^N \alpha_t(i)\beta_{t}(i) }$$
 
 
-记给定观测和参数下的 $\vec z_t=\vec h_i,\vec z_{t+1}=\vec h_j$ 的概率
-$$\xi_t(i,j)=P(\vec z_t=\vec h_i,\vec z_{t+1}=\vec h_j|\vec X, \lambda)={P(\vec z_t=\vec h_i,\vec z_{t+1}=\vec h_j,\vec X|\lambda)\over P(\vec X|\lambda)}=
-{\alpha_t(i)a_{ij}b_{jk}\beta_{t+1}(j)\over \sum_{i=1}^N \alpha_t(i)\beta_{t}(i) }~~~~~~~~k=findindex(\vec x_{t+1})$$
+记给定观测和参数下的 $\mathbf z_t=\mathbf h_i,\mathbf z_{t+1}=\mathbf h_j$ 的概率
+$$\xi_t(i,j)=P(\mathbf z_t=\mathbf h_i,\mathbf z_{t+1}=\mathbf h_j|\mathbf X, \lambda)={P(\mathbf z_t=\mathbf h_i,\mathbf z_{t+1}=\mathbf h_j,\mathbf X|\lambda)\over P(\mathbf X|\lambda)}=
+{\alpha_t(i)a_{ij}b_{jk}\beta_{t+1}(j)\over \sum_{i=1}^N \alpha_t(i)\beta_{t}(i) }\\
+k=findindex(\mathbf x_{t+1})$$
 
 
 
@@ -531,13 +532,13 @@ def cal_xi(T, S, H, A, B, pi, alpha, beta):
 
 算法步骤：
 
-1. 初始化模型参数 $\lambda=(\vec A^{(0)}, \vec B^{(0)}, \vec \Pi^{(0)})$  
+1. 初始化模型参数 $\lambda=(\mathbf A^{(0)}, \mathbf B^{(0)}, \mathbf \Pi^{(0)})$  
 2. 递推
-$$\begin{align}
+$$\begin{aligned}
 a_{ij}^{(n)}&={\sum_{t=1}^{T-1}\xi_t(i,j) \over \sum_{t=1}^{T-1}\gamma_t(i)}\\
-b_{jk}^{(n)}&={\sum_{t=1}^{T}\gamma_t(j)[\vec x_t==\vec s_k] \over \sum_{t=1}^{T}\gamma_t(j)}\\
+b_{jk}^{(n)}&={\sum_{t=1}^{T}\gamma_t(j)[\mathbf x_t==\mathbf s_k] \over \sum_{t=1}^{T}\gamma_t(j)}\\
 \pi_i^{(n)}&=\gamma_1(i)
-\end{align}$$
+\end{aligned}$$
 3. 反复迭代直到结束。
 
 
