@@ -23,6 +23,7 @@ install:
   - chmod 755 ./npm-init.sh
   - source ./npm-init.sh
   - ls
+  - cp -f ./kramed-inline.js node_modules/kramed/lib/rules/inline.js
 
 script:
   - git fetch
