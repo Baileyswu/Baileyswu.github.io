@@ -27,4 +27,5 @@ install:
 
 script:
   - git fetch
+  - npm run clean
   - npm run deploy
