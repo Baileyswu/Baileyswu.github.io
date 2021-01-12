@@ -5,6 +5,7 @@ categories: 技术
 tags: 
  - Hexo
  - theme
+ - Readme
 photos:
 author: Siricee
 ---

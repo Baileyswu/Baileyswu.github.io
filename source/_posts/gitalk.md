@@ -6,6 +6,7 @@ tags:
  - gitalk
  - comment
  - Javascript
+ - ejs
 photos:
 author:
 ---
