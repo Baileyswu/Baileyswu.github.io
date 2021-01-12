@@ -5,7 +5,7 @@ categories: 技术
 author: stiekel
 tags: 
   - Hexo
-  - hexo theme
+  - theme
   - Javascript
   - Readme
 ---
