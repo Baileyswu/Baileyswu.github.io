@@ -1,7 +1,7 @@
 # .travis.yml
 language: node_js
 node_js:
-  - "10"
+  - "14"
 dist: trusty
 sudo: required
 
@@ -23,7 +23,6 @@ install:
   - chmod 755 ./npm-init.sh
   - source ./npm-init.sh
   - ls
-  - cp -f ./kramed-inline.js node_modules/kramed/lib/rules/inline.js
 
 script:
   - git fetch
