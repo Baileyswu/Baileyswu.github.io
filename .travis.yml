@@ -1,7 +1,7 @@
 # .travis.yml
 language: node_js
 node_js:
-  - "10"
+  - "14"
 dist: trusty
 sudo: required
 
@@ -27,4 +27,5 @@ install:
 
 script:
   - git fetch
+  - npm run clean
   - npm run deploy

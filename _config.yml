@@ -21,9 +21,9 @@ permalink_defaults:
 # Directory
 source_dir: source
 public_dir: public
-tag_dir: tags
+tag_dir: tag
 archive_dir: archives
-category_dir: categories
+category_dir: category
 code_dir: downloads/code
 i18n_dir: :lang
 skip_render:
@@ -32,7 +32,7 @@ skip_render:
 new_post_name: :title.md # File name of new posts
 default_layout: post
 titlecase: false # Transform title into titlecase
-external_link: true # Open external links in new tab
+external_link.enable: true # Open external links in new tab
 filename_case: 0
 render_drafts: false
 post_asset_folder: true
@@ -75,14 +75,15 @@ pagination_dir: page
 ## Themes: https://hexo.io/themes/
 # plugins: 
 #   hexo-math
-theme: hexo-theme-random-master
+theme: hexo-theme-Chic
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repository: git@github.com:Baileyswu/Baileyswu.github.io.git
+  repo: git@github.com:Baileyswu/Baileyswu.github.io.git
   branch: master
+  message: "deploy through travis CI updated: {{ now('YYYY-MM-DD HH:mm:ss') }}"
 
 math:
   enable: true

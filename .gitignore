@@ -6,4 +6,3 @@ Thumbs.db
 db.json
 *.log
 .vscode
-package-lock.json
