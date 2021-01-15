@@ -1,4 +1,4 @@
 ---
 title: Friends
-layout: friends
+layout: friend
 ---
