@@ -1,12 +1,12 @@
 ---
 title: "Deep Transformers with Latent Depth"
 date: 2021-01-19 12:05:56
-categories: 论文阅读
+categories: PRML
 tags: 
  - transformer
  - NIPS
- - Bayesian
- - Inference
+ - VI
+ - 论文阅读
 photos:
 author:
 ---
