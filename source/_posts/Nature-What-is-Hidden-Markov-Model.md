@@ -8,7 +8,7 @@ tags:
  - 生物
  - Viterbi
  - 论文阅读
- - Nature Science
+ - Nature
  - 序列模型
 ---
 
