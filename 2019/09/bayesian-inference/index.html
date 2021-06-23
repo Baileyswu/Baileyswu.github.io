@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>贝叶斯推理 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">贝叶斯推理</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/EM/">EM</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Bayesian-Inference/">Bayesian Inference</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E5%85%B1%E8%BD%AD/">共轭</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/GMM/">GMM</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Gibbs-Sampling/">Gibbs Sampling</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2019/09/bayesian-inference/" class="leancloud_visitors" data-flag-title="贝叶斯推理">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/PRML/">PRML</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">09/21, 2019</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="任务场景"><a href="#任务场景" class="headerlink" title="任务场景"></a>任务场景</h2><p>给定数据，真实的分布是未知的。我们学习的任务就是去拟合出真实的分布。现在我们给出一个真实分布是 GMM，在上面采样得到一组数据。你是否能够根据数据去拟合出这个分布？</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GMM(means, variances, weights)</span><br><span class="line">true_model = models.GMM([-<span class="number">4</span>, <span class="number">0</span>, <span class="number">2</span>], [<span class="number">1</span>, <span class="number">2</span>, <span class="number">.7</span>], [<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.6</span>])</span><br></pre></td></tr></table></figure>
+<img src="/2019/09/bayesian-inference/GMM.png" class="">
+<h2 id="单峰分布"><a href="#单峰分布" class="headerlink" title="单峰分布"></a>单峰分布</h2><h3 id="用高斯分布拟合"><a href="#用高斯分布拟合" class="headerlink" title="用高斯分布拟合"></a>用高斯分布拟合</h3><p>我们知道高斯分布是长这样的</p>
+<script type="math/tex; mode=display">
+\DeclareMathOperator{\Norm}{\mathcal{N}}
+\DeclareMathOperator{\Gam}{Gam}
+\DeclareMathOperator{\e}{exp}
+p(x \mid \mu, \sigma^2) = \Norm(x \mid \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \e\{ \frac{-(x - \mu)^2}{2\sigma^2} \}</script><ul>
+<li>$\mu$ is the <strong>mean</strong> of the Gaussian density </li>
+<li>$\sigma^2$ is the <strong>variance</strong> of the Gaussian density</li>
+<li>$\lambda = \frac{1}{\sigma^2}$ is the <strong>precision</strong> of the Gaussian density</li>
+</ul>
+<p>（等等我们可以用 $\lambda$ 代替方差来写高斯分布）</p>
+<p>为了估计真实的分布，可以采用最大化似然的办法得到均值和方差</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mu &= \frac{1}{N} \sum_i x_i \\
+\sigma^2 &= \frac{1}{N} \sum_i x_i^2
+\end{align}</script><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">N = <span class="built_in">len</span>(X)</span><br><span class="line">mean = np.<span class="built_in">sum</span>(X)/N</span><br><span class="line">var = np.<span class="built_in">sum</span>(X**<span class="number">2</span>)/N</span><br></pre></td></tr></table></figure>
+<img src="/2019/09/bayesian-inference/Gaussian-ML.png" class="">
+<p>显然这个结果不能很好地拟合真实分布。</p>
+<h3 id="贝叶斯推理：加入均值和方差的先验"><a href="#贝叶斯推理：加入均值和方差的先验" class="headerlink" title="贝叶斯推理：加入均值和方差的先验"></a>贝叶斯推理：加入均值和方差的先验</h3><p>A common and convenient choice of prior for the Gaussian is the <strong>Normal-Gamma</strong> prior:</p>
+<script type="math/tex; mode=display">
+p(\mu, \lambda \mid m_0, \kappa_0, a_0, b_0) = \Norm(\mu \mid m_0, (\kappa_0 \lambda)^{-1}) \Gam(\lambda \mid a_0, b_0)</script><p>where:</p>
+<script type="math/tex; mode=display">
+\Gam(\lambda \mid a_0, b_0) = \frac{1}{\Gamma(a_0)} b_0^{a_0} \lambda^{a_0 - 1} \e \{ -b_0 \lambda\}</script><p>$m_0$, $\kappa_0$, $a_0$ and $b_0$ are called <strong>hyper-parameters</strong>. They are the parameters of the prior distribution.</p>
+<p>为了对 Normal-Gamma 分布有个形象的了解，可以绘图看到，它的均值和方差是服从这样的概率分布的<br><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NormalGamma(mean, kappa, a, b)</span><br><span class="line">ng_prior = models.NormalGamma(<span class="number">0</span>, <span class="number">2</span>, <span class="number">5</span>, <span class="number">6</span>)</span><br></pre></td></tr></table></figure><br><img src="/2019/09/bayesian-inference/NormalGamma.png" class=""></p>
+<p>由于 Normal-Gamma 是 正态分布的 <strong>共轭先验</strong>，因此 Normal-Gamma 的后验有闭式解，且可以写成如下形式：</p>
+<script type="math/tex; mode=display">
+p(\mu, \lambda \mid \mathbf{x}) = \Norm(\mu \mid m_n, (\kappa_n \lambda)^{-1}) \Gam(\lambda \mid a_n, b_n)</script><p>where:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+m_n &= \frac{\kappa_0 m_0 + N \bar{x}} {\kappa_0 +  N} \\
+\kappa_n &= \kappa_0 + N \\
+a_n &= a_0 + \frac{N}{2} \\
+b_n &= b_0 + \frac{N}{2} ( s + \frac{\kappa_0 (\bar{x} - m_0)^2}{\kappa_0 + N} ) \\
+\bar{x} &= \frac{1}{N} \sum_i x_i \\
+s &= \frac{1}{N} \sum_i (x_i - \bar{x})^2
+\end{align}</script><p>$N$ is the total number of point in the the training data and $m_n$, $\kappa_n$, $a_n$ and $b_n$ are the parameters of the posterior. Note that they are different from the hyper-parameters !! </p>
+<p>因此加入后验的影响后，均值和方差的分布成为更加聚集的一小团。</p>
+<img src="/2019/09/bayesian-inference/NG-posterior.png" class="">
+<p>当需要做预测任务时，则需要把均值和方差边缘化（积分掉），得到数据分布。恰好这个分布是学生分布。由此可以得到每个数据点的概率密度：</p>
+<img src="/2019/09/bayesian-inference/PredStu.png" class="">
+<p>但是由于是单峰的，拟合效果还是很差！</p>
+<h2 id="多峰分布"><a href="#多峰分布" class="headerlink" title="多峰分布"></a>多峰分布</h2><h3 id="用高斯混合模型拟合"><a href="#用高斯混合模型拟合" class="headerlink" title="用高斯混合模型拟合"></a>用高斯混合模型拟合</h3><p>我们尝试用 K 个不同的高斯分布来拟合真实分布：</p>
+<script type="math/tex; mode=display">
+    p(x|\boldsymbol{\mu}, \boldsymbol{\lambda}, \boldsymbol{\pi}) = \sum_{k=1}^{K} \pi_k \Norm(x|\mu_k, (\lambda_k)^{-1})</script><ul>
+<li>$\boldsymbol{\mu}$ is the vector of $K$ means</li>
+<li>$\boldsymbol{\lambda}$ is the vector of $K$ precisions</li>
+<li>$\boldsymbol{\pi}$ is the vector of $K$ weights such that $\sum_{k=1}^K \pi_k = 1$ </li>
+</ul>
+<p>其中给不同高斯加的权重作为隐变量。</p>
+<h3 id="用-EM-算法求解参数"><a href="#用-EM-算法求解参数" class="headerlink" title="用 EM 算法求解参数"></a>用 EM 算法求解参数</h3><ul>
+<li>initialize the parameters of the GMM </li>
+<li>iterate until convergence ($ \log p(\mathbf{x} | \theta^{new}) - \log p(\mathbf{x} | \theta^{old}) \le 0.01$):<ul>
+<li>Expectation (E-step): compute the probability of the latent variable for each data point</li>
+<li>Maximization (M-step): update the parameters from the statistics of the E-step. </li>
+</ul>
+</li>
+</ul>
+<p>具体推导可以看 <a target="_blank" rel="noopener" href="https://baileyswu.github.io/2018/11/Expectation-Maximization/">Expectation Maximization algorithm</a> 以及 <a target="_blank" rel="noopener" href="https://baileyswu.github.io/2019/09/gaussian-mixture-model">GMM</a></p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">last_llh = -<span class="number">1e8</span></span><br><span class="line"><span class="keyword">while</span> <span class="number">1e-2</span> &lt; np.absolute(llh - last_llh):</span><br><span class="line">    <span class="comment"># E-step</span></span><br><span class="line">    Z = gmm.EStep(X)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># M-step</span></span><br><span class="line">    gmm.MStep(X, Z)</span><br><span class="line">    </span><br><span class="line">    last_llh = llh</span><br><span class="line">    llh = gmm.logLikelihood(X)</span><br><span class="line">    print(<span class="string">&#x27;log-likelihood:&#x27;</span>, llh)</span><br></pre></td></tr></table></figure>
+<p>具体的 <code>EStep</code> 和 <code>MStep</code> 可以看<a target="_blank" rel="noopener" href="https://github.com/iondel/JHU2016Labs/blob/5575a4e797ce57ed3a033b662ded996b9d79d8a6/jhu2016_labs/models.py#L75">这里</a></p>
+<p>不同的参数初始化得到的效果不同。这里给出了一个拟合得较好的分布：</p>
+<img src="/2019/09/bayesian-inference/GMM-EM.png" class="">
+<h3 id="贝叶斯推理：加入先验"><a href="#贝叶斯推理：加入先验" class="headerlink" title="贝叶斯推理：加入先验"></a>贝叶斯推理：加入先验</h3><p>加入参数的先验：</p>
+<script type="math/tex; mode=display">
+\DeclareMathOperator{\Dir}{Dir}
+p(\boldsymbol{\pi}) = \Dir(\boldsymbol{\pi} \mid \boldsymbol{\alpha}_0)</script><script type="math/tex; mode=display">
+p(\mu_k, \lambda_k) = \Norm(\mu_k \mid m_0, (\kappa_0 \lambda_k)^{-1}) \Gam(\lambda_k \mid a_0, b_0)</script><p>如果仍旧想用 EM 算法求解参数，则在 M 步会直接把均值和方差算出来，而不是算出均值和方差的后验。因此不能用 EM 算法。</p>
+<p>考虑到参数之间有相互依赖的关系，可以用 Gibbs Sampling 得到参数的后验分布。给出以下三个条件分布，在每次迭代中，都假设知道了条件值，采出样本。最终它们将趋向于真实分布。</p>
+<h4 id="latent-variable-z-i"><a href="#latent-variable-z-i" class="headerlink" title="latent variable $z_i$"></a>latent variable $z_i$</h4><script type="math/tex; mode=display">
+\begin{align}
+p(z_i \mid \mathbf{x}, \Theta) &= p(z_i \mid x_i, \boldsymbol{\pi}, \boldsymbol{\mu}, \boldsymbol{\lambda}) \\
+p(z_i = k \mid x_i, \boldsymbol{\pi}, \boldsymbol{\mu}, \boldsymbol{\lambda}) &= \frac{\pi_k \Norm(x_i \mid \mu_k, \lambda_k)} {\sum_{j=0}^{K} \pi_j \Norm(x_i \mid \mu_j, \lambda_j)}
+\end{align}</script><h4 id="mean-and-variance"><a href="#mean-and-variance" class="headerlink" title="mean and variance"></a>mean and variance</h4><p>We define the set of all data point $x_i$  that are assigned to the component $k$ of the mixture as follows:</p>
+<script type="math/tex; mode=display">
+\mathbf{x}_{(k)} = \{ x_i : z_i = k, \forall i \in \{1,... , N \} \}</script><p>and similarly for the latent variables $\mathbf{z}$:</p>
+<script type="math/tex; mode=display">
+\mathbf{z}_{(k)} = \{ z_i : z_i = k, \forall i \in \{1,... , N \} \}</script><script type="math/tex; mode=display">
+\begin{align}
+p(\mu_k, \lambda_k \mid \mathbf{x}, \mathbf{z}, \Theta_{\smallsetminus \{ \mu_k, \lambda_k \} } ) &= p(\mu_k, \lambda_k \mid \mathbf{x}_{(k)}, \mathbf{z}_{(k)}, \Theta_{\smallsetminus \{ \mu_k, \lambda_k \} } ) \\
+&= \Norm(\mu_k \mid m_{n,k}, (\kappa_{n,k} \lambda_k)^{-1}) \Gam(\lambda_k \mid a_{n,k}, b_{n,k})
+\end{align}</script><p>where:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+m_{n,k} &= \frac{\kappa_0 m_0 + N_k \bar{x}_k} {\kappa_0 +  N_k} \\
+\kappa_{n,k} &= \kappa_0 + N_k \\
+a_{n,k} &= a_0 + \frac{N_k}{2} \\
+b_{n,k} &= b_0 + \frac{N_k}{2} ( s + \frac{\kappa_0 (\bar{x}_k - m_0)^2}{\kappa_0 + N_k} ) \\
+N_k &= \left\vert \mathbf{x}_{(k)} \right\vert \\
+\bar{x}_k &= \frac{1}{N_k} \sum_{\forall x \in \mathbf{x}_{(k)}} x \\
+s_n &= \frac{1}{N} \sum_{\forall x \in \mathbf{x}_{(k)}} (x_i - \bar{x})^2
+\end{align}</script><p>NOTE: these equations are very similar to the Bayesian Gaussian estimate. However, it remains some difference</p>
+<h4 id="weights"><a href="#weights" class="headerlink" title="weights"></a>weights</h4><script type="math/tex; mode=display">
+\begin{align}
+p( \boldsymbol{\pi} \mid \mathbf{x}, \mathbf{z}, \Theta_{\smallsetminus \{ \boldsymbol{\pi} \} } ) &= p( \boldsymbol{\pi} \mid \mathbf{z}) \\
+&= \Dir(\boldsymbol{\pi} \mid \boldsymbol{\alpha})
+\end{align}</script><p>where:</p>
+<script type="math/tex; mode=display">
+\alpha_{n,k} = \alpha_{0,k} + N_k \; ; \; \forall \, k = 1\dots K</script><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">    <span class="comment"># Sample the latent variables</span></span><br><span class="line">    Z = bgmm.sampleLatentVariables(X)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Update the parameters</span></span><br><span class="line">    bgmm.sampleMeansVariances(X, Z)</span><br><span class="line">    bgmm.sampleWeights(Z)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Just for plotting, this is not part of the Gibbs Sampling algorithm.</span></span><br><span class="line">    plotting.plotGMM(bgmm.gmm, fig=fig, ax=ax, color=<span class="string">&#x27;b&#x27;</span>, lw=<span class="number">.5</span>, label=<span class="string">&#x27;sampled GMM&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<img src="/2019/09/bayesian-inference/Gibbs-Sampling.png" class="">
+<p>每次迭代的参数都可以生成一条蓝线。把蓝线加权平均得到了红线。看起来还是比较接近真实分布的。</p>
+<h2 id="相关教程"><a href="#相关教程" class="headerlink" title="相关教程"></a>相关教程</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/iondel/JHU2016Labs">Introduction To Bayesian Inference (jupyter notebook)</a></li>
+<li><a href="kamper_bayesgmm13.pdf">Gibbs sampling for fitting finite and infinite Gaussian mixture models</a></li>
+</ul>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/EM/"># EM</a>
+                    
+                        <a href="/tag/Bayesian-Inference/"># Bayesian Inference</a>
+                    
+                        <a href="/tag/%E5%85%B1%E8%BD%AD/"># 共轭</a>
+                    
+                        <a href="/tag/GMM/"># GMM</a>
+                    
+                        <a href="/tag/Gibbs-Sampling/"># Gibbs Sampling</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/09/gaussian-mixture-model/">高斯混合模型</a>
+            
+            
+            <a class="next" rel="next" href="/2019/09/do-not-escape/">逃避可耻而无用</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>Expectation Maximization algorithm (EM)  期望最大化算法 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Expectation Maximization algorithm (EM)  期望最大化算法</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/EM/">EM</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/mathjax/">mathjax</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/KL-divergence/">KL divergence</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2018/11/Expectation-Maximization/" class="leancloud_visitors" data-flag-title="Expectation Maximization algorithm (EM)  期望最大化算法">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/PRML/">PRML</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">11/15, 2018</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="最大似然"><a href="#最大似然" class="headerlink" title="最大似然"></a>最大似然</h2><p>最大似然是指</p>
+<script type="math/tex; mode=display">
+\theta = \arg\max _{\theta}p ( \mathbf { X } | \theta )
+= \arg\max _{\theta} \ln p ( \mathbf { X } | \theta )</script><p>在含有隐变量的模型中，最大似然是比较麻烦的事情。</p>
+<script type="math/tex; mode=display">
+\ln p ( \mathbf { X } | \boldsymbol { \theta } ) = \ln \left\{ \sum _ { \mathbf { Z } } p ( \mathbf { X } , \mathbf { Z } | \boldsymbol { \theta } ) \right\}</script><p>要先积分掉所有的 $\mathbf{Z}$，再进行对数化。对于指数族分布的 $p ( \mathbf { X } , \mathbf { Z } | \boldsymbol { \theta } )$ 而言，是一个晴天霹雳。</p>
+<h2 id="分解对数似然"><a href="#分解对数似然" class="headerlink" title="分解对数似然"></a>分解对数似然</h2><p>现在引入一个隐变量的分布 $q(\mathbf {Z})$，它可以在 $\ln p ( \mathbf { X } | \theta )$ 的分解中起到作用：</p>
+<script type="math/tex; mode=display">
+\begin{eqnarray*}
+\ln p ( \mathbf { X } | \boldsymbol { \theta } ) 
+= &&\sum _ { \mathbf { Z } } q ( \mathbf { Z } ) \ln p ( \mathbf { X } | \boldsymbol { \theta } )\\
+= &&\sum _ { \mathbf { Z } } q ( \mathbf { Z } ) \ln \left\{ \frac { p ( \mathbf { X } , \mathbf { Z } | \boldsymbol { \theta } ) } { p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ) }  \right\}\\
+= &&\sum _ { \mathbf { Z } } q ( \mathbf { Z } ) \ln \left\{ \frac { p ( \mathbf { X } , \mathbf { Z } | \boldsymbol { \theta } ) } { q ( \mathbf { Z } ) } \frac { q ( \mathbf { Z } ) } { p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ) }  \right\}\\
+= && \sum _ { \mathbf { Z } } q ( \mathbf { Z } ) \ln \left\{ \frac { p ( \mathbf { X } , \mathbf { Z } | \boldsymbol { \theta } ) } { q ( \mathbf { Z } ) } \right\} - \sum _ { \mathbf { Z } } q ( \mathbf { Z } ) \ln \left\{ \frac { p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ) } { q ( \mathbf { Z } ) } \right\}
+\end{eqnarray*}</script><p>记</p>
+<script type="math/tex; mode=display">
+\ln p ( \mathbf { X } | \boldsymbol { \theta } ) = \mathcal { L } ( q , \boldsymbol { \theta } ) + \mathrm { KL } ( q \| p )</script><p>其中</p>
+<script type="math/tex; mode=display">
+\mathcal { L } ( q , \boldsymbol { \theta } ) = \sum _ { \mathbf { Z } } q ( \mathbf { Z } ) \ln \left\{ \frac { p ( \mathbf { X } , \mathbf { Z } | \boldsymbol { \theta } ) } { q ( \mathbf { Z } ) } \right\}</script><script type="math/tex; mode=display">
+\mathrm { KL } ( q \| p ) = - \sum _ { \mathbf { Z } } q ( \mathbf { Z } ) \ln \left\{ \frac { p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ) } { q ( \mathbf { Z } ) } \right\}</script><p>这里已经可以看出求和号被拉到了对数的外面，指数族分布的计算有望了。</p>
+<h3 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h3><p>其中的 $\mathrm { KL } ( q | p )$ 是分布 $q(\mathbf Z)$ 和 后验分布 $p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ) $ 的 KL 散度。根据其数学性质，有</p>
+<script type="math/tex; mode=display">
+\mathrm { KL } ( q \| p ) \geq 0</script><p>当且仅当 $q(\mathbf Z) = p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } )$  时等于0.</p>
+<h3 id="Lowerbound"><a href="#Lowerbound" class="headerlink" title="Lowerbound"></a>Lowerbound</h3><p>从上面的性质可得 $\ln p ( \mathbf { X } | \boldsymbol { \theta } ) \geq \mathcal { L } ( q , \boldsymbol { \theta } ) $ 。也就是说如果可以确定得到 $\mathcal { L } ( q , \boldsymbol { \theta } ) $，则 $\ln p ( \mathbf { X } | \boldsymbol { \theta } )$ 将必然大于这个界限。为了得到最大的 $\ln p ( \mathbf { X } | \boldsymbol { \theta } )$, 则必须要尽量提高它的下界 $\mathcal { L } ( q , \boldsymbol { \theta } )$ 。</p>
+<h2 id="EM-算法"><a href="#EM-算法" class="headerlink" title="EM 算法"></a>EM 算法</h2><p>目标是最大化对数似然 $\ln p ( \mathbf { X } | \boldsymbol { \theta } )$ 。在这一过程中，也最大化了 $\mathcal { L } ( q , \boldsymbol { \theta } )$。两者交替进行最大化。</p>
+<h3 id="E-步"><a href="#E-步" class="headerlink" title="E 步"></a>E 步</h3><p>记当前的参数为 $\boldsymbol { \theta }^{old}$。如果固定 $\boldsymbol { \theta }^{old}$，则 $\mathcal { L } ( q , \boldsymbol { \theta } ^ {old} )$ 是关于 $q(\mathbf Z)$ 的函数；另一方面，$\ln p ( \mathbf { X } | \boldsymbol { \theta } ^ {old})$ 不依赖于 $q(\mathbf Z)$。因此可以认为自变量是  $q(\mathbf Z)$, 那么 $\ln p ( \mathbf { X } | \boldsymbol { \theta } ^ {old})$ 是常量，要最大化 $\mathcal { L } ( q , \boldsymbol { \theta } ^ {old} )$。当且仅当 $\mathrm { KL } ( q | p ) = 0$ 时，取到最大的 $\mathcal { L } ( q , \boldsymbol { \theta } ^ {old} )$。根据 KL 散度的性质，此时 $q(\mathbf Z) = p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ^ {old} )$.</p>
+<h3 id="M-步"><a href="#M-步" class="headerlink" title="M 步"></a>M 步</h3><p>现在再固定 $q(\mathbf Z) = p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ^ {old} )$，则  $\mathcal { L } ( q , \boldsymbol { \theta } )$ 是关于 $\boldsymbol { \theta } $ 的函数。如果通过求导等方式得到新的极值点 $\boldsymbol { \theta }^{new} $，则会使得 $\mathcal { L } ( q , \boldsymbol { \theta } )$ 比原来更大。但同时 $\mathrm { KL } ( q | p ) $ 也增大到不为零的状态。此时 $\ln p ( \mathbf { X } | \boldsymbol { \theta } )$ 就更大。</p>
+<h3 id="Q函数推导"><a href="#Q函数推导" class="headerlink" title="Q函数推导"></a>Q函数推导</h3><p>当 $q(\mathbf Z) = p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ^ {old} )$ 时，</p>
+<script type="math/tex; mode=display">\begin{eqnarray*}
+\mathcal { L } ( q , \boldsymbol { \theta } ) =&& \sum _ { \mathbf { Z } } q ( \mathbf { Z } ) \ln \left\{ \frac { p ( \mathbf { X } , \mathbf { Z } | \boldsymbol { \theta } ) } { q ( \mathbf { Z } ) } \right\} \\
+= &&\sum _ { \mathbf { Z } } p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ^ { \mathrm { old } } ) \ln p ( \mathbf { X } , \mathbf { Z } | \boldsymbol { \theta } ) - \sum _ { \mathbf { Z } } p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ^ { \mathrm { old } } ) \ln p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ^ { \text { old } } ) \\
+= && \mathcal { Q } \left( \boldsymbol { \theta } , \boldsymbol { \theta } ^ { \text { old } } \right) + \text { const }
+\end{eqnarray*}</script><p>把前面关于 $\boldsymbol { \theta } , \boldsymbol { \theta } ^ { \text { old } }$ 的这项记下来用，后面的常数在最大化时不起作用。</p>
+<p>可见要最大化的就是完整数据（包括观测和隐变量）的似然对数的期望。</p>
+<p>因此简单地说，EM算法可以这样表述：</p>
+<h3 id="E-步-1"><a href="#E-步-1" class="headerlink" title="E 步"></a>E 步</h3><p>找到后验分布 $p ( \mathbf { Z } | \mathbf { X } , \boldsymbol { \theta } ^ {old} )$，估计出完整数据的似然对数的期望 $\mathcal { Q } \left( \boldsymbol { \theta } , \boldsymbol { \theta } ^ { \text { old } } \right) $。</p>
+<h3 id="M-步-1"><a href="#M-步-1" class="headerlink" title="M 步"></a>M 步</h3><p>关于参数 $\boldsymbol { \theta }$ 最大化 $\mathcal { Q } \left( \boldsymbol { \theta } , \boldsymbol { \theta } ^ { \text { old } } \right) $。</p>
+<h2 id="函数图像理解"><a href="#函数图像理解" class="headerlink" title="函数图像理解"></a>函数图像理解</h2><p>从图像上可以理解为：现有红色的似然，还不能确定出蓝色的下界的形状。E 步，给定 $\boldsymbol { \theta } ^ {old}$，找到两者相交的点（KL = 0)，确定出了下界的形状。M 步，找到下界的极值点，$\boldsymbol { \theta } ^ {new}$。然后进行下一轮迭代计算，确定出新的绿色的下界的形状，以此类推。直到收敛到红色的似然的极值点。</p>
+<p><img src="em.png" alt=""></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>EM 的主要思路是通过最大化下界来最大化似然。由于下界拥有两个参数，先固定其中一个求极值点，再固定另一个求极值点。循环求解，直到极值点收敛。恰好，一步是在求完整数据的似然对数的期望，另一步是在最大化这个期望，因此命名为Expectation Maximization. </p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/EM/"># EM</a>
+                    
+                        <a href="/tag/mathjax/"># mathjax</a>
+                    
+                        <a href="/tag/KL-divergence/"># KL divergence</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2018/12/My-Nov-in-2018/">在合适的时间做合适的事</a>
+            
+            
+            <a class="next" rel="next" href="/2018/11/git-server/">Git 服务器搭建</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

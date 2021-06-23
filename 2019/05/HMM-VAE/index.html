@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>HMM-VAE | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">HMM-VAE</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/HMM/">HMM</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/VAE/">VAE</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/speech/">speech</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2019/05/HMM-VAE/" class="leancloud_visitors" data-flag-title="HMM-VAE">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/PRML/">PRML</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">05/17, 2019</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="研究动机"><a href="#研究动机" class="headerlink" title="研究动机"></a>研究动机</h2><p>多视角的 HMM 模型。在提出的几种可能的模型中，我最终选择了多视角 deep-HMM 作为我的研究方向。深度的部分我决定照着 HMM-VAE 的模型进行实现。</p>
+<h2 id="模型背景"><a href="#模型背景" class="headerlink" title="模型背景"></a>模型背景</h2><p>HMM-VAE 可以用于非监督的时序数据的任务，比如 Acoustic and Lingustic Unit Discovery (声学、语言学的单元发现)。前者是自动语音识别的基本步骤，后者是自然语言处理的基本步骤。</p>
+<p>以往用于 HMM 的发射概率的部分，都采用 GMM，但众所周知，现在神经网络的效果要优于 GMM，因此可以尝试用 VAE 来代替发射的部分。</p>
+<p>此外，<a target="_blank" rel="noopener" href="https://papers.nips.cc/paper/6379-composing-graphical-models-with-neural-networks-for-structured-representations-and-fast-inference.pdf">Structrure VAE (NIPS 2016)</a> 指出了传统的概率模型具有可解释性，但是假设太 rigid；而深度学习的模型可以灵活训练，但可解释性差。因此大可以将这两者结合起来。</p>
+<p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=btr1poCYIzw">视频</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.isca-speech.org/archive/Interspeech_2017/pdfs/1160.PDF">HMM-VAE</a> 就是一种类型的 SVAE。</p>
+<h2 id="概率图模型"><a href="#概率图模型" class="headerlink" title="概率图模型"></a>概率图模型</h2><p><img src="HMM-VAE.png" alt=""></p>
+<p>$\theta$ 控制了转移与发射概率；$\gamma$ 控制了编解码网络。</p>
+<h2 id="目标式"><a href="#目标式" class="headerlink" title="目标式"></a>目标式</h2><script type="math/tex; mode=display">
+\mathcal{L}(\mathbf{Y} ; \gamma, \theta, \phi)=\sum_{t=1}^{T} \mathcal{L}\left(\mathbf{y}_{t} ; \gamma, \theta, \phi\right)</script><script type="math/tex; mode=display">\begin{aligned} 
+\mathcal{L}\left(\mathbf{y}_{t} ; \gamma, \theta, \phi\right)=& \frac{1}{L} \sum_{l=1}^{L} \ln p\left(\mathbf{y}_{t} | \overline{\mathbf{x}}_{t}^{(l)} ; \gamma\right) \\ &-\mathbb{E}_{\tilde{q}\left(z_{t}\right)}\left[\operatorname{KL}\left(q\left(\mathbf{x}_{t} ; \phi\right) \| p\left(\mathbf{x}_{t} | z_{t} ; \theta\right)\right)\right) \\ &+\mathbb{E}_{\overline{q}\left(z_{t-1}, z_{t}\right)}\left[\ln p\left(z_{t} | z_{t-1} ; \theta\right)\right] \\ &+\mathrm{const.}
+\end{aligned}</script>
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/HMM/"># HMM</a>
+                    
+                        <a href="/tag/VAE/"># VAE</a>
+                    
+                        <a href="/tag/speech/"># speech</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/08/hexo-with-travis/">Real Light Hexo With Travis CI</a>
+            
+            
+            <a class="next" rel="next" href="/2019/03/importance-sampling/">重要性采样</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

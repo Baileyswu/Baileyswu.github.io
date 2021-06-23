@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>Git 服务器搭建 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Git 服务器搭建</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/Git/">Git</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Centos/">Centos</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Linux/">Linux</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/ssh/">ssh</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2018/11/git-server/" class="leancloud_visitors" data-flag-title="Git 服务器搭建">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/%E6%8A%80%E6%9C%AF/">技术</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">11/15, 2018</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>本博客是摘自 <a target="_blank" rel="noopener" href="http://www.runoob.com/git/git-server.html">runoob 教程</a>后的注解。经过亲测，可以加上几个小操作做到更 Easy…</p>
+<h2 id="材料"><a href="#材料" class="headerlink" title="材料"></a>材料</h2><ul>
+<li>一台有公网 IP 的服务器（那么你在世界每个角落都可以访问）</li>
+<li>或者一台有内网 IP 的服务器（那么你只有在内网或者通过 VPN 可以访问，就看能不能 ping 到）</li>
+<li>linux 系统的 root 权限</li>
+</ul>
+<h2 id="成品"><a href="#成品" class="headerlink" title="成品"></a>成品</h2><ul>
+<li>一台提供Git服务的服务器。</li>
+</ul>
+<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>接下来将以 Centos 为例搭建 Git 服务器。</p>
+<h3 id="安装Git"><a href="#安装Git" class="headerlink" title="安装Git"></a>安装Git</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ yum install curl-devel expat-devel gettext-devel openssl-devel zlib-devel perl-devel</span><br><span class="line">$ yum install git</span><br></pre></td></tr></table></figure>
+<p>运气好的话，有人装好了你就不用再装了。</p>
+<p>接下来我们 创建一个git用户组和用户，用来运行git服务：（如果你没有管理员权限的话，就不要再挣扎了）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ groupadd git</span><br><span class="line">$ useradd git -g git</span><br></pre></td></tr></table></figure><br>为了方便后面的操作，你可以给这个 git 账户设置一个密码<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ passwd git</span><br></pre></td></tr></table></figure></p>
+<h3 id="创建证书登录"><a href="#创建证书登录" class="headerlink" title="创建证书登录"></a>创建证书登录</h3><p>查看/home/git/.ssh/authorized_keys文件，如果没有该文件则创建它：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /home/git/</span><br><span class="line">$ mkdir .ssh</span><br><span class="line">$ chmod 755 .ssh</span><br><span class="line">$ touch .ssh/authorized_keys</span><br><span class="line">$ chmod 644 .ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+<p>收集所有需要登录的用户的公钥，公钥位于id_rsa.pub文件中，把我们的公钥导入到/home/git/.ssh/authorized_keys文件里，一行一个。或者使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cat id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+<p>如果觉得一个一个粘贴累，也可以在每个登陆用户的 .ssh/ 目录下直接复制公钥过去<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-copy-id git@xx.xx.xx.xx</span><br></pre></td></tr></table></figure><br>等价于把你的公钥传递过去，但是也需要 git 的密码，就是刚才设置的那个。</p>
+<h3 id="初始化Git仓库"><a href="#初始化Git仓库" class="headerlink" title="初始化Git仓库"></a>初始化Git仓库</h3><p>首先我们选定一个目录作为Git仓库，假定是/home/gitrepo/runoob.git，在/home/gitrepo目录下输入命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /home</span><br><span class="line">$ mkdir gitrepo</span><br><span class="line">$ chown git:git gitrepo/</span><br><span class="line">$ <span class="built_in">cd</span> gitrepo</span><br><span class="line"></span><br><span class="line">$ git init --bare runoob.git</span><br><span class="line">Initialized empty Git repository <span class="keyword">in</span> /home/gitrepo/runoob.git/</span><br></pre></td></tr></table></figure><br>以上命令 Git 创建一个空仓库，服务器上的 Git 仓库通常都以 .git 结尾。<br>注意：如果不使用<code>--bare</code>参数，初始化仓库后，提交master分支时报错。这是由于git默认拒绝了push操作，需要.git/config添加如下代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[receive]</span><br><span class="line">denyCurrentBranch = ignore</span><br></pre></td></tr></table></figure>
+<p>推荐使用：<code>git --bare init</code>初始化仓库。<br>然后，把仓库所属用户改为 git ：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ chown -R git:git runoob.git</span><br></pre></td></tr></table></figure>
+<h3 id="克隆仓库"><a href="#克隆仓库" class="headerlink" title="克隆仓库"></a>克隆仓库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> git@xx.xx.xx.xx:/home/gitrepo/runoob.git</span><br><span class="line">Cloning into <span class="string">&#x27;runoob&#x27;</span>...</span><br><span class="line">warning: You appear to have cloned an empty repository.</span><br><span class="line">Checking connectivity... <span class="keyword">done</span>.</span><br></pre></td></tr></table></figure>
+<p>当然，你也可以不用命令行，我觉得 GitHub Desktop 挺好用的。不仅可以 clone github 上的 .git ，也可以 clone 你设置的服务器上的 .git ，只要在 clone a repository 的时候选择 URL，填对位置，如：git@xx.xx.xx.xx:/home/gitrepo/runoob.git </p>
+<h3 id="想再创建仓库"><a href="#想再创建仓库" class="headerlink" title="想再创建仓库"></a>想再创建仓库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ssh git@xx.xx.xx.xx</span><br><span class="line"><span class="built_in">cd</span> /home/gitrepo</span><br><span class="line">git init --bare second.git</span><br></pre></td></tr></table></figure>
+<p>突发奇想，想本地直接 add 到服务器上失败了，用户权限不够<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ git remote add origin git@xx.xx.xx.xx:/home/gitrepo/gpdm-code.git</span><br><span class="line">$ git push -u origin master</span><br><span class="line">Warning: remote port forwarding failed <span class="keyword">for</span> listen port 52698</span><br><span class="line">fatal: <span class="string">&#x27;/home/repo/gpdm-code.git&#x27;</span> does not appear to be a git repository</span><br><span class="line">fatal: Could not <span class="built_in">read</span> from remote repository.</span><br><span class="line"></span><br><span class="line">Please make sure you have the correct access rights</span><br><span class="line">and the repository exists.</span><br><span class="line"></span><br></pre></td></tr></table></figure><br>可以去 <a target="_blank" rel="noopener" href="https://git-scm.com/book/zh/v2/%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E7%9A%84-Git-%E5%8D%8F%E8%AE%AE">Git 官网</a> 学习一波.</p>
+<h2 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h2><ul>
+<li>设置不同人的 git 账户</li>
+<li>用户有权限上传 .git</li>
+<li>win10 主机作为 git server</li>
+</ul>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/Git/"># Git</a>
+                    
+                        <a href="/tag/Centos/"># Centos</a>
+                    
+                        <a href="/tag/Linux/"># Linux</a>
+                    
+                        <a href="/tag/ssh/"># ssh</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2018/11/Expectation-Maximization/">Expectation Maximization algorithm (EM)  期望最大化算法</a>
+            
+            
+            <a class="next" rel="next" href="/2018/10/dp-level2/">进击的DP</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

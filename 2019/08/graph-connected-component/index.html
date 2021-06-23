@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>连通分量涮涮乐 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">连通分量涮涮乐</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E5%9B%BE%E8%AE%BA/">图论</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Korasaju/">Korasaju</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Tarjan/">Tarjan</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E8%BF%9E%E9%80%9A%E5%88%86%E9%87%8F/">连通分量</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2019/08/graph-connected-component/" class="leancloud_visitors" data-flag-title="连通分量涮涮乐">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/ACM/">ACM</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">08/24, 2019</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <hr>
+<p>开心刷起题来吧！开涮对象——图论里的小小分支，连通分量<br>概念省略一堆：有向图 $G$ 、强连通（两两可达）、强连通分量（极大强连通子图）<br>转置图 $G^T$：每个边反向</p>
+<h2 id="求强连通分量"><a href="#求强连通分量" class="headerlink" title="求强连通分量"></a>求强连通分量</h2><h3 id="Korasaju算法"><a href="#Korasaju算法" class="headerlink" title="Korasaju算法"></a><em>Korasaju算法</em></h3><ol>
+<li>在图 $G$ 随便选择起点dfs，记录访问时间。</li>
+<li>在图 $G^T$ 根据1得到的访问时间最大的点作为起点 dfs，得到若干个树。</li>
+<li>每棵树在原图里都是一个强连通分量（由对称在转置图中同样也是）。</li>
+</ol>
+<p>这个算法给人的感觉就是，顺毛疏一遍，逆毛疏一遍，结成团的就是一个强连通分量。<br><img src="cc1.png" alt="Korasaju"><br>简单的图这样看，上面是原图。第一遍在图 $G$ 的 dfs 留下了时间戳，一条可行的路径是 $A\rightarrow B\rightarrow C$。第二遍在图 $G^T$ 中从时间最大点开始，可见没有回环的路就像是被一截一截锯掉，单点形成一个强连通分量。而 A 开始的路径是 $A\rightarrow C\rightarrow B$，可得在对称的 $G$ 中有可行的回路 $B\rightarrow C\rightarrow A$。综合可以得到 $A\rightarrow B\rightarrow C\rightarrow A$ 这个回路，即强连通分量。</p>
+<h4 id="POJ-2186-Popular-Cows"><a href="#POJ-2186-Popular-Cows" class="headerlink" title="POJ 2186 Popular Cows"></a><a target="_blank" rel="noopener" href="http://poj.org/problem?id=2186">POJ 2186</a> Popular Cows</h4><p>题意：在一个有向图中，有多少个点能被所有的点到达。</p>
+<p>分析：把所有的强连通分量缩点后，得到一个有向无环图。如果有唯一的出度为0的点，则看这个点的大小（缩点前的点数）即是答案。如果不唯一，则至少有两个点 x，y 出度为 0，则 x 不能到达 y，说明 y 不是答案。同理，x 也不是答案。</p>
+<p>变量说明：</p>
+<p><code>v[]</code>原图<br><code>w[]</code>转置图<br><code>a[]</code>时钟<br><code>fn</code>缩点后图上的点数<br><code>flag[]</code>能缩成同一点的点有一样的flag值<br><code>tuan[]</code>同一flag值的点有多少个<br><code>out[]</code>缩点后的点的出度</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*--------------------------------------------</span></span><br><span class="line"><span class="comment"> * File Name: POJ 2186</span></span><br><span class="line"><span class="comment"> * Author: Danliwoo</span></span><br><span class="line"><span class="comment"> * Mail: Danliwoo@outlook.com</span></span><br><span class="line"><span class="comment"> * Created Time: 2016-07-05 08:13:21</span></span><br><span class="line"><span class="comment">--------------------------------------------*/</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;queue&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cmath&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> N 10100</span></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; v[N], w[N];</span><br><span class="line"><span class="keyword">int</span> vis[N], a[<span class="number">2</span>*N], flag[N], clk, tuan[N], out[N], fn, n, m;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">dfs</span><span class="params">(<span class="keyword">int</span> x)</span></span>&#123;</span><br><span class="line">    vis[x] = <span class="number">1</span>;</span><br><span class="line">    a[clk++] = x;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>;j &lt; v[x].size();j++)</span><br><span class="line">        <span class="keyword">if</span>(!vis[v[x][j]])</span><br><span class="line">            dfs(v[x][j]);</span><br><span class="line">    a[clk++] = x;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">strong</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> f)</span></span>&#123;</span><br><span class="line">    vis[x] = <span class="number">1</span>;</span><br><span class="line">    flag[x] = f;</span><br><span class="line">    tuan[f]++;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>;j &lt; w[x].size();j++)</span><br><span class="line">        <span class="keyword">if</span>(!vis[w[x][j]])</span><br><span class="line">            strong(w[x][j], f);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">solve</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(fn == <span class="number">1</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, n);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">memset</span>(out, <span class="number">0</span>, <span class="keyword">sizeof</span>(out));</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; n;i++)</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>;j &lt; v[i].size();j++)</span><br><span class="line">            <span class="keyword">if</span>(flag[i] != flag[v[i][j]])</span><br><span class="line">                out[flag[i]]++;</span><br><span class="line">    <span class="keyword">int</span> ans = <span class="number">0</span>, cc = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>;i &lt;= fn;i++)&#123;</span><br><span class="line">        <span class="keyword">if</span>(out[i] == <span class="number">0</span>)&#123;</span><br><span class="line">            ans = i;</span><br><span class="line">            cc++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(cc &gt; <span class="number">1</span>) ans = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">else</span> ans = tuan[ans];</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, ans);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(~<span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;n, &amp;m))&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; n;i++)&#123;</span><br><span class="line">            v[i].clear();</span><br><span class="line">            w[i].clear();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">memset</span>(a, <span class="number">0</span>, <span class="keyword">sizeof</span>(a));</span><br><span class="line">        <span class="built_in">memset</span>(vis, <span class="number">0</span>, <span class="keyword">sizeof</span>(vis));</span><br><span class="line">        <span class="built_in">memset</span>(flag, <span class="number">0</span>, <span class="keyword">sizeof</span>(flag));</span><br><span class="line">        <span class="built_in">memset</span>(tuan, <span class="number">0</span>, <span class="keyword">sizeof</span>(tuan));</span><br><span class="line">        <span class="keyword">while</span>(m--)&#123;</span><br><span class="line">            <span class="keyword">int</span> x, y;</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;x, &amp;y);</span><br><span class="line">            x--; y--;</span><br><span class="line">            v[x].push_back(y);</span><br><span class="line">            w[y].push_back(x);</span><br><span class="line">        &#125;</span><br><span class="line">        clk = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; n;i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(vis[i]) <span class="keyword">continue</span>;</span><br><span class="line">            dfs(i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">memset</span>(vis, <span class="number">0</span>, <span class="keyword">sizeof</span>(vis));</span><br><span class="line">        fn = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>*n<span class="number">-1</span>;i &gt;= <span class="number">0</span>;i--) </span><br><span class="line">            <span class="keyword">if</span>(!vis[a[i]])</span><br><span class="line">                strong(a[i], ++fn);</span><br><span class="line">        solve();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="POJ-1236-Network-of-Schools"><a href="#POJ-1236-Network-of-Schools" class="headerlink" title="POJ 1236 Network of Schools"></a><a target="_blank" rel="noopener" href="http://poj.org/problem?id=1236">POJ 1236</a> Network of Schools</h4><p>题意：信息具有传递性，传递方向即有向图的方向。要使信息传遍全图，至少在多少个点内传入信息？若只需在一个点内传入信息，至少要连几条边？</p>
+<p>歪路：第一问找入度为 0 的点；第二问找出度为 0 的点。<br>反例：由一个环 A 传递到另一个环B，没有入度出度为 0 的点，但是至少要在环 A 传入信息。第二问，至少要建一条边 B 到 A 回传。</p>
+<p>分析：环可以缩为一点，其内部可以相互传递，对于外部来说相当于一个点。得到一个新的有向无环图后，第一问即入度为 0 的点。假设存在 a 个起点（入度为 0），b 个终点（出度为 0），为使得信息可以传递，需引入 a 条边到起点，从终点引出 b 个终点。这些边的另一个端点是随意的（只要不是自身），但为了尽量减少新建的边，最好将边从终点引到起点，其余的再随便连。因此需要连 <code>max(a,b)</code> 条边。</p>
+<p>注意特判一下只有一个连通块的情况！（不要问我怎么知道的）<br>代码和上面差不多。略。</p>
+<h3 id="Tarjan算法"><a href="#Tarjan算法" class="headerlink" title="Tarjan算法"></a><em>Tarjan算法</em></h3><p>在dfs过程中，每个点维护该点的两个值<code>(dfn,low)</code><br><code>dfn[i]</code>: 表示点<code>i</code>被访问到的时间<br><code>low[i]</code>: 点<code>i</code>可达点集的最小dfn</p>
+<p><img src="cc3.gif" alt="Tarjan"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Tarjan</span><span class="params">(u)</span> </span>&#123;</span><br><span class="line">    dfn[u]=low[u]=++index</span><br><span class="line">    <span class="built_in">stack</span>.push(u)</span><br><span class="line">    <span class="keyword">for</span> each (u, v) in E &#123;</span><br><span class="line">        <span class="keyword">if</span> (v is <span class="keyword">not</span> visted) &#123; </span><br><span class="line">            tarjan(v) </span><br><span class="line">            low[u] = min(low[u], low[v]) </span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (v in <span class="built_in">stack</span>) &#123; </span><br><span class="line">            low[u] = min(low[u], dfn[v]) <span class="comment">//low[u] = min(low[u], low[v])</span></span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">if</span> (dfn[u] == low[u]) &#123; <span class="comment">//u是一个强连通分量的根 </span></span><br><span class="line">        repeat </span><br><span class="line">            v = <span class="built_in">stack</span>.pop </span><br><span class="line">            print v </span><br><span class="line">        until (u == v) </span><br><span class="line">    &#125; <span class="comment">//退栈，把整个强连通分量都弹出来 </span></span><br><span class="line">&#125; <span class="comment">//复杂度是O(E+V)的</span></span><br></pre></td></tr></table></figure>
+<p>若有一个子图的 <code>low[i]</code> 值相同，则这个子图即为一个强连通分量。可以考虑该子图中的任何一点j，设 <code>low[j]=a=dfn[i]</code>，则 <code>j</code> 可以到达 <code>i</code> 点；同时 <code>dfn[i]=a&lt;=dfn[j]</code>，即 <code>j</code> 是经 <code>i</code> 点dfs得到的，则 <code>i</code> 可以到达 <code>j</code> 点。 <code>i</code> 点可以到达子图中的任意一点并返回至 <code>i</code> 点。因此该子图是强连通的。且有 <code>low[i]=dfn[i]</code>。</p>
+<p>已经确认为强连通分量的子图已经被剔除，不会影响剩下的图。因为已经被访问过，又不在栈中，所以已经走远。</p>
+<p><strong>讨论 第九行的注释也是可行的？</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">else if (v in stack) </span><br><span class="line">    low[u] &#x3D; min(low[u], dfn[v]) &#x3D;&gt; low[u] &#x3D; min(low[u], low[v])</span><br></pre></td></tr></table></figure><br><code>low[i]</code> 是点 <code>i</code> 可达点集的最小dfn，且 <code>dfn[i]</code> 和 <code>i</code> 是双射的，记 $dfn^{-1}[dfn[i]]=i$。如果 <code>low[v]=a</code>，则说明v可以到达 $dfn^{-1}[a]$，而 u 又能到达 v，故 u 也能到达 $dfn^{-1}[a]$ 则 <code>low[v]&lt;low[u]</code> 时，确实可以让 <code>low[u]</code> 取到 <code>low[v]</code>。而 <code>dfn[v]&gt;=low[v]</code>，不禁要怀疑原来的式子是不是不够紧？<br>想了想，其实这两种方法求出的强连通分量是相同的，只是过程有些不一样。给出下面 5 幅图，dfs 顺序为从上到下，从左到右。要保证 v 比 u 先入栈，且 v 可能比 u 的根更早入栈（图1，2），或更晚（图3，4，5），且 v 可能回溯成环（图2，4，5），实际上图3，4不会存在，因为 v 随着自己的强连通分量被弹出栈了！虽然 u 的 low 值会被带歪，但是可以保证的是，只有能囊括所有最大强连通分量的根才会出现 low 值等于 dfn 值，并提出该强连通分量。<br><img src="cc2.png" alt="low"><br>如果哪天遇到反例了一定要告诉我啊~</p>
+<h4 id="POJ-3180-The-Cow-Prom"><a href="#POJ-3180-The-Cow-Prom" class="headerlink" title="POJ 3180 The Cow Prom"></a><a target="_blank" rel="noopener" href="http://poj.org/problem?id=3180">POJ 3180</a> The Cow Prom</h4><p>求有向图中点数大于 2 的强连通分量的个数。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*--------------------------------------------</span></span><br><span class="line"><span class="comment"> * File Name: POJ 3180</span></span><br><span class="line"><span class="comment"> * Author: Danliwoo</span></span><br><span class="line"><span class="comment"> * Mail: Danliwoo@outlook.com</span></span><br><span class="line"><span class="comment"> * Created Time: 2016-07-06 12:47:20</span></span><br><span class="line"><span class="comment">--------------------------------------------*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;queue&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cmath&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">int</span> n, m, ans;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> N 10100</span></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; v[N];</span><br><span class="line"><span class="keyword">int</span> vis[N], dfn[N], low[N], stk[N], top, ins[N], clk;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Tarjon</span><span class="params">(<span class="keyword">int</span> x)</span></span>&#123;</span><br><span class="line">    dfn[x] = low[x] = clk++;</span><br><span class="line">    stk[top++] = x;</span><br><span class="line">    vis[x] = ins[x] = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>;j &lt; v[x].size();j++)&#123;</span><br><span class="line">        <span class="keyword">int</span> y = v[x][j];</span><br><span class="line">        <span class="keyword">if</span>(!vis[y])&#123;</span><br><span class="line">            Tarjon(y);</span><br><span class="line">            low[x] = min(low[x], low[y]);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span>(ins[y])&#123;</span><br><span class="line">            low[x] = min(low[x], dfn[y]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(low[x] == dfn[x])&#123;</span><br><span class="line">        <span class="keyword">int</span> sz = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">do</span> &#123;</span><br><span class="line">            ins[stk[top<span class="number">-1</span>]] = <span class="number">0</span>;</span><br><span class="line">            top--;</span><br><span class="line">            sz++;</span><br><span class="line">        &#125; <span class="keyword">while</span>(stk[top] != x);</span><br><span class="line">        <span class="keyword">if</span>(sz &gt; <span class="number">1</span>) ans++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(~<span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;n, &amp;m))&#123;</span><br><span class="line">        <span class="built_in">memset</span>(v, <span class="number">0</span>, <span class="keyword">sizeof</span>(v));</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; m;i++)&#123;</span><br><span class="line">            <span class="keyword">int</span> x, y;<span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;x, &amp;y);</span><br><span class="line">            x--; y--;</span><br><span class="line">            v[x].push_back(y);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">memset</span>(vis, <span class="number">0</span>, <span class="keyword">sizeof</span>(vis));</span><br><span class="line">        <span class="built_in">memset</span>(ins, <span class="number">0</span>, <span class="keyword">sizeof</span>(ins));</span><br><span class="line">        top = ans = clk = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; n;i++) <span class="keyword">if</span>(!vis[i])</span><br><span class="line">            Tarjon(i);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, ans);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="POJ-2762-Going-from-u-to-v-or-from-v-to-u"><a href="#POJ-2762-Going-from-u-to-v-or-from-v-to-u" class="headerlink" title="POJ 2762 Going from u to v or from v to u?"></a><a target="_blank" rel="noopener" href="http://poj.org/problem?id=2762">POJ 2762</a> Going from u to v or from v to u?</h4><p>题意：给出一个有向图，若从中任取两点 u, v，若 u 能到 v <strong>或者</strong> v 能到 u，则输出 Yes， 否则输出 No。</p>
+<p>分析：强连通分量缩点，其内部可互达。考虑缩点后的新图，为满足条件，则需要 dfs 出一条长链，链上的任意两点均可满足条件，只要链长为 n 即输出 Yes。求长链的过程即拓扑排序，每次从唯一的入度为 0 的点开始 dfs，若不唯一或不存在这样的点，均表示不能拉成一条长链。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/%E5%9B%BE%E8%AE%BA/"># 图论</a>
+                    
+                        <a href="/tag/Korasaju/"># Korasaju</a>
+                    
+                        <a href="/tag/Tarjan/"># Tarjan</a>
+                    
+                        <a href="/tag/%E8%BF%9E%E9%80%9A%E5%88%86%E9%87%8F/"># 连通分量</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/08/learn-k8s/">Node, Pod, Contanier</a>
+            
+            
+            <a class="next" rel="next" href="/2019/08/hexo-with-travis/">Real Light Hexo With Travis CI</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

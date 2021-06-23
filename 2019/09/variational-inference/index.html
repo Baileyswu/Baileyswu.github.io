@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>变分推理与黑盒推理 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">变分推理与黑盒推理</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/ELBO/">ELBO</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/VI/">VI</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E6%8C%87%E6%95%B0%E6%97%8F%E5%88%86%E5%B8%83/">指数族分布</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/BBVI/">BBVI</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Reparameterization/">Reparameterization</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2019/09/variational-inference/" class="leancloud_visitors" data-flag-title="变分推理与黑盒推理">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/PRML/">PRML</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">09/28, 2019</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>数据量大，如何挖掘其中的含义，找到其中的因果关系？</p>
+<p>我们用机器学习和统计方法找到其中的联系。</p>
+<p>流程一般是提出假设，挖掘出特征，得到预测，修改模型，提出假设……迭代进行。</p>
+<p><strong>概率机器学习</strong>的目标是学习出后验，即 $p(z|x)={p(z,x) \over p(x)}$。其中联合概率可以用生成式得到，关于分母则需要边缘化隐变量，因此不易求得。</p>
+<h2 id="Variational-Inference"><a href="#Variational-Inference" class="headerlink" title="Variational Inference"></a>Variational Inference</h2><blockquote>
+<p>指数族分布  </p>
+<script type="math/tex; mode=display">
+p(x)=h(x) \exp \left\{\eta^{\top} t(x)-a(\eta)\right\}</script><ul>
+<li>$\eta$ the natural parameter</li>
+<li>$t(x)$ the sufficient statistics</li>
+<li>$a(\eta)$ the log normalizer</li>
+<li>$h(x)$ the base density</li>
+</ul>
+</blockquote>
+<img src="/2019/09/variational-inference/VI-family.png" class="">
+<p>找到一个后验的近似分布 $q(z;\nu)$ 使得它们的 KL 散度尽量小。</p>
+<p>先选择一个<strong>分布族</strong>，如指数分布族，再在该分布族里优化参数 $\nu$，使得 KL 散度最小，此时是最优的后验分布 $q(z;\nu^*)$，即</p>
+<script type="math/tex; mode=display">
+q_{\nu}^{*}(z | x)=\arg \min _{\nu} \mathbb{K} \mathbb{L}\left(q_{\nu}(z | x) \| p(z | x)\right)</script><p>但由于真实后验为</p>
+<script type="math/tex; mode=display">
+p(z | x)=\frac{p(x, z)}{p(x)}</script><p>无从计算，因此很难从优化 KL 散度的角度入手。</p>
+<p>由于</p>
+<script type="math/tex; mode=display">
+\log p(x)=\mathscr{L}(\nu)+\mathbb{K} \mathbb{L}\left(q_{\nu}(z | x) \| p(z | x)\right)</script><p>可以最大化 <strong>证据下界（ELBO）</strong> 进行优化。</p>
+<h3 id="ELBO"><a href="#ELBO" class="headerlink" title="ELBO"></a>ELBO</h3><script type="math/tex; mode=display">
+\mathscr{L}(\nu)=\underbrace{\mathbb{E}_{q}[\log p(\beta, \mathbf{z}, \mathbf{x})]}_{\text {Expected complete log likelihood }}-\underbrace{\mathbb{E}_{q}[\log q(\beta, \mathbf{z} ; \boldsymbol{\nu})]}_{\text {Negative entropy }}</script><p>第一项相当于联合似然，要尽可能大。第二项则相当于变分分布的熵取反，使 q 分布 diffuse.</p>
+<p>还有一种分解 ELBO 的方式：</p>
+<script type="math/tex; mode=display">
+\mathscr{L}(\nu)=\underbrace{\mathbb{E}_{q}[\log p(\mathbf{x} | \beta, \mathbf{z})]}_{\text {Expected log likelihood of data }}-\underbrace{\operatorname{KL}(q(\beta, \mathbf{z} ; \boldsymbol{\nu}) \| p(\beta, \mathbf{z}))}_{\text {KL between variational and prior }}</script><p>第一项相当于似然，第二项是变分分布和真实分布的 KL 散度。</p>
+<blockquote>
+<p>注意： ELBO 不一定是凸的。</p>
+</blockquote>
+<h3 id="Mean-filed-VI"><a href="#Mean-filed-VI" class="headerlink" title="Mean-filed VI"></a>Mean-filed VI</h3><img src="/2019/09/variational-inference/Mean-field.png" class="">
+<p>平均场近似是指隐变量之间相互独立，则可以假设各自的分布。在优化其中一个变量时，固定住其他变量，进行优化。再迭代优化出所有变量。与 Gibbs Sampling 具有一些关联。</p>
+<p>与 EM 类似，比较依赖于初始化设置，不同的初始化会得到截然不同的结果。由于非凸，只能取到局部最优值。</p>
+<h3 id="Stochastic-VI"><a href="#Stochastic-VI" class="headerlink" title="Stochastic VI"></a>Stochastic VI</h3><p>传统的 VI 不能处理大量数据。因此需要随机 VI 来处理。</p>
+<p>思想：大数据采出子集，进行局部结构的优化，再更新全局结构。再进行下一次迭代。</p>
+<p>原始的 ELBO 的 natural gradient 是这样的  </p>
+<script type="math/tex; mode=display">
+\nabla_{\lambda}^{\mathrm{nat}} \mathscr{L}(\lambda)=\left(\alpha+\sum_{i=1}^{n} \mathbb{E}_{\phi_{i}^{*}}\left[t\left(Z_{i}, x_{i}\right)\right]\right)-\lambda</script><p>经过随机优化，得到 noisy natural gradient </p>
+<script type="math/tex; mode=display">
+\begin{aligned} j & \sim \text { Uniform }(1, \ldots, n) \\ \hat{\nabla}_{\lambda}^{\text {nat }} \mathscr{L}(\lambda) &=\alpha+n \mathbb{E}_{\phi_{j}^{*}}\left[t\left(Z_{j}, x_{j}\right)\right]-\lambda \end{aligned}</script><p>这样一个数据点就可以更新整个自然梯度。需要满足的前提是 noisy natural gradient 是无偏的，即$\mathbb{E}\left[\hat{\nabla}_{\nu} \mathscr{L}(\nu)\right]=\nabla_{\nu} \mathscr{L}(\nu)$。</p>
+<h3 id="Recipe"><a href="#Recipe" class="headerlink" title="Recipe"></a>Recipe</h3><p>一般的分布遵循以下步骤即可近似出后验分布：</p>
+<ol>
+<li>Start with a model<br> $p(\mathbf{z}, \mathbf{x})$</li>
+<li>选择合适的变分分布<br> $q(\mathbf{z} ; \nu)$</li>
+<li>根据两种拆分方式写出 ELBO，如<br> $\mathscr{L}(\nu)=\mathbb{E}_{q(\mathbf{z} ; \nu)}[\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; \nu)]$</li>
+<li>积分得到 ELBO<br> Example: $\mathscr{L}(\nu)=x \nu^{2}+\log \nu$</li>
+<li>关于变分参数求梯度，优化 ELBO<br> Example: $\nabla_{\nu} \mathscr{L}(\nu)=2 x \nu+\frac{1}{\nu}$<br> $nu_{t+1}=\nu_{t}+\rho_{t} \nabla_{\nu} \mathscr{L}$</li>
+</ol>
+<h2 id="Black-box-VI"><a href="#Black-box-VI" class="headerlink" title="Black box VI"></a>Black box VI</h2><p>先积分 ELBO 再求梯度往往是比较困难的。是否可以先求梯度再积分，最后进行优化？</p>
+<p>在推导模型时，求似然、后验、梯度等工作往往是费时费力的。能否将这些推理都放入黑盒中，我们最后只要输出后验？</p>
+<p>Define</p>
+<script type="math/tex; mode=display">
+g(\mathbf{z}, \nu)=\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; \nu)</script><p>可以推导出</p>
+<script type="math/tex; mode=display">
+\nabla_{\nu} \mathscr{L}=\mathbb{E}_{q(\mathbf{z} ; \nu)}\left[\nabla_{\nu} \log q(\mathbf{z} ; \nu) g(\mathbf{z}, \nu)+\nabla_{\nu} g(z, \nu)\right]</script><p>这样就把求梯度放在了积分里面。这样就可以从变分分布 q 中采样，用 Monte Carlo 估计出 q 的梯度，并进行随机优化，更新 q；迭代至收敛。</p>
+<p>黑盒 VI 的主要目标是不论模型如何，我们只要做下面这三件事，其余的不用推理。最后黑盒可以输出近似的变分分布作为后验分布。</p>
+<blockquote>
+<p>Black Box Criteria  </p>
+<ul>
+<li>sample from $q(\beta, \mathbf{z})$ </li>
+<li>evaluate $q(\beta, \mathbf{z})$ or function of $q$  </li>
+<li>evaluate $\log p(\beta, \mathbf{z}, \mathbf{x})$  </li>
+</ul>
+</blockquote>
+<p>有以下两种策略都符合 BBC：</p>
+<ul>
+<li>Score gradients</li>
+<li>Reparameterization gradients</li>
+</ul>
+<h3 id="Score-Function-Gradients"><a href="#Score-Function-Gradients" class="headerlink" title="Score Function Gradients"></a>Score Function Gradients</h3><p>See <a target="_blank" rel="noopener" href="http://mathworld.wolfram.com/ScoreFunction.html">score function</a>, it is called <em>likelihood ratio</em> or <em>REINFORCE gradient</em>.</p>
+<p>当$\mathbb{E}_{q}\left[\nabla_{\nu} g(\mathbf{z}, \nu)\right]=\mathbb{E}_{q}\left[\nabla_{\nu} \log q(\mathbf{z} ; \nu)\right]=0$，则 ELBO 的梯度可写为：  </p>
+<script type="math/tex; mode=display">
+\nabla_{\nu} \mathscr{L}=\mathbb{E}_{q(\mathbf{z} ; \nu)}[\underbrace{\nabla_{\nu} \log q(\mathbf{z} ; \nu)}_{\text {score function }}(\underbrace{\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; \nu))}_{\text {instantaneous ELBO }}]</script><p>它的 noisy unbiased gradient 可以用 MC 得到：</p>
+<script type="math/tex; mode=display">
+\begin{array}{r}{\hat{\nabla}_{\nu} \mathscr{L}=\frac{1}{S} \sum_{s=1}^{S} \nabla_{\nu} \log q\left(\mathbf{z}_{s} ; \nu\right)\left(\log p\left(\mathbf{x}, \mathbf{z}_{s}\right)-\log q\left(\mathbf{z}_{s} ; \nu\right)\right)} \\ {\text { where } \mathbf{z}_{s} \sim q(\mathbf{z} ; \nu)}\end{array}</script><p>更新 $q$ 时，有</p>
+<script type="math/tex; mode=display">
+\nu=\nu+\rho\hat{\nabla}_{\nu} \mathscr{L}</script><p>因此实际上需要做的步骤：  </p>
+<ul>
+<li>Sampling from $q(\mathbf{z})$</li>
+<li>Evaluating $\nabla_{\nu} \log q(\mathbf{z} ; \nu)$</li>
+<li>Evaluating $\log p(\mathbf{x}, \mathbf{z})$ and $\log q(\mathbf{z})$</li>
+</ul>
+<p>这个方法适用于离散或连续的模型，但是 noisy gradient 的方差可能会很大。</p>
+<h3 id="Reparameterization-gradients-Pathwise-Gradients-of-the-ELBO"><a href="#Reparameterization-gradients-Pathwise-Gradients-of-the-ELBO" class="headerlink" title="Reparameterization gradients (Pathwise Gradients of the ELBO)"></a>Reparameterization gradients (Pathwise Gradients of the ELBO)</h3><p>假设 $\log p(\mathbf{x}, \mathbf{z})$ 和 $\log q(\mathbf{z})$ 关于 z 可微，可以将 z 分解成如下形式：</p>
+<script type="math/tex; mode=display">
+\begin{aligned} \epsilon & \sim \operatorname{Normal}(0,1) \\ z &=\epsilon \sigma+\mu \\ & \rightarrow z \sim \operatorname{Normal}\left(\mu, \sigma^{2}\right) \end{aligned}</script><p>这样不确定性就被转移到了 $\epsilon$.</p>
+<script type="math/tex; mode=display">
+\nabla_{\nu} \mathscr{L}=\mathbb{E}_{s(\epsilon_)}[\underbrace{\nabla_{z}[\log p(\mathbf{x}, \mathbf{z})-\log q(\mathbf{z} ; \nu)]}_{\text {gradient of instanneous ELBO }} \underbrace{\nabla_{\nu} t(\epsilon, \nu)}_{\text {gradient of transformation }}]</script><p>它的 noisy gradient 可以写成：</p>
+<script type="math/tex; mode=display">
+\begin{array}{r}
+\tilde{g}_{t}=\frac{1}{S} \sum_{s=1}^{S} \nabla_{z}\left[\log p\left(\mathbf{x}, t\left(\epsilon_{s}, \nu_{n}\right)\right)-\log q\left(t\left(\epsilon_{s}, \nu_{n}\right) ; \nu_{n}\right)\right] \nabla_{\nu} t\left(\epsilon_{s}, \nu_{n}\right) \\ 
+{\text { where } \epsilon_{s} \sim s(\epsilon) \quad s=1 \ldots S}
+\end{array}</script><p>这个方法要求模型必须可微。但是 noisy gradient 的方差是可控的。</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://media.nips.cc/Conferences/2016/Slides/6199-Slides.pdf">Variational Inference: Foundations and Modern Methods [PDF]</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/av43405716/">Variational Inference: Foundations and Modern Methods [VIDEO]</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cs.princeton.edu/courses/archive/fall11/cos597C/lectures/variational-inference-i.pdf">Variational Inference [Notes]</a></li>
+</ul>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/ELBO/"># ELBO</a>
+                    
+                        <a href="/tag/VI/"># VI</a>
+                    
+                        <a href="/tag/%E6%8C%87%E6%95%B0%E6%97%8F%E5%88%86%E5%B8%83/"># 指数族分布</a>
+                    
+                        <a href="/tag/BBVI/"># BBVI</a>
+                    
+                        <a href="/tag/Reparameterization/"># Reparameterization</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/09/variational-autoencoder/">变分自编码</a>
+            
+            
+            <a class="next" rel="next" href="/2019/09/conjugate-distribution/">共轭分布</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

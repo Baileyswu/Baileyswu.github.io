@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>KickStart 2021 Round A 题解 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">KickStart 2021 Round A 题解</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/DP/">DP</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/KickStart/">KickStart</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E4%BA%8C%E5%88%86%E5%9B%BE/">二分图</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/">优先队列</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2021/03/ks2021a/" class="leancloud_visitors" data-flag-title="KickStart 2021 Round A 题解">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/ACM/">ACM</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">03/21, 2021</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="2021-Round-A"><a href="#2021-Round-A" class="headerlink" title="2021 Round A"></a><a target="_blank" rel="noopener" href="https://codingcompetitions.withgoogle.com/kickstart/round/0000000000436140">2021 Round A</a></h2><p>Rank: 330/19841</p>
+<p>Score: 66/100</p>
+<p>Code: <a target="_blank" rel="noopener" href="https://github.com/Baileyswu/NEXT/tree/master/EP2021A">MyCode</a></p>
+<hr>
+<h2 id="K-Goodness-String"><a href="#K-Goodness-String" class="headerlink" title="K-Goodness String"></a>K-Goodness String</h2><p>回文串模拟题。</p>
+<hr>
+<h2 id="L-Shaped-Plots"><a href="#L-Shaped-Plots" class="headerlink" title="L Shaped Plots"></a>L Shaped Plots</h2><p>求矩阵里L型的块有多少个。<br>其中L的长边是短边的两倍。</p>
+<h3 id="解答"><a href="#解答" class="headerlink" title="解答"></a>解答</h3><p><code>dp[i][j][k]</code> 对于第<code>(i,j)</code>个块的四个方向分别进行预处理后求解。</p>
+<hr>
+<h2 id="Rabbit-House"><a href="#Rabbit-House" class="headerlink" title="Rabbit House"></a>Rabbit House</h2><p>使得一个非负矩阵相邻元素之间的差&lt;=1，每次操作可对一个元素+1，问最少操作多少次能满足条件。</p>
+<h3 id="解答-1"><a href="#解答-1" class="headerlink" title="解答"></a>解答</h3><p>优先队列 BFS</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">node</span>&#123;</span></span><br><span class="line">    <span class="keyword">int</span> x, y, h;</span><br><span class="line">    node()&#123;&#125;</span><br><span class="line">    node(<span class="keyword">int</span> x, <span class="keyword">int</span> y, <span class="keyword">int</span> h): x(x), y(y), h(h) &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">bool</span> <span class="keyword">operator</span> &lt; (<span class="keyword">const</span> node &amp;a, <span class="keyword">const</span> node &amp;b) &#123;</span><br><span class="line">    <span class="keyword">return</span> a.h &lt; b.h; </span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">priority_queue</span>&lt;node&gt; Q; <span class="comment">// 默认大顶堆</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="Checksum"><a href="#Checksum" class="headerlink" title="Checksum"></a>Checksum</h2><p>已知一个矩阵的 A 的 行异或和 R、列疑惑和 C。<br>现在 A 出现了数据损坏。有些数据可以通过 R 和 C 进行修复，有些无法修复。<br>因此可以求助于老板。老板给出了一个矩阵 B 说明了维修每个位置的价格。<br>求最小的维修费。</p>
+<p><strong>Limits</strong><br>Memory limit: 1 GB.<br>1≤T≤100.<br>−1≤Ai,j≤1, for all i,j.<br>1≤Bi,j≤1000, for i,j where Ai,j=−1, otherwise Bi,j=0.<br>0≤Ri≤1, for all i.<br>0≤Cj≤1, for all j.<br>It is guaranteed that there exist at least one way to replace −1 in A with 0 or 1 such that R and C as satisfied.  </p>
+<p><strong>Test Set 1</strong><br>Time limit: 20 seconds.<br>1≤N≤4.<br><strong>Test Set 2</strong><br>Time limit: 35 seconds.<br>1≤N≤40.<br><strong>Test Set 3</strong><br>Time limit: 35 seconds.<br>1≤N≤500.  </p>
+<h3 id="解答-2"><a href="#解答-2" class="headerlink" title="解答"></a>解答</h3><p>由于异或和的性质，如果有一行或者一列只有一个数据损坏，则必然可以恢复相应的数据。  </p>
+<p>反之，如果有大于一个数据损坏，则必须要借助老板恢复。</p>
+<p>小数据范围下共 2^(N*N) 个数据，可以用状态压缩求解。</p>
+<p>大数据下不能状压。</p>
+<p><img src="https://codejam.googleapis.com/dashboard/get_file/AQj_6U0pPtEOwsR2HMmYIl97yT1TQumpwxdTdFC16G-akSFzGIGp63EqCokGnsUXBj-mcZ1gnEo/checksum.png" alt=""></p>
+<p>将行列表示成二分图，存在一条边即表示该行该列有一个数据损失。如果一条边的一个端点的度为 1，则表示这条边属于可修复数据。这条边即与叶子相连的边。</p>
+<p>如果这个二分图是树，那么说明可以找到叶子，将与叶子相邻的边一条一条去掉，则可以将数据一个个修复。</p>
+<p>所以如果给的二分图不是树，则叫老板修理掉一些边，使得它成为一棵树，这棵树是可修的。</p>
+<p>为了让老板修的最少，则剩下的树要尽可能大，即最大生成树。</p>
+<p>这题的构图以及情况转换很有意思，到最后会发现和 R C 无关。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/DP/"># DP</a>
+                    
+                        <a href="/tag/KickStart/"># KickStart</a>
+                    
+                        <a href="/tag/%E4%BA%8C%E5%88%86%E5%9B%BE/"># 二分图</a>
+                    
+                        <a href="/tag/%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/"># 优先队列</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2021/03/WIT/">WeCanDoIt - Linkedin WIT</a>
+            
+            
+            <a class="next" rel="next" href="/2021/03/exp-in-proj/">如何在混乱中进行有序的安排</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

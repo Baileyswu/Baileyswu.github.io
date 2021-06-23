@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>在合适的时间做合适的事 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">在合适的时间做合适的事</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E9%B8%A1%E6%B1%A4/">鸡汤</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E5%B7%A5%E5%85%B7/">工具</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Momenta/">Momenta</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2018/12/My-Nov-in-2018/" class="leancloud_visitors" data-flag-title="在合适的时间做合适的事">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/%E6%84%9F%E6%83%B3/">感想</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">12/01, 2018</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>十一月过得很快，甚至是有些胆战心惊。这个月遇到了很多人很多事，出去看看世界，然后反过来看看自己。</p>
+<h2 id="人物"><a href="#人物" class="headerlink" title="人物"></a>人物</h2><p>在 Momenta 有很多传奇人物，其中在学术界发了顶会的算一波，但是此行并没有跟他们有太多接触，算是没有如愿，毕竟我当时想去比赛的最主要的理由是，跟着大牛学学怎么做科研。结果事实上，接触最多的还是来参加 Dinner Talk 的各部门主管，还有朝夕相伴的选手同学们。所以算是拐着弯到工业界溜达了一圈。</p>
+<h3 id="LF"><a href="#LF" class="headerlink" title="LF"></a>LF</h3><p>LF 是参加了好几届 Momenta 比赛的选手，终于在这一次比赛中拿到了冠军。直到最后结束那天，请我们吃串的时候，我们才知道他的故事。他以前学的是光电专业，但是毕业了没有找到这个专业对口的工作，所以只好找了行政方向的管培。但是工科生嘛，觉得这种上传下达的工作很无趣，想换个技术方向的工作。但是技术又要从头学起。为了有足够的时间学习新知识和技术，他直接裸辞了，成为了待业在家的无业游民。他报了一个学期五千的网课，学习无人车的前因后果，然后来 Momenta 做比赛，一方面练技术，另一方面也来投简历实习。</p>
+<p>我不知道他是如何下定决心从头开始的。一方面是自信，觉得自己可以胜任；另一方面是自制，即使没有学业的压力，也能有学习的动力。这也让我很感慨，明明在最佳的学习时间，有合适的学习环境，我却不能静下来好好做研究。这是种极大的浪费。</p>
+<h3 id="FH"><a href="#FH" class="headerlink" title="FH"></a>FH</h3><p>FH 是我这次比赛的队友，来自浙大的大四学生。从第一次见面开始，我就觉得有点气场不合。他对于很多问题反应都很快，也有很多自己的见解。但是快速反应也意味着，他的很多回答都是凭借直觉，很多时候他并不清楚我的问题，就在自己的知识库里搜寻最可能的答案，因此沟通非常不顺畅。大概就是传说中的鸡对鸭说。他对自己的立场非常坚定，也有许多大道理，导致我跟他有争议的时候时不时地会上升到方法论之类的原则性问题。总之，我感觉和他交流很累。</p>
+<p>不过 FH 最大的特点是，勤奋。勤奋到什么程度呢？这一个月他每天都在看代码、看论文、看百度的阿波罗，完全没有闲着的时间。因此他对整个代码的逻辑结构非常清楚。从他平时跟我交流的表现来看，他对许许多多的语言、框架、系统都有所了解，可以说学习的热情非常高。而且广泛的知识面的好处是，学习新知识可以与已经学到的东西做一个类比、迁移，因此学新东西的速度也可以很快。</p>
+<p>反观自己就恰好相反。我是一个学东西很慢的人。当别人已经纵观全局的时候，我可能还在纠结某一行是不是有勘误。因此总是钻到了一个牛角尖。仔细一想，貌似从小学开始就养成了这样的习惯，不知道是当时的教育问题，还是性格使然。</p>
+<h3 id="主管们"><a href="#主管们" class="headerlink" title="主管们"></a>主管们</h3><p>过来参加活动的主管们，个个都是人才。要么是名校毕业，要么在大厂工作过。他们的共同点就是，觉得自己做的东西是有意义的，并且具有长远的目光。</p>
+<h2 id="技术"><a href="#技术" class="headerlink" title="技术"></a>技术</h2><p>在公司可以学到很多学校学不到的地方。因此可以把一些好东西打包带回来用。</p>
+<h3 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h3><h4 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h4><p>虽然我自己平时就在 Github 上用，但是使用频率并不高。而且比较私人的代码，我也不敢放在 Github 上公开吧。这次我就学会了在自己的服务器上搭 Git，因此完完全全地私有了。这个技术放在实验室里也可以对大家的代码做有效的管理。</p>
+<h4 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h4><p>早就听说 Docker 的大名，却从未真正使用过。这次用到 Docker 是工作人员早就配好的。如果之后时间允许，可以拿这个在实验室的服务器上搭虚拟环境，可以解决版本不兼容的问题。</p>
+<h4 id="XLaunch"><a href="#XLaunch" class="headerlink" title="XLaunch"></a>XLaunch</h4><p>如果你受不了 Linux 的命令行，早就可以用 XLaunch 了。它可以把服务器上原本可以用图像显示的界面愉快地传到本地使用。比如你在服务器上用浏览器看东西，命令行是无法显示这个浏览器的，但是用 XLaunch 就能把浏览器的图像原原本本地传到我本地来。当然，这个需要比较快的网速，不然会比较卡。</p>
+<h4 id="tmux"><a href="#tmux" class="headerlink" title="tmux"></a>tmux</h4><p>可以创建新的命令行窗口，即使服务器和本地断开连接，仍旧可以保持运行。下次连接时，输入 <code>tmux a</code> 就可以恢复窗口。</p>
+<h3 id="测试的重要性"><a href="#测试的重要性" class="headerlink" title="测试的重要性"></a>测试的重要性</h3><p>很多人觉得做测试很 low，就点点点，没有什么技术性。但是 ZY 就是做测试出身的。测试可以帮助开发人员加速开发。在测试的金字塔上，由底部的单元测试，到上层的模块测试，再到顶层的系统测试。如果一个更新的程序可以通过由下到上的层层考验，那么它就可以很快地替换掉原来的程序。这样层次结构分明的自动化测试，可以有效地过滤掉错误的逻辑与算法。因此，一个企业的后方保障，就是完备的系统测试。</p>
+<h3 id="编程规范"><a href="#编程规范" class="headerlink" title="编程规范"></a>编程规范</h3><p>FH 时常挂在嘴边的话是，好的代码是给别人读的，好的代码是可以一直留下来的。这点确实值得我反思，毕竟我们搞过 ACM 的人写的代码为了追求速度都是 abc，xyz。包括实验室也是，很多时候的命名都是简短到毫无信息。如果一个代码可以毫无注释地读懂，可以说它质量很高了。平时写代码的时候也要多多注意，为了明天看代码的自己和别人。借 LX 的话说，写代码要有爱心。</p>
+<h2 id="面试"><a href="#面试" class="headerlink" title="面试"></a>面试</h2><p>因为说选手有内推通道，我就报名了面试。最好当然是去机器学习岗，奈何它没有，那我只能报了算法岗。万万没想到，一面我的是一个 98 年的小弟弟，当然我是事后得知的。因为在公司呆久了，面试时候和小弟弟相谈甚欢。他的知识面很广，前端后端网络算法，什么都知道一些。所以时间允许的话，技术什么的可以自己玩玩，玩多了就什么都会了。</p>
+<p>二面是公司的产品经理，跟我吹了一波啥啥啥都可以用到机器学习，以便告诉我，我在这里是有事可做的。然后谈了谈公司的发展规划，大概是 8-10 年，而且目标是改变未来人们的生活方式。那好呀。接着又谈了谈我的研究生生涯和他的研究生生涯，巧的是，我们做的东西都非常偏理论，而且并不是那么热门的东西。不过纯理论锻炼人的思维，而且有价值的东西迟早会发出光彩。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>虽然见识了很多 quit, all in 的大佬，最终我还是要回到研究生的学习生涯上来。发掘研究的意义，找到自己感兴趣的点，然后开始真正地研究。其实混日子是很没意思的。我想，活着的乐趣，就是去发现新东西，体会思维之美。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/%E9%B8%A1%E6%B1%A4/"># 鸡汤</a>
+                    
+                        <a href="/tag/%E5%B7%A5%E5%85%B7/"># 工具</a>
+                    
+                        <a href="/tag/Momenta/"># Momenta</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2018/12/learn-docker-tip/">Docker 学习笔记</a>
+            
+            
+            <a class="next" rel="next" href="/2018/11/Expectation-Maximization/">Expectation Maximization algorithm (EM)  期望最大化算法</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

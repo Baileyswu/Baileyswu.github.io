@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>进击的DP | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">进击的DP</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/DP/">DP</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E8%83%8C%E5%8C%85/">背包</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/RMQ/">RMQ</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2018/10/dp-level2/" class="leancloud_visitors" data-flag-title="进击的DP">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/ACM/">ACM</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">10/27, 2018</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="直观的DP"><a href="#直观的DP" class="headerlink" title="直观的DP"></a>直观的DP</h2><p><a target="_blank" rel="noopener" href="http://poj.org/problem?id=1163">POJ 1163</a> </p>
+<p>7<br>3   8<br>8   1   0<br>2   7   4   4<br>4   5   2   6   5  </p>
+<p>正向思维，把每一层的所有状态全都算出来，再给下一层。题目是不难，但这个图是比较直观的反映了 DP ，解决问题时如果可以把层次关系描述出来可以有效帮助做题。</p>
+<p>其中只有根是已知的，每个状态的转移方式也是已知的。<br>从根到叶是<strong>正向思维</strong>。顺次可以得到所有的儿子的状态。当所有状态数量是有限的时候，正向的规模被限制，可以尝试求解。<br>但有时只需要求其中一个儿子的状态，如果还是从根节点出发一一求出状态则显得有点浪费。所以此时应该<strong>逆向思维</strong>。<br>当上一层对下一层状态如树状（类似于分治），则非常理想，从儿子看，他只需要知道父亲的状态，而不需知道伯伯的状态，依次到达根节点。但当状态有交叉时，则要求出相关联的伯伯的状态。<strong>逆向求解有助于减少运算的规模</strong>。</p>
+<p>根据情况初始化。有时可能只能以角落（如第一行第一列的第一个格子）为第一层，有时可能以边界为第一层（比如第一行所有格子）。在层与层的转换时，注意剪枝，即本层要达到状态 s，则前一层必须达到 s’, 达不到 s’ 的状态可以不考虑。</p>
+<p><a target="_blank" rel="noopener" href="https://vjudge.net/problem/CodeForces-429B">走格子1</a></p>
+<p>一个人要从左上角往右下角走，每次只能向左或向下走一格；另一个人要从左下角往右上角走，每次只能向右或向上走一格。两条路径交叉于一点。求两条路径上的点数之和（不包括交叉点）。</p>
+<details>
+  <summary>显示解答</summary>
+![](http://ww1.sinaimg.cn/mw690/006aIx0Cgw1f673xu77irj30bp062wez.jpg)
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dp[i][j<span class="number">-1</span>][<span class="number">0</span>] + dp[i<span class="number">-1</span>][j][<span class="number">1</span>] + dp[i][j+<span class="number">1</span>][<span class="number">2</span>] + dp[i+<span class="number">1</span>][j][<span class="number">3</span>] </span><br><span class="line">dp[i][j<span class="number">-1</span>][<span class="number">3</span>] + dp[i<span class="number">-1</span>][j][<span class="number">0</span>] + dp[i][j+<span class="number">1</span>][<span class="number">1</span>] + dp[i+<span class="number">1</span>][j][<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+</details>
+
+<p><a target="_blank" rel="noopener" href="https://vjudge.net/problem/HDU-5492">走格子2</a>  </p>
+<p>给一个 N * M (N, M &lt; 31)的矩阵，从 (1,1) 到 (N,M) 经过的格点分值分别为 Ai，(0 &lt;= Ai &lt; 31) 路径只能向右或向下走,共N+M-1步)。求各种路径中方差最小的路径。</p>
+<details>
+  <summary>显示解答</summary>
+其中$A_{avg}={1\over {N+M-1}}\sum A_i$,  
+则$\sum 2A_iA_{avg}=2(N+M-1)A_{avg}^2$
+$$原式=(N+M−1)[(\sum A_i^2)-(N+M-1)A_{avg}^2]$$$$=(N+M−1)\sum A_i^2-(\sum A_i)^2$$
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dp[i][j][s]</span><br><span class="line">dp[i<span class="number">-1</span>][j][s-a[i][j]] + a[i][j] * a[i][j]</span><br><span class="line">dp[i][j<span class="number">-1</span>][s-a[i][j]] + a[i][j] * a[i][j]</span><br></pre></td></tr></table></figure>
+</details>
+
+<p><img src="https://gss0.baidu.com/94o3dSag_xI4khGko9WTAnF6hhy/zhidao/pic/item/55e736d12f2eb938b3e61ca1dd628535e4dd6fdd.jpg" alt=""></p>
+<h2 id="背包——DP中的经典"><a href="#背包——DP中的经典" class="headerlink" title="背包——DP中的经典"></a>背包——DP中的经典</h2><p>背包系列问题是DP入门的经典。一言以蔽之：<br><code>n</code>件物品，第<code>i</code>件体积为<code>v[i]</code>, 价值为<code>w[i]</code>, 件数为<code>k[i]</code><br>$F_i(j)：前i个物品放进容积为j的容器里的最大价值（逐步达到最大）$</p>
+<h3 id="0-1背包"><a href="#0-1背包" class="headerlink" title="0-1背包"></a>0-1背包</h3><p><strong>所有k[i]均为1</strong></p>
+<details>
+  <summary>显示公式</summary>
+$$F_i(j)=
+\begin{cases}
+F_{i-1}(j) &&\text{$V_i > j >= 0$}\\
+max\{F_{i-1}(j),F_\color{red}{i-1}(j-V_i)+W_i\} &&\text{$C>=j>=V_i$}
+\end{cases}
+$$
+</details>
+<details>
+  <summary>显示代码</summary>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; n;i++)</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = v[i];j &lt;= C;j++)</span><br><span class="line">        dp[j] = max(dp[j], dp[j-v[i]]+w[i]);</span><br></pre></td></tr></table></figure>
+</details>
+<details>
+  <summary><b>滚动数组</b></summary>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; n;i++) &#123;</span><br><span class="line">    <span class="built_in">memcpy</span>(temp, dp, <span class="keyword">sizeof</span>(dp));</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = v[i];j &lt;= C;j++)</span><br><span class="line">        dp[j] = max(dp[j], temp[j-v[i]]+w[i]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</details>
+<details>
+  <summary>显示代码</summary>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; n;i++)</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = C;j &gt;= v[i];j--)</span><br><span class="line">        dp[j] = max(dp[j], dp[j-v[i]]+w[i]);</span><br></pre></td></tr></table></figure>
+</details>
+
+<h3 id="完全背包"><a href="#完全背包" class="headerlink" title="完全背包"></a>完全背包</h3><p><strong>所有k[i]=inf</strong></p>
+<details>
+  <summary>显示公式</summary>
+$$F_i(j)=
+\begin{cases}
+F_{i-1}(j) &&\text{$V_i > j >= 0$}\\
+max\{F_{i-1}(j),F_\color{red}{i}(j-V_i)+W_i\} &&\text{$C>=j>=V_i$}
+\end{cases}
+$$
+</details>
+<details>
+  <summary>显示代码</summary>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; n;i++)</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = v[i];j &lt;= C;j++)</span><br><span class="line">        dp[j] = max(dp[j], dp[j-v[i]]+w[i]);</span><br></pre></td></tr></table></figure>
+</details>
+
+<h3 id="多重背包"><a href="#多重背包" class="headerlink" title="多重背包"></a>多重背包</h3><p><strong>k[i]&gt;=1</strong></p>
+<details>
+  <summary>显示解答</summary>
+1. 化为0-1背包，则共有 $\sum k_i$ 件物品，当物品件数多时可能会超时。  
+2. 二进制拆分。将k拆为 $1,2,4,...,2^p, k-2^{p+1}+1$,  
+p 为最大的满足该式的值。可知它们可以组合出在 1 到 k 范围内的所有数字。则只要将一件物品拆分成这样的 p+2 件物品，化为 0-1 背包。**注意每件物品重量、价值等比例扩大。**
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; n;i++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> m = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span>(k[i] &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(m &gt; k[i]) m = k[i];</span><br><span class="line">        k[i] -= m;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j = C;j &gt;= v[i];j--)</span><br><span class="line">            dp[j] = max(dp[j], dp[j-v[i]]);</span><br><span class="line">        m &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+3. 单调队列优化
+</details>
+
+<h3 id="变形背包"><a href="#变形背包" class="headerlink" title="变形背包"></a>变形背包</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://vjudge.net/problem/CodeForces-730J">倒水</a></li>
+</ul>
+<p>有 n 个瓶子，各有水量和瓶体积。把水从一个瓶倒到另一个瓶。首先要使得最后不空的瓶子数最少，其次要倒水量最少。求瓶子数和倒水量。</p>
+<details>
+  <summary>分析</summary>
+1. 确定瓶子数。  
+对瓶子的体积排序，前 km 个瓶子体积 V 恰好不小于总水量之和 wt ，则 km 即为最少的瓶子数。  
+2. 确定倒水量  
+`dp[i][j][k]`表示前 i 个瓶子选取 k 个（且第 i 个为所选第 k 个），使得 k 个瓶子体积和为 j ，可以容纳的最大水量。  
+先求出在 `dp[n-1][wt~V][km]` 的 `max`，再用 `wt-max` 即答案。  
+
+由于轮换，可降维到 `dp[j][k]`。  
+另外通过 `reach[j][k]` 表示是否可到达该状态。
+`j`, `k` 的两层循环位置可调换，答案不变。但是一种比另一种速度快一倍，这个问题组原课有解释。  
+由于是0-1背包，须注意 `j`, `k` 是循环递减来遍历，否则就是完全背包了。  
+</details>
+
+<h2 id="状态压缩"><a href="#状态压缩" class="headerlink" title="状态压缩"></a>状态压缩</h2><p>当状态的内部顺序对于结果没有影响时，可以将多个状态进行状态压缩简化推理。</p>
+<p>例题：在一个 n * n （n &lt; 17）的矩阵里选择 n 个数字（两两不同行、列），求数字和最大是多少。</p>
+<details>
+  <summary>分析</summary>
+逐行考虑。在考虑第 i 行的第 j 列 是否要取时，先观察第 j 列 上是否已经取了数字。至于第 j 列上取的数字是第几行的，则不需要考虑。所有关于第 j 列上放了数字的状态，都可以压缩到一起。
+</details>
+
+<details>
+  <summary>压缩</summary>
+定义：逐行选择，并且用一个n位的二进制数表示各列的选择情况。比如00101表示已经选择了两行，第三列、第五列被选择了。   
+a[i][j] 表示第i行、第j列的数值；   
+F[s] 表示状态 s （用二进制表示）选取的最大值。
+
+递推关系：每个二进制状态从前几个相关状态转换而来。比如01101由00101、01001、01100转化过来，即：   
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">F[<span class="number">01101</span>] = max(F[<span class="number">00101</span>]+a[<span class="number">3</span>][<span class="number">2</span>], F[<span class="number">01001</span>]+a[<span class="number">3</span>][<span class="number">3</span>], F[<span class="number">01100</span>]+a[<span class="number">3</span>][<span class="number">5</span>])   </span><br></pre></td></tr></table></figure>
+初始每个F都是0；   
+最后要求的就是F[111111(n-1个1)]。   
+s 可顺次枚举下去，不用担心子状态还未被计算。因为每个s某位少一个1时，必小于s，即该状态已经得到。
+
+</details>
+
+<ul>
+<li><a target="_blank" rel="noopener" href="https://vjudge.net/problem/HDU-5135">求三角形面积和的最大值</a></li>
+</ul>
+<p>给 n（n&lt;13）条边，每条边只能用一次，拼成多个三角形，求三角形面积和的最大值。</p>
+<details>
+  <summary>分析</summary>
+1~2^12 只有 4096，对每个数二进制分解，第 i 位为 1 则用这条边。 
+预处理出所有的数位和为 3 的倍数的状态。 
+</details>
+
+<h2 id="区间DP"><a href="#区间DP" class="headerlink" title="区间DP"></a>区间DP</h2><p>求取一个区间内的有效信息，可以借助于子区间得到。分割子区间的方式，既可以是多次分割取其中一种，也可以是就分割一次。类似于最前面提到的，有树状的，也有非树状的。</p>
+<p>例如区间 [1,5] 上的数的最大公约数，只需要分割一次，求 gcd[gcd[1, 3], gcd[4, 5]] 即可。分割的子区间没有交集。</p>
+<h3 id="多分割"><a href="#多分割" class="headerlink" title="多分割"></a>多分割</h3><ul>
+<li><a target="_blank" rel="noopener" href="http://poj.org/problem?id=2955">括号匹配1</a>  </li>
+</ul>
+<p>求最多的括号匹配数目。</p>
+<details>
+  <summary>显示解答</summary>
+枚举每种区间长度。
+`dp[i][j]`代表`str[i...j]`区间内最多的合法括号数
+
+状态转移方程：
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>((str[i]==<span class="string">&#x27;(&#x27;</span> &amp;&amp; str[j]==<span class="string">&#x27;)&#x27;</span>) || (str[i]==<span class="string">&#x27;[&#x27;</span> &amp;&amp; str[j]==<span class="string">&#x27;]&#x27;</span>))</span><br><span class="line">     dp[i][j] = dp[i+<span class="number">1</span>][j<span class="number">-1</span>] + <span class="number">2</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> k = i;k &lt; j;k++)</span><br><span class="line">    dp[i][j] = max&#123; dp[i][k] + dp[k+<span class="number">1</span>][j] &#125;;</span><br></pre></td></tr></table></figure>
+</details>
+
+
+<ul>
+<li><a target="_blank" rel="noopener" href="http://poj.org/problem?id=1141">括号匹配2</a>  </li>
+</ul>
+<p>补全最少的括号使得所有括号匹配。</p>
+<details>
+  <summary>显示解答</summary>
+  `v[i][j]`记录`dp[i][j]`取最大值时的情况：  
+-1表示`str[i]`与`str[j]`相互匹配；其余表示`dp[i][j]`取最大值时的k值，`str[i]`与`str[k]`相互匹配。
+
+打印过程递归：
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">draw</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(x &gt; y) <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">if</span>(x == y)&#123;</span><br><span class="line">        <span class="keyword">if</span>(str[x] == <span class="string">&#x27;(&#x27;</span> || str[x] == <span class="string">&#x27;)&#x27;</span>) <span class="built_in">printf</span>(<span class="string">&quot;()&quot;</span>);</span><br><span class="line">        <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">&quot;[]&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(v[x][y] == <span class="number">-1</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%c&quot;</span>, str[x]);</span><br><span class="line">        draw(x+<span class="number">1</span>, y<span class="number">-1</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%c&quot;</span>, str[y]);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    draw(x, v[x][y]);</span><br><span class="line">    draw(v[x][y]+<span class="number">1</span>, y);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</details>
+
+<h3 id="单一分割"><a href="#单一分割" class="headerlink" title="单一分割"></a>单一分割</h3><h4 id="线段树"><a href="#线段树" class="headerlink" title="线段树"></a>线段树</h4><p>略略略</p>
+<h4 id="RMQ"><a href="#RMQ" class="headerlink" title="RMQ"></a>RMQ</h4><p>查询O(1)</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://acm.hdu.edu.cn/showproblem.php?pid=5726">区间的最大公约数</a></li>
+</ul>
+<p>给N($N\le 100000$)个数，Q($Q\le 100000$)个询问，每次查询输出区间的最大公约数，以及最大公约数为这个数的区间数目。</p>
+<details>
+  <summary>显示解答</summary>
+  查询次数很多，要做预处理，用map<最大公约数,区间数>存下来，实现O(1)的查询。  
+预处理发现对于同一左端点的区间而言，右端点越靠右，区间gcd单调递减。因此可以固定左端点，二分右端点，找到gcd突变的右端点，确定对于同一gcd的区间数目。为了查询得更快，用ST表(RMQ)存下区间gcd，只要O(1)即可查询得到区间gcd。
+
+对于这题还不够，需要继续进行优化。
+</details>
+
+<ul>
+<li>建表</li>
+</ul>
+<p>$dp[i][j]$表示长度为$2^i$的区间$[i,i+2^j-1]$范围内的$gcd$  </p>
+<script type="math/tex; mode=display">dp[i][j]=gcd(dp[i][j-1], dp[i+2^j][j-1])</script><p>即区间$[i,i+2^{j-1}-1]与[i+2^{j-1},i+2^j-1]$共同确定了区间$[i,i+2^j-1]$的$gcd$  </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i &lt; n;i++)&#123;</span><br><span class="line">        dp[i][<span class="number">0</span>] = a[i];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">1</span>;(<span class="number">1</span>&lt;&lt;j) &lt;= n;j++)&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i + (<span class="number">1</span>&lt;&lt;j) - <span class="number">1</span> &lt; n;i++)&#123;</span><br><span class="line">        dp[i][j] = __gcd(dp[i][j<span class="number">-1</span>], dp[i+(<span class="number">1</span>&lt;&lt;j<span class="number">-1</span>)][j<span class="number">-1</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>询问</li>
+</ul>
+<p>$[l,r]$由$[l,…]与[…,r]$共同决定。两者必须共同覆盖了整个区间。区间长度为$2^k$，其中$k=log_2(r-l+1)$</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">ask</span><span class="params">(<span class="keyword">int</span> l, <span class="keyword">int</span> r)</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> k = <span class="built_in">log</span>(<span class="number">1.0</span>*(r-l+<span class="number">1</span>))/<span class="built_in">log</span>(<span class="number">2</span>);</span><br><span class="line">    <span class="keyword">return</span> __gcd(dp[l][k], dp[r-(<span class="number">1</span>&lt;&lt;k)+<span class="number">1</span>][k]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="树状DP"><a href="#树状DP" class="headerlink" title="树状DP"></a>树状DP</h2><p>树已经构造好了，如何利用父亲节点的已知信息进行DP。遍历更新深度时即是一种应用：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dp[i] = dp[parent[i]] + <span class="number">1</span></span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://vjudge.net/problem/CodeForces-697D">深度的期望</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://vjudge.net/problem/CodeForces-697C">树上转移</a></p>
+</li>
+</ul>
+<h2 id="与贪心的关系"><a href="#与贪心的关系" class="headerlink" title="与贪心的关系"></a>与贪心的关系</h2><p>贪心需要论证，保证一步优，步步优。如果要证明贪心是有问题的，举一个 DP 的反例即可。</p>
+<p>如果 DP 的过程中发现了每次都选了局部最优，则很有可能该问题是可以贪心解决的。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/DP/"># DP</a>
+                    
+                        <a href="/tag/%E8%83%8C%E5%8C%85/"># 背包</a>
+                    
+                        <a href="/tag/RMQ/"># RMQ</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2018/11/git-server/">Git 服务器搭建</a>
+            
+            
+            <a class="next" rel="next" href="/2018/10/D-separation/">D-separation</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

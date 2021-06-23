@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>Docker 学习笔记 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Docker 学习笔记</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/Docker/">Docker</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2018/12/learn-docker-tip/" class="leancloud_visitors" data-flag-title="Docker 学习笔记">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Danliwoo</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/%E6%8A%80%E6%9C%AF/">技术</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">12/06, 2018</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="为什么要用-Docker"><a href="#为什么要用-Docker" class="headerlink" title="为什么要用 Docker"></a>为什么要用 Docker</h2><p>实验室每个人都有自己在跑的实验，各种包的配置版本可能会不一样。下包的时候可能需要管理员权限，也就是一不小心把公有的包都给重写了，给别人造成了麻烦。再者，在多台机器上跑一个代码，重搭环境实在太累人了，谁不想一键搞定所有的搭建工作呢。所以，就把这种脏活累活都交给 Docker 来做吧！</p>
+<h2 id="Docker-架构"><a href="#Docker-架构" class="headerlink" title="Docker 架构"></a>Docker 架构</h2><p>Docker 使用客户端-服务器 (C/S) 架构模式，使用远程API来管理和创建Docker容器。<br>容器与镜像的关系类似于面向对象编程中的对象与类。<br>Docker 容器（对象）通过 Docker 镜像（类）来创建。  </p>
+<h2 id="安装测试"><a href="#安装测试" class="headerlink" title="安装测试"></a>安装测试</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&gt; wget -qO- https://get.docker.com/ | sh</span><br><span class="line">&gt; sudo usermod -aG docker danliwoo</span><br><span class="line">&gt; service docker start</span><br><span class="line">&gt; <span class="comment"># restart the shell!!!</span></span><br><span class="line">&gt; docker run hello-world</span><br><span class="line"></span><br><span class="line">Hello from Docker!</span><br><span class="line">This message shows that your installation appears to be working correctly.</span><br><span class="line"></span><br><span class="line">To generate this message, Docker took the following steps:</span><br><span class="line"> 1. The Docker client contacted the Docker daemon.</span><br><span class="line"> 2. The Docker daemon pulled the <span class="string">&quot;hello-world&quot;</span> image from the Docker Hub.</span><br><span class="line">    (amd64)</span><br><span class="line"> 3. The Docker daemon created a new container from that image <span class="built_in">which</span> runs the</span><br><span class="line">    executable that produces the output you are currently reading.</span><br><span class="line"> 4. The Docker daemon streamed that output to the Docker client, <span class="built_in">which</span> sent it</span><br><span class="line">    to your terminal.</span><br><span class="line"></span><br><span class="line">To try something more ambitious, you can run an Ubuntu container with:</span><br><span class="line"> $ docker run -it ubuntu bash</span><br><span class="line"></span><br><span class="line">Share images, automate workflows, and more with a free Docker ID:</span><br><span class="line"> https://hub.docker.com/</span><br><span class="line"></span><br><span class="line">For more examples and ideas, visit:</span><br><span class="line"> https://docs.docker.com/get-started/</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="运行容器"><a href="#运行容器" class="headerlink" title="运行容器"></a>运行容器</h2><blockquote>
+<p>-t:在新容器内指定一个伪终端或终端。<br>-i:允许你对容器内的标准输入 (STDIN) 进行交互。<br>-d:容器开在后台。<br>-P:将容器内部使用的网络端口映射到我们使用的主机上。<br>-v:将本地的文件夹挂载到容器里。<br>—name:给容器取个名字。</p>
+</blockquote>
+<h3 id="简单的虚拟机"><a href="#简单的虚拟机" class="headerlink" title="简单的虚拟机"></a>简单的虚拟机</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker run -i -t ubuntu:15.10 /bin/bash</span><br></pre></td></tr></table></figure>
+<p>就像装了个 ubuntu:15.10 的虚拟机，可以在里面玩耍</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker run -d ubuntu:15.10 /bin/sh -c <span class="string">&quot;while true; do echo hello world; sleep 1; done&quot;</span></span><br><span class="line">088f1ec5c9988346ef06fb1a717ae65b1d751ea3649061095cb2cdd26d106f3e</span><br></pre></td></tr></table></figure>
+<p>查看日志等信息<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker ps</span><br><span class="line">一堆正在跑的 docker 的信息。</span><br><span class="line">&gt; docker ps -a</span><br><span class="line">&gt; docker logs [CONTAINER ID]</span><br><span class="line">&gt; docker logs [NAMES]</span><br><span class="line">都可以输出当前的日志信息。</span><br><span class="line">&gt; docker stop xxx</span><br></pre></td></tr></table></figure></p>
+<h3 id="Web-容器"><a href="#Web-容器" class="headerlink" title="Web 容器"></a>Web 容器</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker pull training/webapp  </span><br><span class="line">载入镜像</span><br><span class="line">&gt; docker run -d -P training/webapp python app.py</span><br><span class="line">docker:5000 Host:32768</span><br><span class="line">&gt; docker run -d -p 2333:5000 training/webapp python app.py</span><br><span class="line">docker:5000 Host:2333 </span><br><span class="line">&gt; docker run -d -p 127.0.0.1:5000:5000/udp training/webapp python app.py</span><br><span class="line">绑定 UDP 端口</span><br><span class="line">&gt; docker logs -f xxx</span><br><span class="line">看谁访问了我的网页</span><br><span class="line">&gt; docker top xxx</span><br><span class="line">就跟 top 作用很像</span><br><span class="line">&gt; docker inspect</span><br><span class="line">查看底层的配置和状态信息</span><br></pre></td></tr></table></figure>
+<h3 id="GPflow-容器"><a href="#GPflow-容器" class="headerlink" title="GPflow 容器"></a>GPflow 容器</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it -p 8888:8888 gpflow/gpflow</span><br></pre></td></tr></table></figure>
+<p>复活暂停的容器<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker container start [containerName]</span><br></pre></td></tr></table></figure><br>想进入后台正在运行的程序<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker attach [containerName]</span><br></pre></td></tr></table></figure></p>
+<h3 id="批量删除停止的容器"><a href="#批量删除停止的容器" class="headerlink" title="批量删除停止的容器"></a>批量删除停止的容器</h3><p>删除容器<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker ps -a</span><br><span class="line">CONTAINER ID        IMAGE                  COMMAND             CREATED             STATUS                     PORTS                                    NAMES</span><br><span class="line">3ed73013d8ce        danliwoo/gpmed:part3   <span class="string">&quot;/bin/bash&quot;</span>         About an hour ago   Exited (0) 6 seconds ago                                            frosty_shaw</span><br><span class="line">2e1af5e8495b        danliwoo/gpmed:part3   <span class="string">&quot;/bin/bash&quot;</span>         4 weeks ago         Up 2 days                  22/tcp, 80/tcp, 0.0.0.0:2333-&gt;8888/tcp   peaceful_keller</span><br><span class="line">&gt; docker rm 3e</span><br><span class="line">3e</span><br><span class="line">这里只需要敲容器 ID 的前两位，就可以删除指定容器（除非不唯一，则会提醒）。</span><br></pre></td></tr></table></figure><br>容器很多，一个一个删也太费事了<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker container prune</span><br><span class="line">WARNING! This will remove all stopped containers.</span><br><span class="line">Are you sure you want to <span class="built_in">continue</span>? [y/N] y</span><br><span class="line">Deleted Containers:</span><br><span class="line">61e0c59a43b75a76f04ca90905b6e9b02caf67d13333c9a0f0e487a6077810b5</span><br><span class="line">b7212cb2065a3cb2816f9efe07a0bc8203a1e44c916cb4385ae477c9f8d8d127</span><br><span class="line">21d69920d8c9b02b34e51c0e01347f0d411046668e5d2698218df857a3ce14f0</span><br><span class="line">0d4c407b221ef99e7b623186593255744aa157f2db1e51975b0d647497c62960</span><br><span class="line">49a9fe9a9cf45fa2983cf51ed41497c5b14a1052f76fab3de0441f4a57660159</span><br><span class="line"></span><br><span class="line">Total reclaimed space: 1.306kB</span><br><span class="line"></span><br></pre></td></tr></table></figure></p>
+<h3 id="挂载系统文件到容器中"><a href="#挂载系统文件到容器中" class="headerlink" title="挂载系统文件到容器中"></a>挂载系统文件到容器中</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker run -v [本地目录]:[容器目录] [镜像]</span><br><span class="line">&gt; docker run -it -p 17813:8888 -p 6006:6006 -v ~/tensorflow-tutorial:/app danliwoo/gpmed:part3</span><br></pre></td></tr></table></figure>
+<h2 id="镜像管理"><a href="#镜像管理" class="headerlink" title="镜像管理"></a>镜像管理</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker images</span><br><span class="line">列出了所有本机下载到的镜像。</span><br><span class="line">&gt; docker search xxx</span><br><span class="line">搜出了一堆可用镜像</span><br><span class="line">&gt; docker pull xxx</span><br><span class="line">&gt; docker run xxx</span><br><span class="line">&gt; docker commit -m=<span class="string">&quot;msg&quot;</span> -a=<span class="string">&quot;author&quot;</span> [container] [reponame]:[tag]</span><br></pre></td></tr></table></figure>
+<p>构建新镜像<br><a href="Dockerfile">Dockerfile</a><br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker build -t [imagename]:[tag] [dir]</span><br><span class="line">dir 是 Dockerfile 所在的目录。</span><br></pre></td></tr></table></figure><br>Docker 允许上传镜像，每个镜像相当于是一个 repository，在这之前需要注册和登录账号。<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker login</span><br><span class="line">输入用户名和密码（如果没有需要先在网页上注册）</span><br><span class="line">&gt; docker push [username]/[repository]:[tag]</span><br><span class="line">然后可以把新的镜像 push 到远端仓库中。</span><br></pre></td></tr></table></figure></p>
+<h2 id="服务"><a href="#服务" class="headerlink" title="服务"></a>服务</h2><p>一份镜像在产生容器时，将其限制的内存空间、要产生的容器数量等信息配置在 <code>docker-compose.yml</code> 中。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker stack deploy -c docker-compose.yml getstartedlab   </span><br></pre></td></tr></table></figure>
+<p>参考网站  </p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www.runoob.com/docker/docker-tutorial.html">Runoob</a>  </li>
+<li><a target="_blank" rel="noopener" href="https://docs.docker.com/get-started/">官方文档</a></li>
+</ul>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/Docker/"># Docker</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/01/bye2018/">我的2018</a>
+            
+            
+            <a class="next" rel="next" href="/2018/12/My-Nov-in-2018/">在合适的时间做合适的事</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>Real Light Hexo With Travis CI | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Real Light Hexo With Travis CI</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/Hexo/">Hexo</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Travis-CI/">Travis CI</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2019/08/hexo-with-travis/" class="leancloud_visitors" data-flag-title="Real Light Hexo With Travis CI">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/%E6%8A%80%E6%9C%AF/">技术</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">08/20, 2019</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>好久没写博客了。不是不想写，而是每次想写的时候，都要在本地配置好 Hexo，生成网页以后再上传。有 Linux 还好，如果是 Windows 下，又要忙活着配置了。再加上设备比较多的情况下，不至于每台电脑都要配置吧o((⊙﹏⊙))o. 我构思过以下几种办法：</p>
+<ul>
+<li>把想法存档到 markdown，等到需要的时候再一股脑转换成 blog。</li>
+<li>搞一台服务器，在上面装好所有环境，连上去编译。</li>
+</ul>
+<p>直到有一天，我在一个别人的 <a target="_blank" rel="noopener" href="https://github.com/AlekSi/gocoverutil/pull/6#issuecomment-521541893">github 项目</a> 里 pull request，发现在 merge 以前，可以自动跑一堆测试。只有完成测试以及 code review 这两个必要条件以后，才能考虑是否 merge （然而这个大佬并不想 merge 我的代码并把我怼了）。于是！我发现了一个好东西 <a target="_blank" rel="noopener" href="https://travis-ci.com/">Travis CI</a> !</p>
+<hr>
+<h2 id="Operating-Mechanism"><a href="#Operating-Mechanism" class="headerlink" title="Operating Mechanism"></a>Operating Mechanism</h2><p>借用 <a target="_blank" rel="noopener" href="https://github.com/gymgle/g2ex.github.io/blob/d105dc258a9184b667578d9196c223a567fe2269/source/_posts/2019-06-28-hexo-with-travis-ci.md">这个说明</a> 里的图片 <img src="operating.png" alt="Operating Mechanism"></p>
+<p>可以发现 Travis CI 给我们提供了一个跑 Hexo 的地方，使得我们的编辑更加轻松。</p>
+<p>只要在你的 Github Repo 里包含 <code>.travis.yml</code>，关联到 Travis CI 以后便可以自行识别。你可以选择在每次更新分支或提 PR 的时候去跑 <code>.travis.yml</code> 里的脚本。</p>
+<p>给一段脚本如下，最新版本在<a target="_blank" rel="noopener" href="https://github.com/Baileyswu/Baileyswu.github.io/blob/blog_source/.travis.yml">这里</a><br><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># .travis.yml</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">node_js</span></span><br><span class="line"><span class="attr">node_js:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;10&quot;</span></span><br><span class="line"><span class="attr">dist:</span> <span class="string">trusty</span></span><br><span class="line"><span class="attr">sudo:</span> <span class="string">required</span></span><br><span class="line"></span><br><span class="line"><span class="attr">cache:</span></span><br><span class="line">  <span class="attr">directories:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">node_modules</span></span><br><span class="line"></span><br><span class="line"><span class="attr">branches:</span></span><br><span class="line"><span class="comment"># 除了 master 分支，其余分支在更新后都会有所动作，比如 deploy html.</span></span><br><span class="line">  <span class="attr">except:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">master</span></span><br><span class="line"></span><br><span class="line"><span class="attr">before_install:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">git</span> <span class="string">config</span> <span class="string">--global</span> <span class="string">user.name</span> <span class="string">&quot;Baileyswu&quot;</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">git</span> <span class="string">config</span> <span class="string">--global</span> <span class="string">user.email</span> <span class="string">&quot;wulidan0530@live.com&quot;</span></span><br><span class="line"><span class="comment"># 下面是为了把 _config.yml 里的 git@github.com 替换成 https://$&#123;ACCESS_TOKEN&#125;@github.com/</span></span><br><span class="line"><span class="comment"># ACCESS_TOKEN 是在 Travis CI 上登记的环境变量，用于存放 Github 里生成的 Personal access tokens</span></span><br><span class="line"><span class="comment"># 这样你就不需要在 Travis CI 的虚拟机里放自己的私钥了</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">sed</span> <span class="string">-i&#x27;&#x27;</span> <span class="string">&quot;s~git@github.com:~https://$&#123;ACCESS_TOKEN&#125;@github.com/~&quot;</span> <span class="string">_config.yml</span></span><br><span class="line"></span><br><span class="line"><span class="attr">install:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">cat</span> <span class="string">./npm-init.sh</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">chmod</span> <span class="number">755</span> <span class="string">./npm-init.sh</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">source</span> <span class="string">./npm-init.sh</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">ls</span></span><br><span class="line"><span class="comment"># 这里是为了让数学公式表达正常修改的正则表达式</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">cp</span> <span class="string">-f</span> <span class="string">./kramed-inline.js</span> <span class="string">node_modules/kramed/lib/rules/inline.js</span></span><br><span class="line"></span><br><span class="line"><span class="attr">script:</span></span><br><span class="line"><span class="comment"># 上一次生成的静态博客文件都在 master 分支里，将它保存到 .deploy_git 内</span></span><br><span class="line"><span class="comment"># 可以避免每次 deploy 都把原先的 log 清空</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">git</span> <span class="string">clone</span> <span class="string">--branch</span> <span class="string">master</span> <span class="string">https://github.com/Baileyswu/Baileyswu.github.io.git</span> <span class="string">.deploy_git</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">npm</span> <span class="string">run</span> <span class="string">deploy</span></span><br></pre></td></tr></table></figure><br>每次 commmit 都可以看见如下效果</p>
+<p><img src="commit-log.png" alt="After Commit"></p>
+<hr>
+<h2 id="Debug-Travis-CI-Failure"><a href="#Debug-Travis-CI-Failure" class="headerlink" title="Debug Travis CI Failure"></a>Debug Travis CI Failure</h2><h3 id="travis-com-travis-org"><a href="#travis-com-travis-org" class="headerlink" title="travis.com != travis.org"></a>travis.com != travis.org</h3><p>没错，他们不是同一个网站(￣▽￣)”……所以 <code>Personal access tokens</code> 要在两个网站都填好内！</p>
+<h3 id="Deploy-conflict"><a href="#Deploy-conflict" class="headerlink" title="Deploy conflict"></a>Deploy conflict</h3><p>也许你会觉得这行拷贝是多余的……<br><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">git</span> <span class="string">clone</span> <span class="string">--branch</span> <span class="string">master</span> <span class="string">https://github.com/Baileyswu/Baileyswu.github.io.git</span> <span class="string">.deploy_git</span></span><br></pre></td></tr></table></figure><br>如果你又不小心选择了 Travis CI 下的这两个选项</p>
+<p>General</p>
+<ul>
+<li>Build pushed branches   </li>
+<li>Build pushed pull requests  </li>
+</ul>
+<p>那么悲剧就发生了……</p>
+<p>两个进程在同一时刻 <code>clone</code> 了代码，分别 <code>deploy</code>，其中肯定有一个先完成，然后被 <code>push</code> 到了 <code>master</code>。当慢的那个也完成了以后刚要 <code>push</code> 就傻眼了。我上一个版本不是 xxx 吗，怎么变成了 yyy，于是它拒绝 <code>push</code>，于是 <code>deploy</code> 失败。</p>
+<p>所以解决办法就是，每次要 <code>deploy</code> 前先更新一下最近的静态网页。或者不要两个进程一起开。如果确实不需要保留静态文件的历史，直接 <code>git fetch</code> 也没啥大问题。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/Hexo/"># Hexo</a>
+                    
+                        <a href="/tag/Travis-CI/"># Travis CI</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/08/graph-connected-component/">连通分量涮涮乐</a>
+            
+            
+            <a class="next" rel="next" href="/2019/05/HMM-VAE/">HMM-VAE</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

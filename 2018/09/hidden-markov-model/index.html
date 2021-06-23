@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>隐马尔可夫模型（HMM） | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">隐马尔可夫模型（HMM）</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/HMM/">HMM</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/EM/">EM</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/mathjax/">mathjax</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Viterbi/">Viterbi</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E6%8E%A8%E5%85%AC%E5%BC%8F%E5%90%97%E4%BA%B2/">推公式吗亲</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Baum-Welch/">Baum-Welch</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2018/09/hidden-markov-model/" class="leancloud_visitors" data-flag-title="隐马尔可夫模型（HMM）">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/PRML/">PRML</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">09/26, 2018</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p><strong>学习目标：</strong></p>
+<ul>
+<li>介绍HMM的定义与符号</li>
+<li>讨论HMM的三个基本问题<ul>
+<li>概率计算问题：前后向算法</li>
+<li>学习问题：Baum-Welch模型，EM算法计算参数</li>
+<li>预测问题：Viterbi算法</li>
+</ul>
+</li>
+<li>每种算法用代码实现</li>
+<li>参考李航的《统计学习方法》（在这里吐槽一下HMM那章下标 $i$ 乱用，有些算法不是很ok）</li>
+</ul>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>HMM是一种时序数据模型。<br>设序列长度为 $T$ ，具有<strong>观测序列</strong> $\mathbf X=\{\mathbf x_1,\dots,\mathbf x_T\}$ 和<strong>隐变量序列</strong> $\mathbf Z=\{\mathbf z_1,\dots,\mathbf z_T\}$ 。<br>这里认为每一个观测都由对应的隐变量生成。隐变量序列是Markov链，$\mathbf z_t$只依赖于$\mathbf z_{t-1}$<br><img src="hmm-1.jpg" alt=""></p>
+<p>变量都在有限的状态集里变化，<strong>观测的状态集</strong>为 $\mathbf S=\{\mathbf s_1,\dots,\mathbf s_M\}$ ，<strong>隐变量的状态集</strong>为 $\mathbf H=\{\mathbf h_1,\dots,\mathbf h_N\}$ 。<br>因此 $\mathbf x_t\in \mathbf S,\mathbf z_t\in \mathbf H,t=1,\dots,T$ 。<br>有时需要反向找到某状态是状态集里的第几个，定义 $findindex(\mathbf z_t)=i$ ，表示 $\mathbf z_t = \mathbf h_i$ 。<br>同理也有 $findindex(\mathbf x_t)=i$ ，表示 $\mathbf x_t = \mathbf s_i$ 。  </p>
+<p>隐状态间的<strong>转移矩阵</strong>为 $\mathbf A=[a_{ij}]_{N\times N}$ ， $a_{ij}$ 是从状态 $\mathbf h_i$ 转移到 $\mathbf h_j$ 的概率。<br>从隐状态到观测的<strong>发射矩阵</strong> $\mathbf B=[b_{ij}]_{N\times M}$ ， $b_{ij}$ 是从状态 $\mathbf h_i$ 转移到观测 $\mathbf s_j$ 的概率。<br><strong>初始状态概率</strong>向量为 $\mathbf \Pi=[\pi_1,\dots,\pi_N]$ 。鉴于初始时没有其他时刻转移到 $t=0$ ，设 $\mathbf z_0$ 有 $\pi_i$ 的概率属于 $\mathbf h_i$ 。  </p>
+<p>记 $\lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$ ，为HMM中的参数的集合。  </p>
+<h3 id="生成观测序列"><a href="#生成观测序列" class="headerlink" title="生成观测序列"></a>生成观测序列</h3><p>输入：$T,\mathbf S, \mathbf H, \lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$<br>输出：$\mathbf X$</p>
+<p>例如：有4个盒子，每个盒子里有若干红球和白球。每次从某盒子抽某色的球，求该序列的颜色。  </p>
+<p>这个例子中加上约束：盒子之间转移的概率（转移矩阵），盒子里球的概率分布（发射矩阵）。</p>
+<p>由于需要按照特定概率分布产生随机数，定义下面这个函数，输入分布，输出该分布下的随机数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line"><span class="comment"># generate according to the distribution</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">generate</span>(<span class="params">rate</span>):</span></span><br><span class="line">    r = random.random()</span><br><span class="line">    <span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(rate)):</span><br><span class="line">        <span class="built_in">sum</span> += rate[i];</span><br><span class="line">        <span class="keyword">if</span>(r &lt;= <span class="built_in">sum</span>):</span><br><span class="line">            <span class="keyword">return</span> i</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">len</span>(rate)-<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">distribution = [<span class="number">0.4</span>, <span class="number">0.1</span>, <span class="number">0.5</span>]</span><br><span class="line">count = [<span class="number">0</span>]*<span class="built_in">len</span>(distribution)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100000</span>):</span><br><span class="line">    rd = generate(distribution)</span><br><span class="line">    count[rd] += <span class="number">1</span></span><br><span class="line">print(count)</span><br></pre></td></tr></table></figure>
+<pre><code>[40043, 9990, 49967]
+</code></pre><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">observation</span>(<span class="params">T, S, H, A, B, pi</span>):</span></span><br><span class="line">    z = generate(pi)</span><br><span class="line">    x = S[generate(B[z])]</span><br><span class="line">    Z = [H[z]]</span><br><span class="line">    X = [x]</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, T):  </span><br><span class="line">        z = generate(A[z])</span><br><span class="line">        x = S[generate(B[z])]</span><br><span class="line">        Z.append(H[z])</span><br><span class="line">        X.append(x)</span><br><span class="line">    <span class="keyword">return</span> Z, X</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">T = <span class="number">10</span></span><br><span class="line">S = [<span class="string">&#x27;red&#x27;</span>, <span class="string">&#x27;white&#x27;</span>]</span><br><span class="line">H = [<span class="string">&#x27;box1&#x27;</span>, <span class="string">&#x27;box2&#x27;</span>, <span class="string">&#x27;box3&#x27;</span>, <span class="string">&#x27;box4&#x27;</span>]</span><br><span class="line">A = [</span><br><span class="line">    [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0.3</span>, <span class="number">0</span>, <span class="number">0.7</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0.4</span>, <span class="number">0</span>, <span class="number">0.6</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0.6</span>, <span class="number">0.4</span>]</span><br><span class="line">]</span><br><span class="line">B = [</span><br><span class="line">    [<span class="number">0.5</span>, <span class="number">0.5</span>],</span><br><span class="line">    [<span class="number">0.3</span>, <span class="number">0.7</span>],</span><br><span class="line">    [<span class="number">0.6</span>, <span class="number">0.4</span>],</span><br><span class="line">    [<span class="number">0.4</span>, <span class="number">0.6</span>]</span><br><span class="line">]</span><br><span class="line">pi = [<span class="number">0.4</span>, <span class="number">0.1</span>, <span class="number">0.25</span>, <span class="number">0.25</span>]</span><br><span class="line">Z, X = observation(T, S, H, A, B, pi)</span><br><span class="line">print(Z)</span><br><span class="line">print(X)</span><br></pre></td></tr></table></figure>
+<pre><code>[&#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;]
+[&#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;]
+</code></pre><p>从转移矩阵可以发现一件有趣的事。$a_{12}=1$，这说明每次抽一号盒子之后，下一次一定抽二号盒子。</p>
+<h2 id="概率计算问题"><a href="#概率计算问题" class="headerlink" title="概率计算问题"></a>概率计算问题</h2><p>输入：$\mathbf X,\lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$  </p>
+<p>输出：$P(\mathbf X|\lambda)$  </p>
+<p>暴力不可解，借用DP的思想，一层一层算，引入<strong>前后向算法</strong>。</p>
+<h3 id="前向概率"><a href="#前向概率" class="headerlink" title="前向概率"></a>前向概率</h3><p>从第 $t$ 层算第 $t+1$ 层，经典的DP的想法。  </p>
+<p><strong>第一层是边界，特判。</strong></p>
+<p><img src="hmm-2.jpg" alt=""></p>
+<script type="math/tex; mode=display">\begin{aligned}
+\alpha_t(i)&=P(\mathbf x_1,\dots,\mathbf x_t,\mathbf z_t=\mathbf h_i|\lambda)\\
+&=\sum_{j=1}^N P(\mathbf x_1,\dots,\mathbf x_t,\mathbf z_{t-1}=\mathbf h_j,\mathbf z_t=\mathbf h_i|\lambda)\\
+&=\sum_{j=1}^N P(\mathbf x_1,\dots,\mathbf x_{t-1},\mathbf z_{t-1}=\mathbf h_j|\lambda)P(\mathbf z_t=\mathbf h_i|\mathbf z_{t-1}=\mathbf h_j)P(\mathbf x_t|\mathbf z_t=\mathbf h_i)\\
+&=\sum_{j=1}^N \alpha_{t-1}(j)a_{ji}b_{ik} ~~~~~~~~k=findindex(\mathbf x_{t})\\
+&=\left(\sum_{j=1}^N \alpha_{t-1}(j)a_{ji}\right)b_{ik} ~~~~~~~~k=findindex(\mathbf x_{t})
+\end{aligned}</script><script type="math/tex; mode=display">\alpha_t(i)=\begin{cases}
+&\pi_i b_{ik}&\text{t=1}\\
+&\left(\sum_{j=1}^N \alpha_{t-1}(j)a_{ji}\right)b_{ik} &\text{t>1}
+\end{cases} ~~~~~~~~k=findindex(\mathbf x_{t})</script><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cal_alpha</span>(<span class="params">T, S, H, A, B, pi</span>):</span></span><br><span class="line">    N = <span class="built_in">len</span>(H)</span><br><span class="line">    ap = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">        ap.append(pi[i]*B[i][S.index(X[<span class="number">0</span>])])</span><br><span class="line">    alpha = [ap]</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, T):</span><br><span class="line">        ap = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">            <span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">                <span class="built_in">sum</span> += alpha[t-<span class="number">1</span>][j]*A[j][i]</span><br><span class="line">            ap.append(<span class="built_in">sum</span>*B[i][S.index(X[t])])</span><br><span class="line">        alpha.append(ap)</span><br><span class="line">    <span class="keyword">return</span> alpha</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">alpha = cal_alpha(T, S, H, A, B, pi)</span><br><span class="line"><span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(T):</span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> alpha[t]:</span><br><span class="line">        print(<span class="string">&quot;&#123;:.15f&#125;&quot;</span>.<span class="built_in">format</span>(p), end = <span class="string">&quot; &quot;</span>)</span><br><span class="line">    print()</span><br></pre></td></tr></table></figure>
+<pre><code>0.200000000000000 0.030000000000000 0.150000000000000 0.100000000000000 
+0.004500000000000 0.078000000000000 0.048600000000000 0.052000000000000 
+0.011700000000000 0.016758000000000 0.034320000000000 0.029976000000000 
+0.002513700000000 0.017799600000000 0.011886480000000 0.019549440000000 
+0.002669940000000 0.002180487600000 0.014513630400000 0.005980665600000 
+0.000327073140000 0.002542617648000 0.003068844408000 0.004440177792000 
+0.000381392647200 0.000466383270960 0.002666363417280 0.001446951104640 
+0.000069957490644 0.001013556609878 0.000477855580982 0.001307159095334 
+0.000152033491482 0.000182769806126 0.000597514033646 0.000485746192034 
+0.000027415470919 0.000273727373458 0.000167754631803 0.000331684138201 
+</code></pre><h3 id="后向概率"><a href="#后向概率" class="headerlink" title="后向概率"></a>后向概率</h3><p>从第 $t$ 层算第 $t-1$ 层，可以认为是 $x_t$ 按照概率 $a_{ij}$ 枚举了所有的可能。  </p>
+<p><strong>最后一层是边界，特判。</strong></p>
+<p><img src="hmm-3.jpg" alt=""></p>
+<script type="math/tex; mode=display">\begin{aligned}
+\beta_t(i)=&P(\mathbf x_{t+1},\dots,\mathbf x_T|\mathbf z_t=\mathbf h_i,\lambda)\\
+=&\sum_{j=1}^N P(\mathbf x_{t+1},\dots,\mathbf x_T,\mathbf z_{t+1}=\mathbf h_j|\mathbf z_t=\mathbf h_i,\lambda)\\
+=&\sum_{j=1}^N P(\mathbf z_{t+1}=\mathbf h_j|\mathbf z_t=\mathbf h_i)P(\mathbf x_{t+1}|\mathbf z_{t+1}=\mathbf h_j)P(\mathbf x_{t+2},\dots,\mathbf x_T|\mathbf z_{t+1}=\mathbf h_j,\lambda)\\
+=&\sum_{j=1}^N a_{ij}b_{jk}\beta_{t+1}(j)~~~~~~~~k=findindex(\mathbf x_{t+1})\\
+\end{aligned}</script><script type="math/tex; mode=display">\beta_t(i)=\begin{cases}
+&1&\text{t=T}\\
+&\sum_{j=1}^N a_{ij}b_{jk}\beta_{t+1}(j) &\text{t<T} \end{cases} ~~~~~~~~k=findindex(\mathbf x_{t+1})</script><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cal_beta</span>(<span class="params">T, S, H, A, B, pi</span>):</span></span><br><span class="line">    N = <span class="built_in">len</span>(H)</span><br><span class="line">    bt = [<span class="number">1</span>] * N</span><br><span class="line">    beta = [bt]</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(T-<span class="number">2</span>, -<span class="number">1</span>, -<span class="number">1</span>):</span><br><span class="line">        bt = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">            <span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">                <span class="built_in">sum</span> += A[i][j]*B[j][S.index(X[t+<span class="number">1</span>])]*beta[<span class="number">0</span>][j]</span><br><span class="line">            bt.append(<span class="built_in">sum</span>)</span><br><span class="line">        beta.insert(<span class="number">0</span>, bt)</span><br><span class="line">    <span class="keyword">return</span> beta</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">beta = cal_beta(T, S, H, A, B, pi)</span><br><span class="line"><span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(T):</span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> beta[t]:</span><br><span class="line">        print(<span class="string">&quot;&#123;:.15f&#125; &quot;</span>.<span class="built_in">format</span>(p), end = <span class="string">&quot;&quot;</span>)</span><br><span class="line">    print()</span><br></pre></td></tr></table></figure>
+<pre><code>0.001523984431183 0.001898572783199 0.001631730619454 0.001940679517304 
+0.002862946700712 0.005079948103944 0.003497930424029 0.004258903529088 
+0.012940968952800 0.004089923858160 0.011210009860800 0.006535421510400 
+0.007720551720000 0.018487098504000 0.010470861072000 0.016760061888000 
+0.031171644000000 0.025735172400000 0.032884171200000 0.030761001600000 
+0.038173800000000 0.103905480000000 0.047640720000000 0.085064640000000 
+0.198940000000000 0.127246000000000 0.176344000000000 0.134880000000000 
+0.301000000000000 0.284200000000000 0.293200000000000 0.268800000000000 
+0.700000000000000 0.430000000000000 0.640000000000000 0.480000000000000 
+1.000000000000000 1.000000000000000 1.000000000000000 1.000000000000000 
+</code></pre><h3 id="前后向算法"><a href="#前后向算法" class="headerlink" title="前后向算法"></a>前后向算法</h3><p>结合前向和后向概率，对于中间的 $\mathbf x_t$ 前面用前向算法，后面用后向算法。</p>
+<script type="math/tex; mode=display">\begin{aligned}
+P(\mathbf X|\lambda)=&P(\mathbf x_1,\dots,\mathbf x_t,\mathbf x_{t+1},\dots,\mathbf x_T|\lambda)\\
+=&\sum_{i=1}^N P(\mathbf x_1,\dots,\mathbf x_t,\mathbf x_{t+1},\dots,\mathbf x_T,\mathbf z_t=\mathbf h_i|\lambda)\\
+=&\sum_{i=1}^N P(\mathbf x_1,\dots,\mathbf x_t,\mathbf z_t=\mathbf h_i|\lambda)P(\mathbf x_{t+1},\dots,\mathbf x_T|\mathbf z_{t}=\mathbf h_i,\lambda)\\
+=&\sum_{i=1}^N \alpha_t(i)\beta_{t}(i) 
+\end{aligned}</script><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">forword_backword</span>(<span class="params">alpha, beta, t, T, S, H, A, B, pi</span>):</span></span><br><span class="line">    <span class="keyword">if</span> t &lt; <span class="number">0</span> <span class="keyword">or</span> t &gt;= T:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">    N = <span class="built_in">len</span>(H)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">        <span class="built_in">sum</span> += alpha[t][i]*beta[t][i]</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">sum</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(T):</span><br><span class="line">    print(<span class="string">&quot;&#123;:2d&#125;&quot;</span>.<span class="built_in">format</span>(t), <span class="string">&quot;&#123;:.15f&#125;&quot;</span>.<span class="built_in">format</span>(forword_backword(alpha, beta, t, T, S, H, A, B, pi)))</span><br></pre></td></tr></table></figure>
+<pre><code> 0 0.000800581614381
+ 1 0.000800581614381
+ 2 0.000800581614381
+ 3 0.000800581614381
+ 4 0.000800581614381
+ 5 0.000800581614381
+ 6 0.000800581614381
+ 7 0.000800581614381
+ 8 0.000800581614381
+ 9 0.000800581614381
+</code></pre><h3 id="有什么用"><a href="#有什么用" class="headerlink" title="有什么用"></a>有什么用</h3><p>不论 $t$ 的取值是什么，最后算出来的观测概率都是一样的。为什么要大费周章算第 $t$ 个观测的情况，这里埋个伏笔。</p>
+<h2 id="预测问题"><a href="#预测问题" class="headerlink" title="预测问题"></a>预测问题</h2><p>输入：$\mathbf X,\lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$<br>输出：$\mathbf Z$</p>
+<p>在上面DP的过程中，记录第 $t$ 层的第 $i$ 个状态是前一层哪一个转移过来的，可以得到最优路径。</p>
+<h3 id="Viterbi算法"><a href="#Viterbi算法" class="headerlink" title="Viterbi算法"></a>Viterbi算法</h3><p>一开始我以为 Viterbi 算法和前向算法是一个东西，第 $t$ 层的每个节点都计算了从第 $t-1$ 层过来的所有概率之和。<br>实际上 Viterbi 算的不是和，而是从 $t-1$ 层过来的 $N$ 个概率的最大值。<br>前向算法好比是算最大流，$\alpha_t(i)$ 是第 $t$ 个时刻经过节点 $\mathbf h_i$ 的所有的可能。<br>Viterbi算法好比是求最短路，第 $t$ 个时刻经过节点 $\mathbf h_i$ 的路径有好多条，只需要选择其中概率最大的一条。  </p>
+<script type="math/tex; mode=display">\sigma_t(i)=\begin{cases}
+&\pi_i b_{ik}&\text{t=1}\\
+&\left(\max\limits_{1\leq j\leq N} \sigma_{t-1}(j)a_{ji}\right)b_{ik} &\text{t>1}
+\end{cases} ~~~~~~~~k=findindex(\mathbf x_{t})</script><p>在计算最值的过程中，同时记录了转移到第 $t$ 个时刻节点 $\mathbf h_i$ 的上一层节点的标号。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">viterbi</span>(<span class="params">T, S, H, A, B, pi, X</span>):</span></span><br><span class="line">    N = <span class="built_in">len</span>(H)</span><br><span class="line">    sg = []</span><br><span class="line">    parent = [<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">        sg.append(pi[i]*B[i][S.index(X[<span class="number">0</span>])])</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, T):</span><br><span class="line">        sigma = sg</span><br><span class="line">        sg = []</span><br><span class="line">        pt = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">            maxindex, maxvalue = [-<span class="number">1</span>, <span class="number">0</span>]</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">                <span class="keyword">if</span> sigma[j]*A[j][i] &gt; maxvalue:</span><br><span class="line">                    maxvalue = sigma[j]*A[j][i]</span><br><span class="line">                    maxindex = j</span><br><span class="line">            sg.append(maxvalue*B[i][S.index(X[t])])</span><br><span class="line">            pt.append(maxindex)</span><br><span class="line">        parent.append(pt)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">        maxindex, maxvalue = [-<span class="number">1</span>, <span class="number">0</span>]</span><br><span class="line">        <span class="keyword">if</span> sigma[i] &gt; maxvalue:</span><br><span class="line">            maxvalue = sigma[i]</span><br><span class="line">            maxindex = i</span><br><span class="line">    parent.append(maxindex)</span><br><span class="line">    <span class="keyword">return</span> parent</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_solution</span>(<span class="params">parent, T</span>):</span></span><br><span class="line">    ind = [parent[T]]</span><br><span class="line">    ret = [H[ind[<span class="number">0</span>]]]</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(T-<span class="number">1</span>, <span class="number">0</span>, -<span class="number">1</span>):</span><br><span class="line">        p = parent[t][ind[<span class="number">0</span>]]</span><br><span class="line">        ind.insert(<span class="number">0</span>, p)</span><br><span class="line">        ret.insert(<span class="number">0</span>, H[p])</span><br><span class="line">    <span class="keyword">return</span> ret</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">parent = viterbi(T, S, H, A, B, pi, X)</span><br><span class="line">result = get_solution(parent, T)</span><br><span class="line">print(<span class="string">&#x27;X:   &#x27;</span>, X)</span><br><span class="line">print(<span class="string">&#x27;true Z: &#x27;</span>, Z)</span><br><span class="line">print(<span class="string">&#x27;viterbi:&#x27;</span>, result)</span><br><span class="line"></span><br><span class="line">y = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(Z)):</span><br><span class="line">    <span class="keyword">if</span> Z[i] == result[i]: y += <span class="number">1</span></span><br><span class="line">print(<span class="string">&#x27;YES: &#x27;</span>, y, <span class="string">&#x27;   NO: &#x27;</span>, <span class="built_in">len</span>(Z)-y)</span><br></pre></td></tr></table></figure>
+<pre><code>X:    [&#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;]
+true Z:  [&#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;]
+viterbi: [&#39;box1&#39;, &#39;box2&#39;, &#39;box1&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;]
+YES:  7    NO:  3
+</code></pre><p>错误率很高，准不准看心情。看来生成同一个观测的隐序列有好多条，概率大的那条和真实的那条，并不能保证更加重合。</p>
+<h3 id="预测缺失"><a href="#预测缺失" class="headerlink" title="预测缺失"></a>预测缺失</h3><p>输入：$\mathbf x_1,\dots,\mathbf x_{t-1},\mathbf x_{t+1},\dots,\mathbf x_{T},\lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$<br>输出：$\mathbf x_t$</p>
+<script type="math/tex; mode=display">\begin{aligned}
+\theta=&\arg\max_k P(\mathbf x_t=\mathbf s_k|\mathbf x_1,\dots,\mathbf x_{t-1},\mathbf x_{t+1},\dots,\mathbf x_{T},\lambda)\\
+=&\arg\max_k {P(\mathbf X|\lambda)\over P(\mathbf x_1,\dots,\mathbf x_{t-1},\mathbf x_{t+1},\dots,\mathbf x_{T}|\lambda)}~~~~~~~~\mathbf x_t=\mathbf s_k\\
+=&\arg\max_k {P(\mathbf X|\lambda)\over \sum_{i=1}^N \sum_{j=1}^N P(\mathbf x_1,\dots,\mathbf x_{t-1},\mathbf z_{t-1}=\mathbf h_i)P(\mathbf z_t=\mathbf h_j|\mathbf z_{t-1}=\mathbf h_i)P(\mathbf x_{t+1},\dots,\mathbf x_{T}|\mathbf z_t=\mathbf h_j,\lambda)}\\
+=&\arg\max_k {\sum_{i=1}^N \alpha_t(i)\beta_{t}(i)\over \sum_{i=1}^N \sum_{j=1}^N \alpha_{t-1}(i)a_{ij}\beta_t(j)}~~~~~~~~\mathbf x_t=\mathbf s_k\\
+=&\arg\max_k \sum_{i=1}^N \alpha_t(i)\beta_{t}(i)~~~~~~~~\mathbf x_t=\mathbf s_k\\
+\mathbf x_t=&\mathbf s_\theta
+\end{aligned}</script><p>先计算出所有的 $\alpha,\beta,$复杂度为$O(TN^2)$，再根据 $\mathbf x_t=\mathbf s_k$ 更新出 $\alpha_t(i)$，复杂度为$O(N^2)$。$\beta_t(i)$ 不受 $\mathbf x_t$ 的影响，故不用更新。</p>
+<p>分母是对两个隐变量进行积分。隐变量多一个，复杂度就要乘 $N$，尽量让隐变量越少越好。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">normalization</span>(<span class="params">distribution</span>):</span></span><br><span class="line">    <span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> x <span class="keyword">in</span> distribution:</span><br><span class="line">        <span class="built_in">sum</span> += x</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">sum</span> == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> distribution</span><br><span class="line">    ret = []</span><br><span class="line">    <span class="keyword">for</span> x <span class="keyword">in</span> distribution:</span><br><span class="line">        ret.append(x/<span class="built_in">sum</span>)</span><br><span class="line">    <span class="keyword">return</span> ret</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">predict</span>(<span class="params">T, S, H, A, B, pi, X, t</span>):</span></span><br><span class="line">    alpha = cal_alpha(T, S, H, A, B, pi)</span><br><span class="line">    beta = cal_beta(T, S, H, A, B, pi)</span><br><span class="line">    N = <span class="built_in">len</span>(H)</span><br><span class="line">    pd = []</span><br><span class="line">    <span class="keyword">for</span> sk <span class="keyword">in</span> S:</span><br><span class="line">        X[t] = sk</span><br><span class="line">        <span class="keyword">if</span> t == <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">                alpha[<span class="number">0</span>][i] = pi[i]*B[i][S.index(X[<span class="number">0</span>])]</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">                alpha[t][i] = <span class="number">0</span></span><br><span class="line">                <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">                    alpha[t][i] += alpha[t-<span class="number">1</span>][j]*A[j][i]</span><br><span class="line">                alpha[t][i] *= B[i][S.index(X[t])]</span><br><span class="line">        pd.append(forword_backword(alpha, beta, t, T, S, H, A, B, pi))</span><br><span class="line">    print(pd)</span><br><span class="line">    print(<span class="string">&#x27;after normalization: &#x27;</span>, normalization(pd))</span><br><span class="line">    theta = pd.index(<span class="built_in">max</span>(pd))</span><br><span class="line">    <span class="keyword">return</span> S[theta]</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">t = <span class="number">0</span></span><br><span class="line">xt = predict(T, S, H, A, B, pi, X, t)</span><br><span class="line">print(X)</span><br><span class="line">print(<span class="string">&#x27;Truth: &#x27;</span>, X[t], <span class="string">&#x27;       Result: &#x27;</span>, xt)</span><br></pre></td></tr></table></figure>
+<pre><code>[0.0008005816143812111, 0.0008919719706016694]
+after normalization:  [0.47300222662628943, 0.5269977733737106]
+[&#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;]
+Truth:  white        Result:  white
+</code></pre><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">t = <span class="built_in">int</span>(T/<span class="number">2</span>)</span><br><span class="line">xt = predict(T, S, H, A, B, pi, X, t)</span><br><span class="line">print(X)</span><br><span class="line">print(<span class="string">&#x27;Truth: &#x27;</span>, X[t], <span class="string">&#x27;       Result: &#x27;</span>, xt)</span><br></pre></td></tr></table></figure>
+<pre><code>[0.0008919719706016694, 0.0013705471229141035]
+after normalization:  [0.3942384279354817, 0.6057615720645183]
+[&#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;]
+Truth:  white        Result:  white
+</code></pre><p>对 $M$ 个结果归一化，若概率比较接近，则结果比较不准确。概率差的越多越准。</p>
+<h2 id="学习问题"><a href="#学习问题" class="headerlink" title="学习问题"></a>学习问题</h2><p>输入：$\mathbf X$<br>输出：$\lambda=(\mathbf A, \mathbf B, \mathbf \Pi)$</p>
+<p>常规用监督学习的样本来估计出参数，但标注费用比较高，因此用非监督的学习方法来做。  </p>
+<p>借助：$P(\mathbf X|\lambda)$用最大似然估计参数，EM算法计算参数。</p>
+<h3 id="Baum-Welch模型"><a href="#Baum-Welch模型" class="headerlink" title="Baum-Welch模型"></a>Baum-Welch模型</h3><p>记给定观测和参数下的 $\mathbf z_t=\mathbf h_i$ 的概率</p>
+<script type="math/tex; mode=display">\gamma_t(i)=P(\mathbf z_t=\mathbf h_i|\mathbf X, \lambda)={P(\mathbf z_t=\mathbf h_i,\mathbf X|\lambda)\over P(\mathbf X|\lambda)}=
+{\alpha_t(i)\beta_{t}(i)\over \sum_{i=1}^N \alpha_t(i)\beta_{t}(i) }</script><p>记给定观测和参数下的 $\mathbf z_t=\mathbf h_i,\mathbf z_{t+1}=\mathbf h_j$ 的概率</p>
+<script type="math/tex; mode=display">\xi_t(i,j)=P(\mathbf z_t=\mathbf h_i,\mathbf z_{t+1}=\mathbf h_j|\mathbf X, \lambda)={P(\mathbf z_t=\mathbf h_i,\mathbf z_{t+1}=\mathbf h_j,\mathbf X|\lambda)\over P(\mathbf X|\lambda)}=
+{\alpha_t(i)a_{ij}b_{jk}\beta_{t+1}(j)\over \sum_{i=1}^N \alpha_t(i)\beta_{t}(i) }\\
+k=findindex(\mathbf x_{t+1})</script><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cal_gamma</span>(<span class="params">T, S, H, A, B, pi, alpha, beta</span>):</span></span><br><span class="line">    N = <span class="built_in">len</span>(H)</span><br><span class="line">    gamma = []</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(T):</span><br><span class="line">        d = forword_backword(alpha, beta, t, T, S, H, A, B, pi)</span><br><span class="line">        gm = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">            gm.append(alpha[t][i]*beta[t][i]/d)</span><br><span class="line">        gamma.append(gm)</span><br><span class="line">    <span class="keyword">return</span> gamma</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cal_xi</span>(<span class="params">T, S, H, A, B, pi, alpha, beta</span>):</span></span><br><span class="line">    N = <span class="built_in">len</span>(H)</span><br><span class="line">    xi = []</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(T-<span class="number">1</span>):</span><br><span class="line">        d = forword_backword(alpha, beta, t, T, S, H, A, B, pi)</span><br><span class="line">        tx = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">            ty = []</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">                ty.append(alpha[t][i]*A[i][j]*B[j][S.index(X[t+<span class="number">1</span>])]*beta[t+<span class="number">1</span>][j]/d)</span><br><span class="line">            tx.append(ty)</span><br><span class="line">        xi.append(tx)</span><br><span class="line">    <span class="keyword">return</span> xi</span><br></pre></td></tr></table></figure>
+<p>算法步骤：</p>
+<ol>
+<li>初始化模型参数 $\lambda=(\mathbf A^{(0)}, \mathbf B^{(0)}, \mathbf \Pi^{(0)})$  </li>
+<li>递推<script type="math/tex; mode=display">\begin{aligned}
+a_{ij}^{(n)}&={\sum_{t=1}^{T-1}\xi_t(i,j) \over \sum_{t=1}^{T-1}\gamma_t(i)}\\
+b_{jk}^{(n)}&={\sum_{t=1}^{T}\gamma_t(j)[\mathbf x_t==\mathbf s_k] \over \sum_{t=1}^{T}\gamma_t(j)}\\
+\pi_i^{(n)}&=\gamma_1(i)
+\end{aligned}</script></li>
+<li>反复迭代直到结束。</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">BaumWelch</span>(<span class="params">T, S, H, A, B, pi, X</span>):</span></span><br><span class="line">    alpha = cal_alpha(T, S, H, A, B, pi)</span><br><span class="line">    beta = cal_beta(T, S, H, A, B, pi)</span><br><span class="line">    gamma = cal_gamma(T, S, H, A, B, pi, alpha, beta)</span><br><span class="line">    xi = cal_xi(T, S, H, A, B, pi, alpha, beta)</span><br><span class="line">    N = <span class="built_in">len</span>(H)</span><br><span class="line">    M = <span class="built_in">len</span>(S)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">        pi[i] = gamma[<span class="number">0</span>][i]</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">            a = <span class="number">0</span></span><br><span class="line">            b = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(T-<span class="number">1</span>):</span><br><span class="line">                a += xi[t][i][j]</span><br><span class="line">                b += gamma[t][i]</span><br><span class="line">            A[i][j] = a / b</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">        <span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(M):</span><br><span class="line">            c = <span class="number">0</span></span><br><span class="line">            d = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> t <span class="keyword">in</span> <span class="built_in">range</span>(T):</span><br><span class="line">                <span class="keyword">if</span> X[t] == S[k]: c += gamma[t][j]</span><br><span class="line">                d += gamma[t][j]</span><br><span class="line">            B[j][k] = c / d</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">T = <span class="number">100</span></span><br><span class="line">S = [<span class="string">&#x27;red&#x27;</span>, <span class="string">&#x27;white&#x27;</span>]</span><br><span class="line">H = [<span class="string">&#x27;box1&#x27;</span>, <span class="string">&#x27;box2&#x27;</span>, <span class="string">&#x27;box3&#x27;</span>, <span class="string">&#x27;box4&#x27;</span>]</span><br><span class="line">A = [</span><br><span class="line">    [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0.3</span>, <span class="number">0</span>, <span class="number">0.7</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0.4</span>, <span class="number">0</span>, <span class="number">0.6</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0.6</span>, <span class="number">0.4</span>]</span><br><span class="line">]</span><br><span class="line">B = [</span><br><span class="line">    [<span class="number">0.5</span>, <span class="number">0.5</span>],</span><br><span class="line">    [<span class="number">0.3</span>, <span class="number">0.7</span>],</span><br><span class="line">    [<span class="number">0.6</span>, <span class="number">0.4</span>],</span><br><span class="line">    [<span class="number">0.4</span>, <span class="number">0.6</span>]</span><br><span class="line">]</span><br><span class="line">pi = [<span class="number">0.4</span>, <span class="number">0.1</span>, <span class="number">0.25</span>, <span class="number">0.25</span>]</span><br><span class="line">Z, X = observation(T, S, H, A, B, pi)</span><br><span class="line">print(Z)</span><br><span class="line">print(X)</span><br></pre></td></tr></table></figure>
+<pre><code>[&#39;box2&#39;, &#39;box1&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box1&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box1&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box1&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box2&#39;, &#39;box1&#39;, &#39;box2&#39;, &#39;box1&#39;, &#39;box2&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;, &#39;box3&#39;, &#39;box4&#39;]
+[&#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;red&#39;, &#39;red&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;, &#39;red&#39;, &#39;white&#39;]
+</code></pre><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">N = <span class="built_in">len</span>(H)</span><br><span class="line">M = <span class="built_in">len</span>(S)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">    pi[i] = <span class="number">1</span>/N</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">        A[i][j] = <span class="number">1.0</span>/N</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(M):</span><br><span class="line">        B[i][j] = <span class="number">1.0</span>/M</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> n <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    BaumWelch(T, S, H, A, B, pi, X)</span><br><span class="line">print(<span class="string">&#x27;A = &#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> a <span class="keyword">in</span> A: print(a)</span><br><span class="line">print(<span class="string">&#x27;B = &#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> a <span class="keyword">in</span> B: print(a)</span><br><span class="line">print(<span class="string">&#x27;pi = &#x27;</span>, pi)    </span><br></pre></td></tr></table></figure>
+<pre><code>A = 
+[0.25, 0.25, 0.25, 0.25]
+[0.25, 0.25, 0.25, 0.25]
+[0.25, 0.25, 0.25, 0.25]
+[0.25, 0.25, 0.25, 0.25]
+B = 
+[0.49, 0.51]
+[0.49, 0.51]
+[0.49, 0.51]
+[0.49, 0.51]
+pi =  [0.25, 0.25, 0.25, 0.25]
+</code></pre><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">A = [</span><br><span class="line">    [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0.3</span>, <span class="number">0</span>, <span class="number">0.7</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0.4</span>, <span class="number">0</span>, <span class="number">0.6</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0.6</span>, <span class="number">0.4</span>]</span><br><span class="line">]</span><br><span class="line">B = [</span><br><span class="line">    [<span class="number">0.5</span>, <span class="number">0.5</span>],</span><br><span class="line">    [<span class="number">0.3</span>, <span class="number">0.7</span>],</span><br><span class="line">    [<span class="number">0.6</span>, <span class="number">0.4</span>],</span><br><span class="line">    [<span class="number">0.4</span>, <span class="number">0.6</span>]</span><br><span class="line">]</span><br><span class="line">pi = [<span class="number">0.4</span>, <span class="number">0.1</span>, <span class="number">0.25</span>, <span class="number">0.25</span>]</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> n <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    BaumWelch(T, S, H, A, B, pi, X)</span><br><span class="line">print(<span class="string">&#x27;A = &#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> a <span class="keyword">in</span> A: print(a)</span><br><span class="line">print(<span class="string">&#x27;B = &#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> a <span class="keyword">in</span> B: print(a)</span><br><span class="line">print(<span class="string">&#x27;pi = &#x27;</span>, pi)    </span><br></pre></td></tr></table></figure>
+<pre><code>A = 
+[0.0, 1.0, 0.0, 0.0]
+[0.24846367821110096, 0.0, 0.7515363217888992, 0.0]
+[0.0, 0.2933646349456608, 0.0, 0.7066353650543393]
+[0.0, 0.0, 0.3315243870373437, 0.6684756129626561]
+B = 
+[0.009243586459035613, 0.990756413540964]
+[0.002343559403560941, 0.9976564405964387]
+[0.8930977369597577, 0.10690226304024238]
+[0.4123984323282614, 0.5876015676717384]
+pi =  [5.000125928515478e-158, 2.953264517100414e-70, 5.776557121141218e-18, 1.0]
+</code></pre><h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><ul>
+<li>viterbi和学习参数效果挺差的，看点相关论文学习优化</li>
+<li>老板说要结合多视角啊</li>
+<li>BW算法推导的地方有空再补上</li>
+</ul>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/HMM/"># HMM</a>
+                    
+                        <a href="/tag/EM/"># EM</a>
+                    
+                        <a href="/tag/mathjax/"># mathjax</a>
+                    
+                        <a href="/tag/Viterbi/"># Viterbi</a>
+                    
+                        <a href="/tag/%E6%8E%A8%E5%85%AC%E5%BC%8F%E5%90%97%E4%BA%B2/"># 推公式吗亲</a>
+                    
+                        <a href="/tag/Baum-Welch/"># Baum-Welch</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2018/10/Nature-What-is-Hidden-Markov-Model/">HMM 的应用之基因检测</a>
+            
+            
+            <a class="next" rel="next" href="/2018/09/test-equation/">test equation</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

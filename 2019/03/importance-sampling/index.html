@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>重要性采样 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">重要性采样</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/Bayesian-Inference/">Bayesian Inference</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/sampling/">sampling</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2019/03/importance-sampling/" class="leancloud_visitors" data-flag-title="重要性采样">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/PRML/">PRML</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">03/21, 2019</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="采样"><a href="#采样" class="headerlink" title="采样"></a>采样</h2><p>求期望原本是个数学推导的过程。如果数学不好，推不出答案；或者问题压根没有闭式解，怎么样才能得到一个近似的结果呢？采样就可以做到。</p>
+<p>采样，即人为地产生一些数据，使之服从目标分布。最简单的，如果想产生均匀分布，之间 <code>rand() % MAXSIZE</code> 就均匀地产生了 <code>[0, MAXSIZE)</code> 的随机数。</p>
+<p>如果现在有一个任意的概率密度 $p(x)$，那怎么采样呢？比较一般的想法是，先求出 CDF，即积分得到分布函数 $F(x)$。它的值域一定在 $[0, 1]$。那我们从值域上均匀采样，再通过反函数求到对应的 $x=F^{-1}(y)$，也就能成功采样了。</p>
+<p><img src="sample.png" alt="sample"></p>
+<p>学会了采样，求 $\mathbb{E}[f(x)]$ 就更加简单了：</p>
+<script type="math/tex; mode=display">
+\mathbb{E}[f(x)] = \int_x f(x) p(x)dx = {1\over N}\sum_{x\sim p} f(x) = \overline {f(x)}</script><p>即采样出服从 $p$ 的 $N$ 个 $x$，计算相应的 $f(x)$，再求平均。根据大数定理，平均值就是期望。</p>
+<h2 id="重要性采样"><a href="#重要性采样" class="headerlink" title="重要性采样"></a>重要性采样</h2><p>刚才的采样有一个非常重要的前提条件，那就是 CDF 可求，且可逆。如果遇到不会积分，分段函数，或者奇奇怪怪的情况，都会使得原来的做法太困难。</p>
+<p>因此我们假设有一个我们易于掌控的概率函数 $q(x)$，它的 CDF 可求，且可逆，将原式化成：</p>
+<script type="math/tex; mode=display">
+\mathbb{E}[f(x)]=\int_{x}\frac{p(x)}{q(x)} f(x)  q(x)d x
+= {1\over N}\sum_{x\sim q} \frac{p(x)}{q(x)} f(x) = \overline {w(x) f(x)}</script><p>其中$w(x)=\frac{p(x)}{q(x)}$。即采样出服从 $q$ 的 $N$ 个 $x$，计算相应的 $w(x)f(x)$，再求平均。</p>
+<p>根据大数定理，平均值就是期望。</p>
+<h2 id="贝叶斯推理"><a href="#贝叶斯推理" class="headerlink" title="贝叶斯推理"></a>贝叶斯推理</h2><p>在机器学习中，如果可以求出参数的期望，那么训练也就完成了。</p>
+<script type="math/tex; mode=display">
+\mathbb{E}[\theta]=\int_{\theta|X}\theta~p(\theta|X) d\theta</script><p>由于 </p>
+<script type="math/tex; mode=display">
+p(\theta|X) = {p(X|\theta) p(\theta)\over p(X)}\propto p(X|\theta) p(\theta)</script><p>我们通过 $p(X|\theta) p(\theta)$ 计算得到的 $p’$ 积分不为 1，而是一个难以计算的常数。真正的后验是$p$。设 $C = \int_{\theta} p’ d\theta$，$p=p’/C$ 。</p>
+<p>再通过重要性采样时，$\tilde w={p’\over q}=C{p\over q}$，一般地我们可以改写上面重要性采样的公式：</p>
+<script type="math/tex; mode=display">\begin{eqnarray}
+\mathbb{E}[f(x)]&=&\int_x f(x) p(x)dx
+=\int_{x} \frac{p'(x)}{C q(x)} f(x) q(x) d x \\
+&=& {1\over C}{1\over N}\sum_{x\sim q} \frac{p'(x)}{q(x)} f(x)
+= {1\over C}\overline {\tilde w(x) f(x)}
+\end{eqnarray}</script><p>C 同样可以采样得到：</p>
+<script type="math/tex; mode=display">
+C = \int_x p'(x) dx = \int_x {p'(x)\over q(x)} q(x) dx = {1\over N}\sum_{x\sim q} {p'(x)\over q(x)} = \overline{\tilde w(x)}</script><p>因此</p>
+<script type="math/tex; mode=display">
+\mathbb{E}[f(x)] = {\overline {\tilde w(x) f(x)}\over \overline{\tilde w(x)}}</script><p>回到贝叶斯</p>
+<blockquote>
+<script type="math/tex; mode=display">f(\theta) \leftarrow \theta</script><script type="math/tex; mode=display">\tilde w(\theta) \leftarrow {p(X|\theta) p(\theta)\over q(\theta|X)}</script></blockquote>
+<p>$p(X|\theta)$ 是模型假设；$p(\theta)$ 和 $q(\theta)$ 是形式相同的两个分布。$q$ 可能会根据输入数据的特性来调整。</p>
+<p>参见下面的例子：</p>
+<p><img src="example.png" alt="example"></p>
+<h2 id="避免溢出下界"><a href="#避免溢出下界" class="headerlink" title="避免溢出下界"></a>避免溢出下界</h2><p>可以先求对数，等需要的时候再算指数。</p>
+<p>另一方面，在求平均数之前，势必已经算出了各个数字。如果每个数字都除掉了最大数，那么在最后的式子里不受影响。</p>
+<script type="math/tex; mode=display">
+\mathbb{E}[f(x)] = {\overline {\exp(\log\tilde w(x)-M) f(x)} \over \overline{\exp(\log\tilde w(x)-M) }}</script><script type="math/tex; mode=display">M = max(\log\tilde w(x))</script><h2 id="q-的选取"><a href="#q-的选取" class="headerlink" title="q 的选取"></a>q 的选取</h2><p>$q$ 在 $p$ 高密度的地方也要尽量高密度，这样才能真实还原数据的性质。</p>
+<p>我看的几个 exerise 里面 $q$ 都取和先验一样的形式。一般以 ESS 来衡量其稳定性：</p>
+<script type="math/tex; mode=display">
+E S S=\sqrt{\frac{1}{N} \sum_{i=1}^{N}\left(\frac{\tilde{w}\left(X_{i}\right)}{\overline{w}}-1\right)^{2}}</script><p>当 $q$ 本身的方差在合理的范围内，ESS 才会比较小。下图 c 衡量了方差。</p>
+<p><img src="ESS-q.png" alt="ESS-q"></p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a target="_blank" rel="noopener" href="http://dept.stat.lsa.umich.edu/~jasoneg/Stat406/lab7.pdf">Importance Sampling</a></p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/Bayesian-Inference/"># Bayesian Inference</a>
+                    
+                        <a href="/tag/sampling/"># sampling</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/05/HMM-VAE/">HMM-VAE</a>
+            
+            
+            <a class="next" rel="next" href="/2019/01/python-exception/">Python 异常与断言</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>Latent Normalizing Flows for Discrete Sequences | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Latent Normalizing Flows for Discrete Sequences</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">论文阅读</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/">序列模型</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/ICML/">ICML</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E8%A7%84%E8%8C%83%E5%8C%96%E6%B5%81/">规范化流</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Autoregressive/">Autoregressive</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2019/12/latent-normalizing-flows/" class="leancloud_visitors" data-flag-title="Latent Normalizing Flows for Discrete Sequences">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/PRML/">PRML</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">12/19, 2019</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>规范化流 （Normalizing Flows, NF）在连续随机变量的建模上是个非常有用的一类模型，优点有：较强的模型灵活性；可用于非自回归（non-autoregressive）生成任务中。但是要把连续变量换成离散变量，仍有一些挑战。</p>
+<h2 id="Main-Points-Latent-Flows-for-Discrete-Sequence"><a href="#Main-Points-Latent-Flows-for-Discrete-Sequence" class="headerlink" title="Main Points: Latent Flows for Discrete Sequence"></a>Main Points: Latent Flows for Discrete Sequence</h2><p>这篇论文主要提出了一种用于离散变量序列的隐变量模型，它可以从连续分布中学习得到一个基于 <code>NF</code> 的隐层分布用以描述离散变量。关于这个隐层的分布可以设置不同的先验，保证模型的灵活性。</p>
+<h3 id="Basic-Normalizing-Flows-Blocks"><a href="#Basic-Normalizing-Flows-Blocks" class="headerlink" title="Basic Normalizing Flows Blocks"></a>Basic Normalizing Flows Blocks</h3><p>规范化流用于建模隐层的联合分布 $p(Z)$. 在一些任务中 $Z$ 未必是隐层，也有可能是实际的观测。Anyway，有一个比 $Z$ 还要更上一层的 $\epsilon$ 用于更为抽象的表示，并建模关系 $f_{\theta}: \epsilon \rightarrow Z$. 这意味着，当 $\epsilon$ 从一个简单的分布 $p(\epsilon)$ 采样时，可以通过这层映射关系得到 $z$，即 $z = f_{\theta}(\epsilon)$. </p>
+<p>由于两者积分都为 1，因此两者相互变化时满足一个恒等式</p>
+<script type="math/tex; mode=display">
+p_{Z}(z)=p_{\epsilon}\left(f_{\theta}^{-1}(z)\right)\left|\operatorname{det} \frac{\partial f_{\theta}^{-1}(z)}{\partial z}\right|.</script><p>这个恒等式意味着两个随机变量的概率转化在行列式可算的情况下将非常简单。当雅可比矩阵是三角矩阵时，行列式将是线性可算的。如何构造三角矩阵呢？有以下几种方法：</p>
+<p><img src="latent-normalizing-flows-for-discrete-sequences/fig1_block.png" alt=""></p>
+<ul>
+<li>Autoregressive Flow (AF)</li>
+</ul>
+<p>$z_t$ 与 $z_{&lt;t}$ 之间有依赖关系（自回归模型，<code>autoregressive</code>），导致 $z$ 的产生必须是串行的。这导致在采样（<code>sampling</code>）的过程中计算比较缓慢。而反之，在估计（<code>evaluation</code>）的过程中，$\epsilon$ 之间并没有相互依赖的关系，因此可以并行计算。</p>
+<p>这里的映射关系考虑地也相对简单，是线性的表达式。</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+f_{\theta}(\boldsymbol{\epsilon})_{d}=z_{d} &=a\left(\boldsymbol{z}_{<d} ; \theta\right)+b\left(\boldsymbol{z}_{<d} ; \theta\right) \cdot \epsilon_{d} \\
+f_{\theta}^{-1}(\boldsymbol{z})_{d} &=\epsilon_{d}=\frac{z_{d}-a(\boldsymbol{z}<d ; \theta)}{b(\boldsymbol{z}<d ; \theta)} 
+\end{aligned}</script><ul>
+<li>Inverse Autoregressive Flow (IAF)</li>
+</ul>
+<p>有一种简单的想法，就是把依赖关系搬到 $\epsilon$ 上，那么和 AF 相反，在采样时可以并行，而在估计时需要串行。</p>
+<script type="math/tex; mode=display">
+\begin{aligned} f_{\theta}(\epsilon)_{d}=z_{d} &=a\left(\epsilon_{<d} ; \theta\right)+b\left(\epsilon_{<d} ; \theta\right) \cdot \epsilon_{d} \\ f_{\theta}^{-1}(z)_{d} &=\epsilon_{d}=\frac{z_{d}-a\left(\epsilon_{<d} ; \theta\right)}{b\left(\epsilon_{<d} ; \theta\right)} \end{aligned}</script><ul>
+<li>Split Coupling Flow</li>
+</ul>
+<p>为了更好的并行化，可以抽出一部分 $z$ 形成一个集合 $S$，未被抽到的组成集合 $\bar S$，并让 $S$ 中的所有变量去影响 $\bar S$ 中的每一个变量形成，而 $\bar S$ 之间并不相互影响。那么对于所有 $\bar S$ 中的元素而言，其采样是可以并行的。与此同时，反向的估计也是并行的。</p>
+<script type="math/tex; mode=display">
+\begin{aligned} f_{\theta}(\epsilon)_{d}=z_{d} &=a\left(z_{\mathcal{S}} ; \theta\right)+b\left(z_{\mathcal{S}} ; \theta\right) \cdot \epsilon_{d} \\
+f_{\theta}^{-1}(z)_{d} &=\epsilon_{d}=\frac{z_{d}-a\left(z_{\mathcal{S}} ; \theta\right)}{b\left(z_{\mathcal{S}} ; \theta\right)} \end{aligned}</script><p>但是它的缺点也很明显。$z_t$ 不必再依赖于 $z_{&lt;t}$，即此时的模型不再是一个自回归模型（ <code>non-autoregressive</code> ）。由于没用建模时序之间的依赖关系，最终的损失也会比较高。</p>
+<ul>
+<li>Layers Flows</li>
+</ul>
+<p>组合 <code>SCF</code>，使得每一层使用的子集 $S$ 都有所不同。这样做使得多层之后 $z$ 之间可以相互关联。</p>
+<h4 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h4><p>前三个表达式相比，只有自变量发生了变化，映射的形式等保持不变。</p>
+<p>前两个方案虽然看起来差不多，但实际上前者在训练时损失更小。因为 IAF 没用考虑隐层转移的时序关系，因此在模型学习上存在一些缺陷。</p>
+<p>关于这三种构造方案是三角矩阵的证明可以参考附录。</p>
+<p>这三种方案将作为 Block 被用于隐层的构建，简写为 $f_{\mathrm{AF}}(\boldsymbol{\epsilon} ; \theta), f_{\mathrm{IAF}}(\boldsymbol{\epsilon} ; \theta),$ and $f_{\mathrm{SCF}}(\boldsymbol{\epsilon} ; \theta)$.</p>
+<h3 id="Generating-Discrete-Sequences"><a href="#Generating-Discrete-Sequences" class="headerlink" title="Generating Discrete Sequences"></a>Generating Discrete Sequences</h3><p>Latent NF 用到的模型如下，其中 <code>Flow Prior</code> 的内容将在后面展开。该图模型假设了观测之间是条件独立的。其时序关系用 $z$ 来建模。最后可以得到</p>
+<script type="math/tex; mode=display">
+p\left(\boldsymbol{x}_{1: T} | \boldsymbol{z}_{1: T}, T\right)=\prod_{t=1}^{T} p\left(x_{t} | \boldsymbol{z}_{1: T}, T\right)</script><p><img src="latent-normalizing-flows-for-discrete-sequences/fig2_generative_model.png" alt=""></p>
+<p>其中时序的长度为  $T$，隐空间大小为 $H$，意味着共有 $D=T\times H$ 的维度用于规范化流。</p>
+<h3 id="Criteria-for-Effective-Flow-Parameterization"><a href="#Criteria-for-Effective-Flow-Parameterization" class="headerlink" title="Criteria for Effective Flow Parameterization"></a>Criteria for Effective Flow Parameterization</h3><p>对于连续模型而言，提高模型的灵活性并不有助于在数据上更好地建模。</p>
+<p>对于离散模型而言，可以建模调整模态的位置和数目。</p>
+<p>这里引入 <code>multimodal</code> 这一概念，用以表示已知 $z_{&lt;t}$ 时 $p(z_t)$ 的多样性。下图即说明了在各个字符输入的过程中，$p\left(\boldsymbol{z}_{t} | \boldsymbol{z}_{&lt;t}\right)$ 的分布情况。在输入 s 时，有 <code>group</code>, <code>groups</code>两种情况，因此有两类。而到最后表示单词确定，因此只有一团。</p>
+<p><img src="latent-normalizing-flows-for-discrete-sequences/groups.png" alt=""></p>
+<h3 id="Flow-Architectures-for-Sequence-Dynamics"><a href="#Flow-Architectures-for-Sequence-Dynamics" class="headerlink" title="Flow Architectures for Sequence Dynamics"></a>Flow Architectures for Sequence Dynamics</h3><p>本模型的重点在于对 $D=T\times H$ 的维度做了两层处理。一是对于某一时刻而言，其内部进行维度为 $H$ 的规范化流 ( <code>NF in hidden</code> )。再对所有时刻的联合做一个维度为 $T$ 的规范化流 ( <code>NF in time</code> )。两者嵌套后，得到一个更为灵活的隐层先验。本文列举了以下三种嵌套的组合 ( <code>NF in time / NF in hidden</code> ):</p>
+<ul>
+<li><code>AF / AF</code></li>
+<li><code>AF / SCF</code></li>
+<li><code>IAF / SCF</code></li>
+</ul>
+<p><img src="latent-normalizing-flows-for-discrete-sequences/fig4_hidden_nf.png" alt=""></p>
+<p>以 <code>AF / SCF</code> 为例，其表达式为</p>
+<script type="math/tex; mode=display">
+z_{t}=f_{\mathrm{SCF}}\left(\epsilon_{t} ; z_{<t}, \theta\right), \quad \epsilon_{t}=f_{\mathrm{SCF}}^{-1}\left(z_{t} ; z_{<t}, \theta\right)</script><p>其中 $f_{SCF}$ 表示了映射的 <code>Block</code> 在一时刻的隐层内部是 <code>SCF</code> 类型的 <code>NF</code>，而从自变量的形式可知在所有时刻下，它是 <code>AF</code> 类型的 <code>NF</code>.</p>
+<h3 id="Results"><a href="#Results" class="headerlink" title="Results"></a>Results</h3><p>实验情况可以参考论文，总的来说加了隐层以后损失并没有比现有最好的模型小，而是大致与 <code>LSTM</code> 持平，表明在时序关系的建模上是靠谱的。但在长时依赖上，又显得力不足。</p>
+<p>在非自回归模型上，即使用了 <code>IAF</code>, <code>SCF</code> 的模型上，由于其可以完全并行，因此比部分并行的 <code>LSTM</code> 快出不少。</p>
+<h2 id="Inspiration"><a href="#Inspiration" class="headerlink" title="Inspiration"></a>Inspiration</h2><ol>
+<li>要与最新的论文比较，结果差了实在比不过就比点别的。（牺牲一点损失比速度，等等）</li>
+<li>规范化流可以用于隐层联合概率建模，在 <code>VAE</code> 的隐层上照样可用。</li>
+<li>对于时间序列而言，建模时序关系是相当重要的一环。这里用了 NF，LSTM 用了遗忘门，HMM用了转移矩阵，可以思考怎么样建立更好的转移关系。这样一比，HMM 的转移真的太朴素了……</li>
+</ol>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v97/ziegler19a.html">Latent Normalizing Flows for Discrete Sequences, ICML 2019</a></li>
+</ul>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/"># 论文阅读</a>
+                    
+                        <a href="/tag/%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/"># 序列模型</a>
+                    
+                        <a href="/tag/ICML/"># ICML</a>
+                    
+                        <a href="/tag/%E8%A7%84%E8%8C%83%E5%8C%96%E6%B5%81/"># 规范化流</a>
+                    
+                        <a href="/tag/Autoregressive/"># Autoregressive</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/12/vscode-tutorials/">万灵药 VS Code 的常用妙方之 LaTeX 写论文</a>
+            
+            
+            <a class="next" rel="next" href="/2019/11/exponential-family/">指数族分布</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

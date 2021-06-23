@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>Chic Theme Doc | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Chic Theme Doc</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/Hexo/">Hexo</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/theme/">theme</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Readme/">Readme</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2020/12/hexo-theme-chic/" class="leancloud_visitors" data-flag-title="Chic Theme Doc">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Siricee</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/%E6%8A%80%E6%9C%AF/">技术</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">12/30, 2020</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p align="center">
+<img src="https://i.loli.net/2019/06/12/5d006bd289aa325037.png" alt="Chic theme">
+</p>
+
+<blockquote>
+<p>Chic,法语词意同’Elegant’</p>
+</blockquote>
+<p align="center">
+<img alt="Author" src="https://img.shields.io/badge/Author-Sirice-lightgray.svg"/>
+<img alt="Node" src="https://img.shields.io/badge/Node-6.0%2B-43853d.svg"/>
+<img alt="Hexo" src="https://img.shields.io/badge/Hexo-3.0+-0e83cd.svg"/>
+<img alt="Device" src="https://img.shields.io/badge/Device-responsive-orange.svg"/>
+<img alt="Build Status" src="https://img.shields.io/badge/build-passing-brightgreen"/>
+</p>
+
+<h2 id="文档语言"><a href="#文档语言" class="headerlink" title="文档语言"></a>文档语言</h2><ul>
+<li><a href="README-CN.md">中文文档</a></li>
+<li><a href="README.md">English</a></li>
+</ul>
+<h2 id="Contents-目录"><a href="#Contents-目录" class="headerlink" title="Contents 目录"></a>Contents 目录</h2><ul>
+<li><a href="#文档语言">文档语言</a></li>
+<li><a href="#contents-目录">Contents 目录</a></li>
+<li><a href="#introduction-介绍">Introduction 介绍</a></li>
+<li><a href="#demo-演示">Demo 演示</a></li>
+<li><a href="#features-特点">Features 特点</a></li>
+<li><a href="#installation-安装">Installation 安装</a></li>
+<li><a href="#configuration-配置">Configuration 配置</a><ul>
+<li><a href="#添加tagcategory页面">添加Tag、Category页面</a></li>
+<li><a href="#开启mathjax支持数学公式">开启MathJax支持（数学公式）</a></li>
+<li><a href="#图片标题">图片标题</a></li>
+</ul>
+</li>
+<li><a href="#customize-自定义">Customize 自定义</a></li>
+<li><a href="#faq-提问">FAQ 提问</a></li>
+<li><a href="#gallary-图片展示">Gallary 图片展示</a></li>
+<li><a href="#license-开源许可">LICENSE 开源许可</a></li>
+</ul>
+<h2 id="Introduction-介绍"><a href="#Introduction-介绍" class="headerlink" title="Introduction 介绍"></a>Introduction 介绍</h2><p>优雅、功能全面、阅读友好的hexo主题。</p>
+<h2 id="Demo-演示"><a href="#Demo-演示" class="headerlink" title="Demo 演示"></a>Demo 演示</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://siricee.github.io/hexo-theme-Chic">Demo site</a></li>
+<li><del><a target="_blank" rel="noopener" href="https://siricee.github.io/">作者的博客</a></del> (<em>不再使用 hexo 驱动</em>)</li>
+</ul>
+<h2 id="Features-特点"><a href="#Features-特点" class="headerlink" title="Features 特点"></a>Features 特点</h2><ul>
+<li>恰到好处的留白，优雅却不简陋。</li>
+<li>夜间模式主题一键切换。</li>
+<li>多种代码高亮方案。</li>
+<li>精心挑选的字体，最好的阅读体验。* <em>特别推荐 微软正黑</em></li>
+<li>响应式适配移动端/桌面端。</li>
+<li>支持MathJax，支持LaTeX语法的数学公式</li>
+</ul>
+<h2 id="Installation-安装"><a href="#Installation-安装" class="headerlink" title="Installation 安装"></a>Installation 安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> your-blog/themes</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/Siricee/hexo-theme-Chic.git Chic</span><br><span class="line">// Modify theme setting <span class="keyword">in</span> _config.yml to Chic.</span><br></pre></td></tr></table></figure>
+<h2 id="Configuration-配置"><a href="#Configuration-配置" class="headerlink" title="Configuration 配置"></a>Configuration 配置</h2><details>
+  <summary><mark>点击展开配置文件</mark></summary>
+  <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Header</span></span><br><span class="line"><span class="attr">navname:</span> <span class="string">Bentham&#x27;s</span> <span class="string">Blog</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># navigatior items</span></span><br><span class="line"><span class="attr">nav:</span></span><br><span class="line">  <span class="attr">Posts:</span> <span class="string">/archives</span></span><br><span class="line">  <span class="attr">Categories:</span> <span class="string">/category</span></span><br><span class="line">  <span class="attr">Tags:</span> <span class="string">/tag</span></span><br><span class="line">  <span class="attr">About:</span> <span class="string">/about</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># favicon</span></span><br><span class="line"><span class="attr">favicon:</span> <span class="string">/favicon.ico</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Profile</span></span><br><span class="line"><span class="attr">nickname:</span> <span class="string">Jeremy</span> <span class="string">Bentham</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### this variable is MarkDown form.</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">Lorem</span> <span class="string">ipsum</span> <span class="string">dolor</span> <span class="string">sit</span> <span class="string">amet,</span> <span class="string">**consectetur</span> <span class="string">adipiscing</span> <span class="string">elit.**</span> <span class="string">&lt;br&gt;Fusce</span> <span class="string">eget</span> <span class="string">urna</span> <span class="string">vitae</span> <span class="string">velit</span> <span class="string">*eleifend</span> <span class="string">interdum</span> <span class="string">at</span> <span class="string">ac*</span> <span class="string">nisi.</span></span><br><span class="line"><span class="attr">avatar:</span> <span class="string">/image/avatar.jpeg</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># main menu navigation</span></span><br><span class="line"><span class="comment">## links key words should not be changed.</span></span><br><span class="line"><span class="comment">## Complete url after key words.</span></span><br><span class="line"><span class="comment">## Unused key can be commented out.</span></span><br><span class="line"><span class="attr">links:</span></span><br><span class="line">  <span class="attr">Blog:</span> <span class="string">/archives</span></span><br><span class="line"><span class="comment">#  Category:</span></span><br><span class="line"><span class="comment">#  Tags:</span></span><br><span class="line"><span class="comment">#  Link:</span></span><br><span class="line"><span class="comment">#  Resume:</span></span><br><span class="line"><span class="comment">#  Publish:</span></span><br><span class="line"><span class="comment">#  Trophy:</span></span><br><span class="line"><span class="comment">#  Gallary:</span></span><br><span class="line"><span class="comment">#  RSS:</span></span><br><span class="line"><span class="comment">#  AliPay:</span></span><br><span class="line">  <span class="attr">ZhiHu:</span> <span class="string">https://www.zhihu.com/people/sirice</span></span><br><span class="line"><span class="comment">#  LinkedIn:</span></span><br><span class="line"><span class="comment">#  FaceBook:</span></span><br><span class="line"><span class="comment">#  Twitter:</span></span><br><span class="line"><span class="comment">#  Skype:</span></span><br><span class="line"><span class="comment">#  CodeSandBox:</span></span><br><span class="line"><span class="comment">#  CodePen:</span></span><br><span class="line"><span class="comment">#  Sketch:</span></span><br><span class="line"><span class="comment">#  Gitlab:</span></span><br><span class="line"><span class="comment">#  Dribble:</span></span><br><span class="line">  <span class="attr">Instagram:</span></span><br><span class="line">  <span class="attr">Reddit:</span></span><br><span class="line"><span class="comment">#  YouTube:</span></span><br><span class="line"><span class="comment">#  QQ:</span></span><br><span class="line"><span class="comment">#  Weibo:</span></span><br><span class="line"><span class="comment">#  WeChat:</span></span><br><span class="line">  <span class="attr">Github:</span> <span class="string">https://github.com/Siricee</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># how links show: you have 2 choice--text or icon.</span></span><br><span class="line"><span class="attr">links_text_enable:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">links_icon_enable:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Post page</span></span><br><span class="line"><span class="comment">## Post_meta</span></span><br><span class="line"><span class="attr">post_meta_enable:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="attr">post_author_enable:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">post_date_enable:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">post_category_enable:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment">## Post copyright</span></span><br><span class="line"><span class="attr">post_copyright_enable:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="attr">post_copyright_author_enable:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">post_copyright_permalink_enable:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">post_copyright_license_enable:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">post_copyright_license_text:</span> <span class="string">Copyright</span> <span class="string">(c)</span> <span class="number">2019</span> <span class="string">&lt;a</span> <span class="string">href=&quot;http://creativecommons.org/licenses/by-nc/4.0/&quot;&gt;CC-BY-NC-4.0&lt;/a&gt;</span> <span class="string">LICENSE</span></span><br><span class="line"><span class="attr">post_copyright_slogan_enable:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">post_copyright_slogan_text:</span> <span class="string">Do</span> <span class="string">you</span> <span class="string">believe</span> <span class="string">in</span> <span class="string">&lt;strong&gt;DESTINY&lt;strong&gt;?</span></span><br><span class="line"><span class="comment">## toc</span></span><br><span class="line"><span class="attr">post_toc_enable:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Page</span></span><br><span class="line"><span class="attr">page_title_enable:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Date / Time format</span></span><br><span class="line"><span class="comment">## Hexo uses Moment.js to parse and display date</span></span><br><span class="line"><span class="comment">## You can customize the date format as defined in</span></span><br><span class="line"><span class="comment">## http://momentjs.com/docs/#/displaying/format/</span></span><br><span class="line"><span class="attr">date_format:</span> <span class="string">MMMM</span> <span class="string">D,</span> <span class="string">YYYY</span></span><br><span class="line"><span class="attr">time_format:</span> <span class="string">H:mm:ss</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># stylesheets loaded in the &lt;head&gt;</span></span><br><span class="line"><span class="attr">stylesheets:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">/css/style.css</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># scripts loaded in the end of the body</span></span><br><span class="line"><span class="attr">scripts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">/js/script.js</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">/js/tocbot.min.js</span></span><br><span class="line">    <span class="comment"># tscanlin/tocbot: Build a table of contents from headings in an HTML document.</span></span><br><span class="line">    <span class="comment"># https://github.com/tscanlin/tocbot</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># plugin functions</span></span><br><span class="line"><span class="comment">## Mathjax: Math Formula Support</span></span><br><span class="line"><span class="comment">## https://www.mathjax.org</span></span><br><span class="line"><span class="attr">mathjax:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">import:</span> <span class="string">demand</span> <span class="comment"># global or demand</span></span><br><span class="line">  <span class="comment">## global: all pages will load mathjax,this will degrade performance and some grammers may be parsed wrong.</span></span><br><span class="line">  <span class="comment">## demand: Recommend option,if your post need fomula, you can declare &#x27;mathjax: true&#x27; in Front-matter</span></span><br></pre></td></tr></table></figure>
+</details>
+
+<p><br></p>
+<h3 id="添加Tag、Category页面"><a href="#添加Tag、Category页面" class="headerlink" title="添加Tag、Category页面"></a>添加Tag、Category页面</h3><p>Hexo初始化没有tag、category页面，需要自行添加，本主题请按以下步骤进行:<br></p>
+<ol>
+<li>执行命令<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hexo new page tag</span><br><span class="line">hexo new page category</span><br></pre></td></tr></table></figure></li>
+<li>进入页面目录<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> <span class="built_in">source</span>/tag</span><br></pre></td></tr></table></figure></li>
+<li>增加layout字段<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">//</span> <span class="string">source\tag\index.md</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">Tag</span></span><br><span class="line"><span class="attr">layout:</span> <span class="string">tag</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure></li>
+<li>category页面同理，layout字段键值为category。 <br></li>
+</ol>
+<h3 id="开启MathJax支持（数学公式）"><a href="#开启MathJax支持（数学公式）" class="headerlink" title="开启MathJax支持（数学公式）"></a>开启MathJax支持（数学公式）</h3><p>相关配置文件内容（<code>Chic/_config.yml</code>）：<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># plugin functions</span></span><br><span class="line"><span class="comment">## Mathjax: Math Formula Support</span></span><br><span class="line"><span class="comment">## https://www.mathjax.org</span></span><br><span class="line"><span class="attr">mathjax:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">import:</span> <span class="string">global</span> <span class="comment"># global or demand</span></span><br><span class="line">  <span class="comment">## global: all pages will load mathjax,this will degrade performance and some grammers may be parsed wrong.</span></span><br><span class="line">  <span class="comment">## demand: if your post need fomula, you can declare &#x27;mathjax: true&#x27; in Front-matter</span></span><br></pre></td></tr></table></figure><br><code>mathjax</code>有如下字段：</p>
+<ul>
+<li><code>enable</code>:值为true为开启该功能（默认开启）；false为关闭</li>
+<li><code>import</code>:该字段为mathjax的加载方式，可选值为<code>global</code>和<code>demand</code>。<ul>
+<li><code>global</code>：全局引入，所有页面均加载。好处是便利，缺点是可能会导致部分markdown语法被错误解析，比如连续$$$$会被解析为公式；而且全局引入会在没有公式的页面明显浪费页面性能。</li>
+<li><code>demand</code>【推荐方式】：按需引入。使用方法为在config中设置该字段后，文章中如果需要使用mathjax，在Front-matter中声明即可<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">MathJax</span> <span class="string">Test</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019-07-05 21:27:59</span></span><br><span class="line"><span class="attr">tags:</span></span><br><span class="line"><span class="attr">mathjax:</span> <span class="literal">true</span> <span class="comment"># 加入这个声明，这篇文章就会开启mathjax渲染</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+LaTeX语法这里不做解释，本主题中，单dollar符号包围的为行内公式，例：<script type="math/tex">f(x)=ax+b</script>，双dollar符号包围的为块公式，例$$$f(x)=ax+b$$$更多写法请参考LaTeX和<a target="_blank" rel="noopener" href="https://siricee.github.io/hexo-theme-Chic/2019/07/05/MathJax_test/">Demo site中的公式测试页面</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="图片标题"><a href="#图片标题" class="headerlink" title="图片标题"></a>图片标题</h3><p>在Hexo中，你有两种方式引入图片：</p>
+<ul>
+<li>GFM 语法直接引入（不显示图片标题）<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![pic](picUrl)</span><br></pre></td></tr></table></figure></li>
+<li>Hexo 内置标签系统-图片标签（显示图片标题）<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;% img [class names] &#x2F;path&#x2F;to&#x2F;image [width] [height] &#39;&quot;alt text&quot; &quot;title text&quot;&#39; %&#125;</span><br></pre></td></tr></table></figure>
+所以如果你仅仅想方便快捷引入图片，那你应该使用 GFM 语法，这种方式也是兼容性最好的方案。</li>
+</ul>
+<p>但如果你需要显示<strong>图片标题</strong>，你就应该使用第二种方案，<strong>图片标签方式</strong>。</p>
+<ul>
+<li><code>&quot;alt text&quot;</code>用来显示当图片加载失败时垫底的提示文字。</li>
+<li><code>&quot;title text&quot;</code>将会被显示到图片下方作为图片标题。</li>
+</ul>
+<p>你可以在 <a target="_blank" rel="noopener" href="https://siricee.github.io/hexo-theme-Chic/2019/06/05/markdown_test/#Image">Demo site</a> 中查看图片标题的效果和示例语法。</p>
+<h2 id="Customize-自定义"><a href="#Customize-自定义" class="headerlink" title="Customize 自定义"></a>Customize 自定义</h2><ul>
+<li><p>代码高亮风格 在<code>hexo-theme-Chic\themes\Chic\source\css\style.styl</code>中更改highlight为<code>_highlight</code>文件夹中的stylus文件即可更换代码高亮风格。</p>
+</li>
+<li><p>自定义css(stylus语法) 您可以在<code>hexo-theme-Chic\themes\Chic\source\css\custom.styl</code>路径文件中添加css规则</p>
+</li>
+<li><p>自定义JavaScript 您可以在<code>hexo-theme-Chic\themes\Chic\source\js</code>路径中添加js脚本，并在_config.yml中<code>script</code>字段添加声明。</p>
+</li>
+</ul>
+<h2 id="FAQ-提问"><a href="#FAQ-提问" class="headerlink" title="FAQ 提问"></a>FAQ 提问</h2><ol>
+<li><p>我在二级地址（非github page根repo，即username.github.io/Blog）上部署了hexo，为什么css、avatar等资源都404了？</p>
+<p> 答：此处需要另外填写主配置文件URL字段。以该主题repo为例：</p>
+ <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (blog/_config.yml)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># URL</span></span><br><span class="line"><span class="comment">## If your site is put in a subdirectory, set url as &#x27;http://yoursite.com/child&#x27; and root as &#x27;/child/&#x27;</span></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://siricee.github.io/hexo-theme-Chic/</span>  <span class="comment"># 此处为你的部署url</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/hexo-theme-Chic/</span>  <span class="comment"># 此处为你的项目根文件夹url。</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">:year/:month/:day/:title/</span></span><br><span class="line"><span class="attr">permalink_defaults:</span></span><br></pre></td></tr></table></figure></li>
+<li><p>我想将黑色主题设为默认全局主题该怎么做？</p>
+<p>答：此处只需要改一下<code>themes\Chic\source\js\script.js</code>中<code>doucument.ready</code>函数的内容。代码如下</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">document</span>.ready(</span><br><span class="line"> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">     <span class="comment">// ...省略代码</span></span><br><span class="line">     <span class="keyword">const</span> isDark = currentTheme === <span class="string">&#x27;dark&#x27;</span>;</span><br><span class="line">     <span class="comment">// 此行改为</span></span><br><span class="line">     <span class="comment">// const isDark = currentTheme !== &#x27;dark&#x27;;</span></span><br></pre></td></tr></table></figure>
+<p>即可实现效果。</p>
+</li>
+<li><p>常见问题待补充……  </p>
+</li>
+</ol>
+<h2 id="Gallary-图片展示"><a href="#Gallary-图片展示" class="headerlink" title="Gallary 图片展示"></a>Gallary 图片展示</h2><p><img src="https://i.loli.net/2019/06/12/5d00a0850285252790.png" alt="screely-1560228577821.png"><br><img src="https://i.loli.net/2019/06/12/5d00a0856063661133.png" alt="screely-1560228791041.png"><br><img src="https://i.loli.net/2019/06/12/5d00a084e29cd40271.png" alt="screely-1560228621288.png"><br><img src="https://i.loli.net/2019/06/12/5d00a0855d28072392.png" alt="screely-1560228761180.png"></p>
+<p><img src="https://i.loli.net/2019/06/12/5d00a085d115d16700.png" alt="smartmockups_jwrd4ru3.png"></p>
+<p><img src="https://i.loli.net/2019/06/12/5d00a085ec26284832.png" alt="smartmockups_jwrd9y4r.png"></p>
+<h2 id="LICENSE-开源许可"><a href="#LICENSE-开源许可" class="headerlink" title="LICENSE 开源许可"></a>LICENSE 开源许可</h2><p>Chic © <a target="_blank" rel="noopener" href="https://github.com/Siricee">@Sirice</a></p>
+<p><a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/Hexo/"># Hexo</a>
+                    
+                        <a href="/tag/theme/"># theme</a>
+                    
+                        <a href="/tag/Readme/"># Readme</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2021/01/gitalk/">增加连名带姓的评论功能</a>
+            
+            
+            <a class="next" rel="next" href="/2020/06/pytorch-kaldi/">PyTorch-Kaldi简介</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+.gt-container {
+  max-width: 780px;
+  margin: auto;
+}
+.gt-comments-null {
+  display: none;
+}
+.valine_thread {
+  max-width: 780px;
+  margin: auto;
+}
+.vpanel {
+  display: none;
+}
+.vpower {
+  display: none;
+}
+.vempty {
+  display: none;
+  transform: scale(0, 0);
+}

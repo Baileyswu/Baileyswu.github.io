@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>test equation | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">test equation</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/mathjax/">mathjax</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/swig/">swig</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2018/09/test-equation/" class="leancloud_visitors" data-flag-title="test equation">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/%E6%8A%80%E6%9C%AF/">技术</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">09/25, 2018</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>$x^3+y^3=z^3$</p>
+<script type="math/tex; mode=display">x^3+y^3=z^3</script><p>下面这个都不显示了</p>
+<p>很关键的一点，选一个好一点的 mathjax CDN ， 格式什么的也会不一样，比如我现在这个公式就特别粗感觉……</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">math:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">engine:</span> <span class="string">mathjax</span></span><br><span class="line">  <span class="attr">mathjax:</span></span><br><span class="line">    <span class="comment"># Use 2.7.1 as default, jsdelivr as default CDN, works everywhere even in China</span></span><br><span class="line">    <span class="comment"># cdn: //cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML</span></span><br><span class="line">    <span class="comment"># For newMathJax CDN (cdnjs.cloudflare.com) with fallback to oldMathJax (cdn.mathjax.org).</span></span><br><span class="line">    <span class="comment">#cdn: //cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML</span></span><br><span class="line">    <span class="comment"># For direct link to MathJax.js with CloudFlare CDN (cdnjs.cloudflare.com).</span></span><br><span class="line">    <span class="comment"># cdn: //cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML</span></span><br><span class="line">    <span class="comment"># For automatic detect latest version link to MathJax.js and get from Bootcss.</span></span><br><span class="line">    <span class="attr">cdn:</span> <span class="string">//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML</span></span><br></pre></td></tr></table></figure>
+<p>根据自己主题的特性，看看怎么加合适吧。写我这个主题的人好像喜欢用 swig ， 貌似是一种可以调用 js 的高级语言，然后在合适的地方放上 <code>mathjax.swig</code>，只要保证后面配置的时候写对路径就行。最后一行看到了 <code>mathjax.cdn</code> 了吧，就是要用上面说的 <code>cdn</code> 。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type&#x3D;&quot;text&#x2F;x-mathjax-config&quot;&gt;</span><br><span class="line">  MathJax.Hub.Config(&#123;</span><br><span class="line">    extensions: [&quot;tex2jax.js&quot;],</span><br><span class="line">    jax: [&quot;input&#x2F;TeX&quot;, &quot;output&#x2F;HTML-CSS&quot;],</span><br><span class="line">    tex2jax: &#123;</span><br><span class="line">      inlineMath: [ [&#39;$&#39;,&#39;$&#39;], [&quot;\\(&quot;,&quot;\\)&quot;] ],</span><br><span class="line">      displayMath: [ [&#39;$$&#39;,&#39;$$&#39;], [&quot;\\[&quot;,&quot;\\]&quot;] ],</span><br><span class="line">      processEscapes: true</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;HTML-CSS&quot;: &#123; availableFonts: [&quot;TeX&quot;] &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&lt;&#x2F;script&gt;</span><br><span class="line"></span><br><span class="line">&lt;script type&#x3D;&quot;text&#x2F;x-mathjax-config&quot;&gt;</span><br><span class="line">    MathJax.Hub.Queue(function() &#123;</span><br><span class="line">      var all &#x3D; MathJax.Hub.getAllJax(), i;</span><br><span class="line">        for (i&#x3D;0; i &lt; all.length; i +&#x3D; 1) &#123;</span><br><span class="line">          all[i].SourceElement().parentNode.className +&#x3D; &#39; has-jax&#39;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&lt;&#x2F;script&gt;</span><br><span class="line">&lt;script type&#x3D;&quot;text&#x2F;javascript&quot; src&#x3D;&quot;&#123;&#123; theme.math.mathjax.cdn &#125;&#125;&quot;&gt;&lt;&#x2F;script&gt;</span><br></pre></td></tr></table></figure>
+<p>然后调用这个东西的 <code>math\index.swig</code> 长这样<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;% if theme.math.enable %&#125;</span><br><span class="line">  &#123;% set is_index_has_math &#x3D; false %&#125;</span><br><span class="line"></span><br><span class="line">  &#123;# At home, check if there has &#96;mathjax: true&#96; post #&#125;</span><br><span class="line">  &#123;% if is_home() %&#125;</span><br><span class="line">    &#123;% for post in page.posts %&#125;</span><br><span class="line">      &#123;% if post.mathjax and not is_index_has_math %&#125;</span><br><span class="line">        &#123;% set is_index_has_math &#x3D; true %&#125;</span><br><span class="line">      &#123;% endif %&#125;</span><br><span class="line">    &#123;% endfor %&#125;</span><br><span class="line">  &#123;% endif %&#125;</span><br><span class="line"></span><br><span class="line">  &#123;% if not theme.math.per_page or (is_index_has_math or page.mathjax) %&#125;</span><br><span class="line">    &#123;% if theme.math.engine &#x3D;&#x3D; &#39;mathjax&#39; %&#125;</span><br><span class="line">      &#123;% include &#39;mathjax.swig&#39; %&#125;</span><br><span class="line">    &#123;% elif theme.math.engine &#x3D;&#x3D; &#39;katex&#39; %&#125;</span><br><span class="line">      &#123;% include &#39;katex.swig&#39; %&#125;</span><br><span class="line">   &#123;% endif %&#125;</span><br><span class="line">  &#123;% endif %&#125;</span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure><br>然后调用上面这个的 <code>post.swig</code> 长这样<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;% extends &#39;includes&#x2F;layout.swig&#39; %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% block body %&#125;</span><br><span class="line">  &#123;% include &#39;math&#x2F;index.swig&#39; %&#125;</span><br><span class="line">  &lt;article id&#x3D;&quot;post&quot;&gt;</span><br><span class="line">    &lt;h1&gt;&#123;&#123; page.title || __(&#39;without_title&#39;) &#125;&#125;&lt;&#x2F;h1&gt;</span><br><span class="line">    &lt;p class&#x3D;&quot;page-title-sub&quot;&gt;</span><br><span class="line">    ......</span><br></pre></td></tr></table></figure><br>没错， <code>include</code> 的位置很关键，既不能太前面，也不能太后面。它会按顺序生成 <code>html</code>，每一句话就是一个小模块。所以说呀 <code>swig</code> 还是很高级的，跟它一个等级的还有 <code>ejs</code> 吧，大概。</p>
+<p>然后在生成 <code>html</code> 之后，会先按照 <code>escape</code> 和 <code>em</code> 的规则自己替换一通转义符，导致后面有些公式符号也被替换了，<code>mathjax</code> 表示哭晕在厕所。所以要在自己的 <code>node_modules</code> 里面找到替换规则，换一个正则表达式，好跳过 “$$”、 “__” 这种公式必须的东西。</p>
+<p>凭记忆找了一通，应该是这个！嗯！<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">path: node_modules/kramed/lib/rules/inline.js</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> inline = &#123;</span><br><span class="line">  math: <span class="regexp">/^\$\$\s*([\s\S]*?[^\$])\s*\$\$(?!\$)/</span>,</span><br><span class="line">  <span class="comment">// escape: /^\\([\\`*&#123;&#125;\[\]()#$+\-.!_&gt;])/,</span></span><br><span class="line">  <span class="built_in">escape</span>: <span class="regexp">/^\\([`*\[\]()#+\-.!_&gt;])/</span>,</span><br><span class="line">  autolink: <span class="regexp">/^&lt;([^ &gt;]+(@|:\/)[^ &gt;]+)&gt;/</span>,</span><br><span class="line">  url: noop,</span><br><span class="line">  html: <span class="regexp">/^&lt;!--[\s\S]*?--&gt;|^&lt;(\w+(?!:\/|[^\w\s@]*@)\b)*?(?:&quot;[^&quot;]*&quot;|&#x27;[^&#x27;]*&#x27;|[^&#x27;&quot;&gt;])*?&gt;([\s\S]*?)?&lt;\/\1&gt;|^&lt;(\w+(?!:\/|[^\w\s@]*@)\b)(?:&quot;[^&quot;]*&quot;|&#x27;[^&#x27;]*&#x27;|[^&#x27;&quot;&gt;])*?&gt;/</span>,</span><br><span class="line">  link: <span class="regexp">/^!?\[(inside)\]\(href\)/</span>,</span><br><span class="line">  reflink: <span class="regexp">/^!?\[(inside)\]\s*\[([^\]]*)\]/</span>,</span><br><span class="line">  nolink: <span class="regexp">/^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/</span>,</span><br><span class="line">  reffn: <span class="regexp">/^!?\[\^(inside)\]/</span>,</span><br><span class="line">  strong: <span class="regexp">/^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/</span>,</span><br><span class="line">  <span class="comment">// em: /^\b_((?:__|[\s\S])+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,</span></span><br><span class="line">  em: <span class="regexp">/^\*((?:\*\*|[\s\S])+?)\*(?!\*)/</span>,</span><br><span class="line">  code: <span class="regexp">/^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/</span>,</span><br><span class="line">  br: <span class="regexp">/^ &#123;2,&#125;\n(?!\s*$)/</span>,</span><br><span class="line">  del: noop,</span><br><span class="line">  text: <span class="regexp">/^[\s\S]+?(?=[\\&lt;!\[_*`$]| &#123;2,&#125;\n|$)/</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>要是公式还是显示不出来，老乡学个前端吧-.-</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/mathjax/"># mathjax</a>
+                    
+                        <a href="/tag/swig/"># swig</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2018/09/hidden-markov-model/">隐马尔可夫模型（HMM）</a>
+            
+            
+            <a class="next" rel="next" href="/2018/09/random-theme/">hexo-theme-random 中文文档</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

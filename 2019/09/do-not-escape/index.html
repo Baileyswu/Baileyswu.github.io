@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>逃避可耻而无用 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">逃避可耻而无用</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E9%80%83%E9%81%BF/">逃避</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E6%8B%96%E5%BB%B6%E7%97%87/">拖延症</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2019/09/do-not-escape/" class="leancloud_visitors" data-flag-title="逃避可耻而无用">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/%E6%84%9F%E6%83%B3/">感想</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">09/14, 2019</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <blockquote>
+<p>转载自知乎 <a target="_blank" rel="noopener" href="https://www.zhihu.com/question/21283856/answer/298619320">压力越大就越想逃避问题怎么办？ - 绅女的回答 - 知乎</a></p>
+</blockquote>
+<p>当面对千头万绪、堆积如山的工作，人们往往发现自己不知道如何下手，然后在压力面前找不到行动的动力，于是选择逃避变成了一种常见的选择。</p>
+<p>这个行为背后有一个逻辑错误，那就是人人往往以为是先有动力，再有行动。但是这个认识是错误的，实际上是<strong>先有行动，再有动力</strong>。</p>
+<p>因为分不清楚“动力”和“行动”的先后顺序，所以人们往往会傻傻地等待自己有行动的心情，采取做事，如果觉得心情一直很烦躁，就会选择一拖再拖，迟迟不去把事情完成。 </p>
+<p>比如我非常讨厌案头行政工作，对我来说，整理年度的公司礼物寄送名单是非常枯燥乏味的事情，可是真的逼自己坐在电脑前开始整理的时候，就会发现能很快进入状态，快速地完成名单的整理。</p>
+<p>所以真实的行动过程是这样的：</p>
+<blockquote>
+<p><strong>行动——动力——更多行动——更多动力</strong></p>
+</blockquote>
+<p>并不是说我们躺在床上等着，动力就会来到自己的身体里，这是很多拖延症患者常见的误区。</p>
+<p>所以要克服题主说的逃避心理，<strong>关键是自我推动行动起来。</strong></p>
+<p>在遭遇非常困难的任务和复杂的情境时，巨大的压力往往会扼杀我们的自我推动力量，我们会焦虑不安、情绪低落，甚至发呆走神，很难集中注意力。</p>
+<p>这个时候我们又会用许许多多的“应该”、“必须“等字句来鞭策自己，可是越强迫自己，期待中的动力越不会到来，甚至我们的积极性会进一步被打压，以至于有人会觉得宁可在床上睡一天也不想去碰那个令人烦恼的事情。</p>
+<hr>
+<p>对于题主遇到的情况，我有两个建议：</p>
+<h3 id="1-化整为零"><a href="#1-化整为零" class="headerlink" title="1. 化整为零"></a>1. 化整为零</h3><p>也就是说把复杂的任务分解为若干个易于执行的部分。 比如我要做一个复杂的方案，我不知道如何下手，我会把方案拆分成多个模块，比如从竞品分析中的竞品选择这个小点入手。这样就会一下子降低起始任务的难度，更容易找到推动力。</p>
+<p>为了更好的效果，甚至可以对某个具体任务限定时间，规定的时间一到，不管有没有完成，你都要立刻停止去做一些有意思的事情，然后再回到原来的工作中。</p>
+<h3 id="2-把“我应该”换成“我想要”"><a href="#2-把“我应该”换成“我想要”" class="headerlink" title="2. 把“我应该”换成“我想要”"></a>2. 把“我应该”换成“我想要”</h3><p>当我们习惯强迫自己的时候，其实很多时候是会消耗掉意志力，反而会心生抗拒，带来更大的拖延和逃避。在节食减肥的女孩子里最容易看到这种情况，往往在几天的节食后反而会暴饮暴食吃上一顿，结果就是“越减越肥“。</p>
+<p>在思维习惯上，我们要学会对自己温柔，把“我应该”换成“我想要”，把命令自己换成尊重自己，给自己自由选择的权利和感觉。</p>
+<p>”我应该“转化为“我想要“的第一步是多问自己，“我想要自己怎么做？什么样的抉择最符合我的利益？”  （发现没有，绅女一直说的抉择商在很多场景下都适用。）</p>
+<p>比如，在面对很大压力的时候，很多人会选择“一睡了之”，起床越来越难，到后来连正常时间上班这种基本要求都做不到，整个人都陷入到了“懒散拖拉”的状态里。</p>
+<p>但是如果真的给自己选择，把“一睡了之”的好处和坏处都列出来：</p>
+<p><strong>一睡了之的好处：</strong> 简单，什么都不用做，不用面对公司里的一大堆问题，眼睛一闭就能混过一天。</p>
+<p><strong>一睡了之的坏处：</strong> 睡觉虽然简单，但是时间久了躺床上也是很无聊的，而且我会越来越自责。况且继续睡下去问题也不会自动解决，反而可能会更恶化，到时候就更棘手了。如果我起床活动一下，会感觉更精神一点。</p>
+<p>这样两相比较的话，我们会发现，起床是对自己更有利的选择。</p>
+<p>试一下，你就会发现这种<strong>自我推动机制</strong>要比命令和鞭策的效果更好，也更持久。 </p>
+<p>希望上面的建议对题主有用。谢谢。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/%E9%80%83%E9%81%BF/"># 逃避</a>
+                    
+                        <a href="/tag/%E6%8B%96%E5%BB%B6%E7%97%87/"># 拖延症</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/09/bayesian-inference/">贝叶斯推理</a>
+            
+            
+            <a class="next" rel="next" href="/2019/08/add-comment/">增加评论和统计功能</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

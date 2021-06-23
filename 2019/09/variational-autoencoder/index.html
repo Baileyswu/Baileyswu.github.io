@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>变分自编码 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">变分自编码</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/VAE/">VAE</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/VI/">VI</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2019/09/variational-autoencoder/" class="leancloud_visitors" data-flag-title="变分自编码">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/PRML/">PRML</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">09/29, 2019</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>变分自编码（Variational Autoencoder）可以用于生成高精度的图像，我们可以从神经网络、概率图模型这两个角度去描述它。</p>
+<h2 id="The-Neural-Net-Perspective"><a href="#The-Neural-Net-Perspective" class="headerlink" title="The Neural Net Perspective"></a>The Neural Net Perspective</h2><p>从神经网络的角度来看，VAE 包含了编码器、解码器和损失。<br><img src="/2019/09/variational-autoencoder/encoder-decoder.png" class=""></p>
+<p>自编码器是输入 X 进行编码后得到 Z，再利用 Z 解码得到 X’。对比 X 与 X’ 的误差，利用神经网络训练使得误差逐渐减小，达到非监督学习的目的。</p>
+<h3 id="Encoder"><a href="#Encoder" class="headerlink" title="Encoder"></a>Encoder</h3><p>编码是从高维信息降维得到低维信息的过程。可以认为是非线性的 PCA。</p>
+<p>这里用 $q_{\theta}(z | x)$ 表示编码网络。一般可以假设它服从高斯分布。$\theta$ 是编码网络的参数。</p>
+<h3 id="Decoder"><a href="#Decoder" class="headerlink" title="Decoder"></a>Decoder</h3><p>解码是编码的逆向过程。</p>
+<p>以 MNIST 数据集为例，解码器将 Z 的值解码成 784 个伯努利分布的参数，每个伯努利分布描述了一个像素点的灰度值。</p>
+<p>用 $p_{\phi}(x | z)$ 表示解码网络。$\phi$ 是解码网络的参数。</p>
+<p>log-likelihood $\log p_{\phi}(x | z)$ 可以表示用 z 出重建 x 的有效程度。</p>
+<h3 id="Loss"><a href="#Loss" class="headerlink" title="Loss"></a>Loss</h3><p>整体损失为单点损失之和，</p>
+<script type="math/tex; mode=display">
+Loss=\sum_{i=1}^{N} l_{i}</script><p>其中单点损失可以表示为</p>
+<script type="math/tex; mode=display">
+l_{i}(\theta, \phi)=-\mathbb{E}_{z \sim q_{\theta}\left(z | x_{i}\right)}\left[\log p_{\phi}\left(x_{i} | z\right)\right]+\mathbb{K} \mathbb{L}\left(q_{\theta}\left(z | x_{i}\right) \| p(z)\right)</script><p>即解码器的 log-likelihood 再加一个正则项，约束编码器和先验的差距。</p>
+<p>一般假设先验服从正态分布，并且让编码器和先验接近，这样可以让编码器尽量的分散，而不是在特定点上过拟合。</p>
+<p>通过在损失上梯度下降，可以更新出编码网络的参数。</p>
+<h2 id="The-Probability-Model-Perspective"><a href="#The-Probability-Model-Perspective" class="headerlink" title="The Probability Model Perspective"></a>The Probability Model Perspective</h2><p>从概率图模型的角度看，它将和<a target="_blank" rel="noopener" href="https://baileyswu.github.io/2019/09/variational-inference/">变分推理</a>的思路一致。</p>
+<p>从观测到隐层，称为推理网络（Inference Network），即编码器；从隐层到观测，称为生成网络（Generative Network），即解码器。</p>
+<p>KL 不易计算，因此 VI 优化 <strong>证据下界（ELBO）</strong> 来求解。</p>
+<h3 id="ELBO"><a href="#ELBO" class="headerlink" title="ELBO"></a>ELBO</h3><p>由于观测之间不共享同一个潜变量，因此可以写出单点的 ELBO</p>
+<script type="math/tex; mode=display">
+\mathscr{L}_{i}(\lambda)=\mathbb{E}_{q_{\lambda}\left(z | x_{i}\right)}\left[\log p\left(x_{i} | z\right)\right]-\mathbb{K} \mathbb{L}\left(q_{\lambda}\left(z | x_{i}\right) \| p(z)\right)</script><p>可见 ELBO 与神经网络的损失表达式取反是一致的。$\lambda$ 是变分参数。</p>
+<p>变分参数可以选择多观测共享或不共享。</p>
+<ul>
+<li>Mean-field variational inference<ul>
+<li>no shared parameters</li>
+</ul>
+</li>
+<li>Amortized inference <ul>
+<li>global parameters are shared across all datapoints</li>
+</ul>
+</li>
+</ul>
+<h3 id="Inference-Network"><a href="#Inference-Network" class="headerlink" title="Inference Network"></a>Inference Network</h3><p>用推理网络进行编码，即学习出一个分布族里最接近真实后验的变分分布。</p>
+<script type="math/tex; mode=display">
+q_{\lambda}^{*}(z | x)=\arg \min _{\lambda} \mathbb{K} \mathbb{L}\left(q_{\lambda}(z | x) \| p(z | x)\right)</script><h3 id="Generative-Network"><a href="#Generative-Network" class="headerlink" title="Generative Network"></a>Generative Network</h3><p>用生成式网络进行解码时，往往会假设</p>
+<script type="math/tex; mode=display">
+\begin{array}{l}{p({z})=\operatorname{Normal}(0,1)} \\ {p({x} | {z})=\operatorname{Normal}\left(\mu_{\beta}({z}), \sigma_{\beta}^{2}({z})\right)}\end{array}</script><p>where $\mu$ and $\sigma^{2}$ are deep networks with parameters $\beta$</p>
+<h3 id="Amortized-Inference"><a href="#Amortized-Inference" class="headerlink" title="Amortized Inference"></a>Amortized Inference</h3><p>为了让多个数据可以分批训练，假设模型有公共的变分分布，即进行摊余推理。</p>
+<p>变分分布依赖于第 i 个数据和共享的变分参数。于是原本的 ELBO 为多个模型参数</p>
+<script type="math/tex; mode=display">
+\mathscr{L}\left(\lambda, \phi_{1 \ldots n}\right)=\mathbb{E}_{q}[\log p(\beta, \mathbf{z}, \mathbf{x})]-\mathbb{E}_{q}\left[\log q(\beta ; \lambda)+\sum_{i=1}^{n} q\left(z_{i} ; \phi_{i}\right)\right]</script><p>改写为</p>
+<script type="math/tex; mode=display">
+\mathscr{L}(\lambda, \theta)=\mathbb{E}_{q}[\log p(\beta, \mathbf{z}, \mathbf{x})]-\mathbb{E}_{q}\left[\log q(\beta ; \lambda)+\sum_{i=1}^{n} q\left(z_{i} | x_{i} ; \phi_{i}=f_{\theta}\left(x_{i}\right)\right)\right]</script><p>因此 ELBO 的目标式为</p>
+<script type="math/tex; mode=display">
+\mathscr{L}(\nu)=\sum_{i=1}^{n} \mathbb{E}_{q\left(z_{i} ; x_{i}, \nu\right)}\left[\log p\left(z_{i}\right)+\log p\left(x_{i} | z_{i}, \theta\right)-\log q\left(z_{i} ; x_{i}, \nu\right)\right]</script><h3 id="Reparameterization"><a href="#Reparameterization" class="headerlink" title="Reparameterization"></a>Reparameterization</h3><script type="math/tex; mode=display">
+\begin{aligned} \varepsilon & \sim \mathcal{N}(0,1) \\ t\left(\varepsilon, x_{i}, \nu\right) &=\varepsilon+g\left(x_{i} ; \nu\right) \end{aligned}</script><script type="math/tex; mode=display">
+\nabla_{\nu} \mathscr{L}=\sum_{i=1}^{n} \mathbb{E}_{s(\varepsilon)}\left[\nabla_{z_{i}}\left(\log p\left(z_{i}\right)+\log p\left(x_{i} | z_{i}, \theta\right)-\log q\left(z_{i} ; x_{i}, \nu\right)\right) \nabla_{\nu} t\left(\varepsilon, \nu, x_{i}\right)\right]</script><h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><p>符合 <a target="_blank" rel="noopener" href="https://baileyswu.github.io/2019/09/variational-inference/#Black-box-VI">BBVI 准则</a>。</p>
+<ul>
+<li>samples $\varepsilon_{i}$ for each data point and calculates $z_{i}$</li>
+<li>uses these samples to calculate noisy gradients with respect to $\nu$ and $\theta$</li>
+<li>follows those gradients in a stochastic optimization</li>
+</ul>
+<img src="/2019/09/variational-autoencoder/vae.png" class="">
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://jaan.io/what-is-variational-autoencoder-vae-tutorial/">Tutorial - What is a variational autoencoder?</a></li>
+<li><a target="_blank" rel="noopener" href="https://media.nips.cc/Conferences/2016/Slides/6199-Slides.pdf">Variational Inference: Foundations and Modern Methods</a></li>
+</ul>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/VAE/"># VAE</a>
+                    
+                        <a href="/tag/VI/"># VI</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/11/recurrent-neural-networks/">循环神经网络</a>
+            
+            
+            <a class="next" rel="next" href="/2019/09/variational-inference/">变分推理与黑盒推理</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

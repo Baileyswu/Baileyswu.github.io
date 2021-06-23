@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>D-separation | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">D-separation</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E6%A6%82%E7%8E%87%E5%9B%BE%E6%A8%A1%E5%9E%8B/">概率图模型</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E6%9D%A1%E4%BB%B6%E7%8B%AC%E7%AB%8B/">条件独立</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E5%9B%A0%E6%9E%9C%E5%9B%BE/">因果图</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2018/10/D-separation/" class="leancloud_visitors" data-flag-title="D-separation">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/PRML/">PRML</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">10/09, 2018</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>英文转载自 <a target="_blank" rel="noopener" href="http://www.andrew.cmu.edu/user/scheines/tutor/d-sep.html">andrew.cmu.edu</a></p>
+<h2 id="Contents"><a href="#Contents" class="headerlink" title="Contents"></a>Contents</h2><ul>
+<li>History and Motivation  </li>
+<li>D-separation Explained, with Applet  </li>
+<li>Formal Definition of D-separation, with Applet  </li>
+<li>中文小结（当然是我写的）</li>
+<li>References</li>
+</ul>
+<h2 id="History-and-Motivation"><a href="#History-and-Motivation" class="headerlink" title="History and Motivation"></a>History and Motivation</h2><p>In the early 1930s, a biologist named Sewall Wright figured out a way to statistically model the causal structure of biological systems. He did so by combining directed graphs , which naturally represent causal hypotheses, and linear statistical models, which are systems of linear regression equations and statistical constraints, into a unified representation he called <strong>path analysis</strong>. </p>
+<h3 id="The-Hunger-Model"><a href="#The-Hunger-Model" class="headerlink" title="The Hunger Model"></a>The Hunger Model</h3><p>Wright, and others after him, realized that the causal structure of his models (the directed graph) determined statistical predictions we could test without doing experiments. For example, consider a model in which blood sugar causes hunger, but only indirectly. </p>
+<blockquote>
+<p>blood sugar $\rightarrow$ stomach acidity $\rightarrow$ hunger</p>
+</blockquote>
+<p>The model asserts that blood sugar causes stomach acidity directly, and that stomach acidity causes hunger directly. It turns out that no matter what the strength (as long as its not zero) of these causal connections, which are called “parameters”, the model implies that <strong>blood sugar and hunger are correlated, but that the partial correlation of blood sugar and hunger controlling for stomach acity does vanish</strong>. </p>
+<p>This means that if we could measure blood sugar, stomach acidity and hunger, then we could also test the causal claims of this theory without doing a controlled experiment. We could invite people off the street to come into our office, take measurements of their blood sugar, stomach acidity and hunger levels, and examine the data to see if blood sugar and hunger are significantly correlated, and not significantly correlated when we control for stomach acidity. If these predictions don’t hold, then the causal claims of our model are suspect. </p>
+<h3 id="Frame-in-A-Mathematical-Form"><a href="#Frame-in-A-Mathematical-Form" class="headerlink" title="Frame in A Mathematical Form"></a>Frame in A Mathematical Form</h3><p>Although it is easy to derive the two statistical consequences of this path analytic causal model, in general it is quite hard. In the 1950s and 60s, Herbert Simon (1954) and Hubert Blalock (1961) worked on the problem, but only solved it for a number of particular causal structures (directed graphs). The problem that Wright, Simon, and Blalock were trying to tackle can be put very generally: what are the testable statistical consequences of causal structure. This question is central to the epistemology and methodology of behavioral science, but put this way is still too vague to answer mathematically. </p>
+<p>By assuming that the causal structure of a model is captured entirely by the directed graph part of the statistical model, we move a step closer towards framing the question in a clear mathematical form. By clarifying what we mean by “testable statistical consequences” we take one more step in this direction. Although Wright, Blalock and Simon considered vanishing correlations and vanishing partial correlations, we will be a little more general and consider independence and conditional independence , which include vanishing correlation and partial correlation as special cases, as one class of “testable statistical constraints”. These are not the only statistical consequences of causal structure. For example, Spearman (1904), Costner (1971), and Glymour, Scheines, Spirtes, and Kelly (1987) used the vanishing tetrad difference to probe the causal structure of models with variables that cannot be directly meausured (called latent variables) like general intelligence. But clearly conditional independence constraints are central, and here we restrict ourselves to them. </p>
+<h3 id="Solved-by-Algorithm"><a href="#Solved-by-Algorithm" class="headerlink" title="Solved by Algorithm"></a>Solved by Algorithm</h3><p>So here is a general question that is precise enough to answer mathematically: Can we specify an algorithm that will compute, for any directed graph interpreted as a linear statistical model, all and only those independence and conditional independence relations that hold for all values of the parameters (causal strengths). </p>
+<p>Judea Pearl, Dan Geiger, and Thomas Verma, computer scientists at UCLA working on the problem of storing and processing uncertain information efficiently in artificially intelligent agents, solved this mathematical problem in the mid 1980s. Pearl and his colleagues realized that <strong>uncertain information could be stored much more efficiently by taking advantage of conditional independence</strong>, and they used directed acyclic graphs (graphs with no loops from a variable back to itself) to encode probabilities and the conditional independence relations among them. <strong>D-separation was the algorithm they invented to compute all the conditional independence relations entailed by their graphs (see Pearl, 1988).</strong> Peter Spirtes, Clark Glymour, and Richard Scheines, working on the problem of causal inference at the Philosopy Department at Carnegie Mellon University in the late 1980s and early 1990s, connected the artificial intelligence work of Pearl and his colleagues to the problem of testing and discovering causal structure in behavioral sciences (see Spirtes, Glymour, and Scheines, 1993). The work didn’t stop there, however. Pearl and his colleagues proved many more interesting results about graphical models, what they entail, and algorithms to discover them (see Judea Pearl’s home page). In 1994, Spirtes <strong>proved</strong> that d-separation correctly computes the conditional independence relations entailed by cyclic directed graphs interepred as linear statistical models (Spirtes, 1994), and in the same year Richardson (1994) developed an efficient procedure to determine when two linear models, cyclic or not, are d-separation equivalent. In 1996, Pearl proved that d-separation correctly encodes the independencies entailed by directed graphs with or without cycles in a special class of discrete causal models (Pearl, 1996). Also in 1996, Spirtes Richardson, Meek, Scheines, and Glymour (1996) proved that d-separation works for linear statistical models with correlated errors. So it should be obvious that d-separation is a central idea in the theory of graphical causal models. In the rest of this module, we try to explain the ideas behind the definition and then give the definition formally. At the end of the module you can run a few Java applets which provide interactive tutorials for these ideas.</p>
+<hr>
+<h2 id="D-separation-Explained"><a href="#D-separation-Explained" class="headerlink" title="D-separation Explained"></a>D-separation Explained</h2><p>In this section we explain the ideas that underly the definition of d-separation. If you want to go to the section in which we give a formal <strong>definition of d-separation</strong>, go to section 3. </p>
+<p>Although there are many ways to understand d-separation, we prefer using the ideas of <code>active path</code> and <code>active vertex</code> on a path. </p>
+<h3 id="Conditional-Independence"><a href="#Conditional-Independence" class="headerlink" title="Conditional Independence"></a>Conditional Independence</h3><p>Recall the motivation for d-separation. <strong>The “d” in d-separation and d-connection stands for dependence.</strong> Thus if two variables are <strong>d-separated relative to a set of variables Z</strong> in a directed graph, then they are independent conditional on Z in all probability distributions such a graph can represent. Roughly, two variables X and Y are <strong>independent conditional on Z</strong> if knowledge about X gives you no extra information about Y once you have knowledge of Z. In other words, once you know Z, X adds nothing to what you know about Y. </p>
+<h3 id="Active-Path"><a href="#Active-Path" class="headerlink" title="Active Path"></a>Active Path</h3><p>Intuitively, <strong>a path is active if it carries information, or dependence</strong>. Two variables X and Y might be connected by lots of paths in a graph, where all, some, or none of the paths are active. X and Y are <strong>d-connected</strong>, however, if there is <strong>any active path</strong> between them. So X and Y are <strong>d-separated</strong> if <strong>all</strong> the paths that connect them are <strong>inactive</strong>, or, equivalently, if no path between them is active. </p>
+<p>So now we need to focus on what makes a path active or inactive. <strong>A path is active when every vertex on the path is active.</strong> Paths, and vertices on these paths, are active or inactive relative to a set of other vertices Z. First lets examine when things are active or inactive relative to an <strong>empty Z</strong>. To make matters concrete, consider all of the possible <del>undirected</del> directed paths between a pair of variables A and B that go through a third variable C: </p>
+<blockquote>
+<p>1) A $\rightarrow$ C $\rightarrow$ B active<br>2) A $\leftarrow$ C $\leftarrow$ B active<br>3) A $\leftarrow$ C $\rightarrow$ B active<br>4) A $\rightarrow$ C $\leftarrow$ B inactive  </p>
+</blockquote>
+<p>The first is a directed path from A to B through C, the second a directed path from B to A through C, and the third a pair of directed paths from C to A and from C to B. If we interpret these paths causally, in the first case A is an indirect cause of B, in the second B is an indirect cause of A, and in the third C is a common cause of A and B. <strong>All three of these causal situations give rise to association, or dependence, between A and B</strong>, and all three of these <del>undirected</del> directed paths are active in the theory of d-separation. If we interpret the fourth case causally, then <strong>A and B have a common effect in C, but no causal connection between them</strong>. In the theory of d-separation, the fourth path is inactive. Thus, when the conditioning set is empty, only paths that correspond to causal connection are active. </p>
+<p>We said before that a path is active in the theory of d-separation just in case all the vertices on the path are active. Since C is the only vertex on all four paths between A and B above, it must be active in the first three paths and inactive in the fourth. </p>
+<p>What is common to the way C occurs on the first three paths but different in how it occurs on the fourth? In the first three, C is a <strong>non-collider</strong> on the path, and in the fourth C is a <strong>collider</strong> (See the module on directed graphs for an explanation of colliders and non-colliders). When the conditioning set is empty, non-colliders are active. Intuitively, non-colliders transmit information (dependence). When the conditioning set is empty, colliders are inactive. Intuitively, colliders don’t transmit information (dependence). So when Z is empty, the question of whether X and Y are d-separated by Z in a graph G is very simple: Are there any paths between X and Y that have no colliders? </p>
+<h3 id="Flip-flops"><a href="#Flip-flops" class="headerlink" title="Flip-flops"></a>Flip-flops</h3><p>Now consider what happens when the <strong>conditioning set is not empty</strong>. <strong>When a vertex is in the conditioning set, its status with respect to being active or inactive flip-flops.</strong> Consider the four paths above again, but now lets consider the question of whether the variables A and B are d-separated by C (in boldface). </p>
+<blockquote>
+<p>1) A $\rightarrow$ <strong>C</strong> $\rightarrow$ B inactive<br>2) A $\leftarrow$ <strong>C</strong> $\leftarrow$ B inactive<br>3) A $\leftarrow$ <strong>C</strong> $\rightarrow$ B inactive<br>4) A $\rightarrow$ <strong>C</strong> $\leftarrow$ B active  </p>
+</blockquote>
+<p>In the first three paths, C was active when the conditioning set was empty, so now C is inactive on these paths. To fix intuitions, again interpret the paths causally. In the first case the path from A to B is blocked by conditioning on the intermediary C, similarly in case 2, and in case 3 you are conditioning on a common cause, which makes the effects independent. Philosophers like Reichenbach, Suppes, and Salmon, as well as mathematicians like Markov, worked out this part of the story. Reichenbach called it the “Principle of the Common Cause,” and Markov expressed it as the claim that the present makes the past and future independent, but all were aware that conditioning on a causal intermediary or common cause, which are <strong>non-colliders</strong> in directed graphs interpreted causally, <strong>cuts off dependence</strong> that would otherwise have existed. </p>
+<p>In the fourth case, C is a <strong>collider</strong> and thus inactive when the conditioning set is empty, so <strong>is now active</strong>. This can also be made intuitive by considering what happens when you look at the relationship between two independent causes after you condition on a common effect. Consider an example given by Pearl (1988) in which there are two independent causes of your car refusing to start: having no gas and having a dead battery. </p>
+<blockquote>
+<p>dead battery $\rightarrow$ <strong>car won’t start</strong> $\leftarrow$ no gas</p>
+</blockquote>
+<p>Telling you that the battery is charged tells you nothing about whether there is gas, but telling you that the battery is charged after I have told you that the car won’t start tells me that the gas tank must be empty. So <strong>independent causes are made dependent by conditioning on a common effect</strong>, which in the directed graph representing the causal structure is the same as conditioning on a collider. David Papineau (1985) was the first to understand this case, but never looked at the general connection between directed graphs interpreted causally and conditional independence. </p>
+<p>The final piece of the story involves the <strong>descendants of a collider</strong>. Whereas conditioning on a collider activates it, so does conditioning on any of its descendants. No one understood this case before Pearl and his colleagues. </p>
+<p>We built a Java applet to help you understand active paths and active vertices on the path. You can draw a graph, pick vertices and a conditioning set, and then pick a path between the vertices you have selected. You then must decide which vertices are active or inactive on the path. The applet will give you feedback, and, if you like, explanations. Run the applet on active paths and active vertices.</p>
+<hr>
+<h2 id="D-separation-formally-defined"><a href="#D-separation-formally-defined" class="headerlink" title="D-separation formally defined"></a>D-separation formally defined</h2><p>In this section we define d-separation formally.</p>
+<p>The following terms occur in the definition of d-separation: </p>
+<ul>
+<li><del>undirected</del> directed path,</li>
+<li>collider</li>
+<li>non-collider</li>
+<li>descendant</li>
+</ul>
+<p>Each of them is defined and explained in the module on directed graphs. It is easier to define d-connection, and then define d-separation as the negation of d-connection. </p>
+<p><strong>D-connection</strong>:<br>If G is a directed graph in which X, Y and Z are disjoint sets of vertices, then X and Y are <strong>d-connected</strong> by Z in G if and only if there exists <strong>an <del>undirected</del> directed path U</strong> between some vertex in X and some vertex in Y such that for every collider C on U, either C or a descendent of C is in Z, and no non-collider on U is in Z. </p>
+<p>X and Y are d-separated by Z in G if and only if they are not d-connected by Z in G. </p>
+<p>Since you can’t really learn a definition unless you try to apply it, we built a Java aapplet that lets you experiment with this definition. The applet lets you draw any graph you like, pick vertices and a conditioning set, state your opinion about whether the vertices you have picked are d-separated or d-connected by the conditioning set you have chosen, and finally tells you whether you are right or wrong. Run the applet on the definition of d-separation</p>
+<hr>
+<h2 id="中文小结"><a href="#中文小结" class="headerlink" title="中文小结"></a>中文小结</h2><ul>
+<li><p>有向图：为了表示事物之间的因果关系而产生。路径是从因指向果的。</p>
+</li>
+<li><p>X, Y 关于 Z 条件独立（$X\bot Y | Z$）：<br>如果已知 Z ，则知道了 X 并不会对知道 Y 提供什么帮助。</p>
+</li>
+<li><p>collider：头对头节点，如 A $\rightarrow$ C $\leftarrow$ B 中的 C<br>non-collider：头对尾，尾队尾节点，如 A $\rightarrow$ C $\rightarrow$ B，A $\leftarrow$ C $\rightarrow$ B 中的 C</p>
+</li>
+<li><p>Active vertex:<br>不在 Z 中的 non-collider，在 Z 中的 collider，补充：如果 collider 不在 Z 中，则要求它的所有后继在 Z 中。<br>反之则是 inactive vertex<br>active vertex 可以传递信息和依赖性。</p>
+</li>
+<li><p>Active path 有两个定义：<br>Def 1：可以传递因果信息，或者表示依赖关系的路径。<br>Def 2：path上所有的节点都是 active vertex  </p>
+</li>
+<li><p>A B 关于 Z 是 d-connected：<br>从 A 到 B 的所有 path 中，只要存在一条 active path，就认为A B关于Z是d-connected;<br>反之，则A B关于Z是d-seperated  </p>
+</li>
+<li><p>判断依据<br>X 到 Y 存在一条路，其中所有点都是 active vertex<br>$\Rightarrow$ X 到 Y 存在一条active path<br>$\Rightarrow$ X 与 Y 是 d-connected<br>X 到 Y 的所有路，上面都有至少一个 inactive vertex<br>$\Rightarrow$ X 到 Y 没有active path<br>$\Rightarrow$ X 与 Y 是 d-separated</p>
+</li>
+<li><p>勘误解释<br>原文里面的 undirected 被我改成了 directed，在我原来的认知里，原图是有向图，说里面的路径是无向路径，有点离奇。但是再仔细一想，从 A 连到 B 的路径，并不是按照有向路径的方向来指示的，比如 A $\leftarrow$ C $\rightarrow$ B 这条路，按照有向图的走法，A 是 无论如何走不到 C 和 B 的。所以其实在分析时，是按照无向图的路径走的。</p>
+</li>
+</ul>
+<hr>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>Blalock, H. (Ed.) (1971). Causal Models in the Social Sciences. Aldine-Atherton, Chicago. </p>
+<p>Blalock, H. (1961). Causal Inferences in Nonexperimental Research. University of North Carolina Press, Chapel Hill, NC. </p>
+<p>Costner, H. (1971). Theory, deduction and rules of correspondence. Causal Models in the Social Sciences, Blalock, H. (ed.). Aldine, Chicago. </p>
+<p>Geiger, D. and Pearl, J. (1989b). Axioms and Algorithms for Inferences Involving Conditional Independence. Report CSD 890031, R-119-I, Cognitive Systems Laboratory, University of California, Los Angeles. </p>
+<p>Geiger, D., Verma, T., and Pearl, J. (1990) Identifying independence in Bayesian Networks. Networks 20, 507-533. </p>
+<p>Glymour, C., Scheines, R., Spirtes, P., and Kelly, K. (1987). Discovering Causal Structure. Academic Press, San Diego, CA. </p>
+<p>Kiiveri, H. and Speed, T. (1982). Structural analysis of multivariate data: A review. Sociological Methodology, Leinhardt, S. (ed.). Jossey-Bass, San Francisco. </p>
+<p>Pearl, J. (1988). Probabilistic Reasoning in Intelligent Systems. Morgan and Kaufman, San Mateo. </p>
+<p>Pearl, J. (1995). Causal diagrams for empirical research. Biometrika, 82, pp. 669-710. </p>
+<p>Pearl, J. and Dechter, R. (1989). Learning structure from data: A survey. Proceedings COLT ‘89, 30-244. </p>
+<p>Pearl, J., Geiger, D. and Verma, T. (1990). The logic of influence diagrams. Influence Diagrams, Belief Nets and Decision Analysis. R. Oliver and J. Smith, editors. John Wiley &amp; Sons Ltd. </p>
+<p>Pearl, J. and Verma, T. (1991). A theory of inferred causation. Principles of Knowledge Representation and Reasoning: Proceedings of the Second International Conference, Morgan Kaufmann, San Mateo, CA. </p>
+<p>Pearl, J. and Verma, T. (1990). A Formal Theory of Inductive Causation. Technical Report R-155, Cognitive Systems Labratory, Computer Science Dept. UCLA. </p>
+<p>Pearl, J. and Verma, T. (1987). The Logic of Representing Dependencies by Directed Graphs. Report CSD 870004, R-79-II, University of California at Los Angeles Cognitive Systems Laboratory. </p>
+<p>Richardson, T. (1994). Properties of Cyclic Graphical Models. MS Thesis, Carnegie Mellon University. </p>
+<p>Richardson (1995). A Polynomial-Time Algorithm for Deciding Markov Equivalence of Directed Cyclic Graphical Models, Technical Report PHIL-63, Philosophy Department, Carnegie Mellon University. </p>
+<p>Reichenbach, H. (1956). The Direction of Time. Univ. of California Press, Berkeley, CA. </p>
+<p>Salmon, W. (1980). Probabilistic causality. Pacific Philosophical Quarterly 61, 50-74. </p>
+<p>Spirtes, P. (1994a). “Conditional Independence in Directed Cyclic Graphical Models for Feedback.” Technical Report CMU-PHIL-54, Department of Philosophy, Carnegie Mellon University, Pittsburgh, PA. </p>
+<p>Spirtes, P., Glymour, C., &amp; Scheines, R. (1993). Causation, prediction, and search. Springer-Verlag Lecture Notes in Statistics 81,. Springer-Verlag, NY. </p>
+<p>Spirtes, P., Richardson, T., Meek, C., Scheines, R., and Glymour, C. (1996). Using d-separation to calculate zero partial correlations in linear models with correlated errors. Technical Report CMU-PHIL-72, Dept. of Philosophy, Carnegie Mellon University, Pittsburgh, PA, 15213. </p>
+<p>Suppes, P. (1970). A Probabilistic Theory of Causality. North-Holland, Amsterdam. </p>
+<hr>
+<p>Richard Scheines (R.Scheines@andrew.cmu.edu)/ Carnegie Mellon University</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/%E6%A6%82%E7%8E%87%E5%9B%BE%E6%A8%A1%E5%9E%8B/"># 概率图模型</a>
+                    
+                        <a href="/tag/%E6%9D%A1%E4%BB%B6%E7%8B%AC%E7%AB%8B/"># 条件独立</a>
+                    
+                        <a href="/tag/%E5%9B%A0%E6%9E%9C%E5%9B%BE/"># 因果图</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2018/10/dp-level2/">进击的DP</a>
+            
+            
+            <a class="next" rel="next" href="/2018/10/Nature-What-is-Hidden-Markov-Model/">HMM 的应用之基因检测</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

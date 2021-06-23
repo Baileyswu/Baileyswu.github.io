@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Baileyswu">
+
+
+
+
+
+<title>HMM 的应用之基因检测 | Ugly Gardon</title>
+
+
+
+    <link rel="icon" href="/hollow.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+    src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Ugly Garden</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Ugly Garden</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/friends">Friends</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">HMM 的应用之基因检测</h1>
+            <section class="post-tags">
+                <div>
+                    <span class="tag">
+                        
+                        
+                            <a class="iconfont icon-tags" href="/tag/HMM/">HMM</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E5%9F%BA%E5%9B%A0%E6%A3%80%E6%B5%8B/">基因检测</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E7%94%9F%E7%89%A9/">生物</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Viterbi/">Viterbi</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">论文阅读</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/Nature/">Nature</a>
+                        
+                            <a class="iconfont icon-tags" href="/tag/%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/">序列模型</a>
+                        
+                            
+                    </span>
+                </div>
+                
+                    <div>
+                        <span id="/2018/10/Nature-What-is-Hidden-Markov-Model/" class="leancloud_visitors" data-flag-title="HMM 的应用之基因检测">
+                            <i class="leancloud-visitors-count">101</i>
+                            <em class="post-meta-item-text"> views </em>
+                        </span>
+                    </div>
+                
+            </section>
+
+            
+                <div class="post-meta">
+                    
+                        
+                            <a itemprop="author" rel="author" href="/" class="iconfont icon-resume">Baileyswu</a>
+                        
+                    
+
+                    
+                        <span class="post-category">
+                            
+                                <a class="iconfont icon-category" href="/category/PRML/">PRML</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                        <a href="#">10/08, 2018</a>
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Nature-What-is-Hidden-Markov-Model"><a href="#Nature-What-is-Hidden-Markov-Model" class="headerlink" title="Nature: What is Hidden Markov Model"></a>Nature: What is Hidden Markov Model</h1><p>这是一篇发布在 Nature 上面的文章，作为计算机研究僧，其实不怎么了解 Nature 那一套，然而这篇文章，仅仅是介绍什么叫 HMM ，就光荣发布了，当时距离 HMM 被提出应该也有十几二十年了吧，隔行如隔山，看来生物领域还是很需要计算机专业的人才。稍微扯一点，最近在看《未来简史》，作者在书中就有一个看法，以后人类的发展就要靠计算机和生物科学家，人脑是计算机，而计算机也是人脑。<br><img src="brain.jpg" alt=""></p>
+<ul>
+<li>文章来自 <a target="_blank" rel="noopener" href="https://www.nature.com/articles/nbt1004-1315#ref1">What is a hidden Markov model?</a></li>
+<li>关于 HMM 的详细推导，在<a target="_blank" rel="noopener" href="https://baileyswu.github.io/2018/09/hidden-markov-model/">前面的博客里</a>。</li>
+</ul>
+<h2 id="Motivation-computational-sequence-analysis"><a href="#Motivation-computational-sequence-analysis" class="headerlink" title="Motivation: computational sequence analysis"></a>Motivation: computational sequence analysis</h2><p>生物上可以检测出一系列核苷酸，通过脑海里仅剩的高中生物的知识可以知道它们是 AGCT 里面的一种。<br>一段核苷酸序列组成了一小段基因，基因有显性，隐性，连接子，三种类型。<br>现在需要标注一段核苷酸序列的类型（exons, introns, or intergenic sequence），遇到问题：  </p>
+<ol>
+<li>如何对分类结果进行评分   </li>
+<li>概率的解释，即对评分的信心   </li>
+<li>如何做一个通用的模型，而不是定制化的模型  </li>
+</ol>
+<p>然后需要借助于 HMM，据说HMM的在生物学上的应用有以下几类：<br>genefinding, profile searches, multiple sequence alignment and regulatory site identification</p>
+<h2 id="A-toy-HMM-5′-splice-site-recognition"><a href="#A-toy-HMM-5′-splice-site-recognition" class="headerlink" title="A toy HMM: 5′ splice site recognition"></a>A toy HMM: 5′ splice site recognition</h2><p>下面给出了一个例子：<br>已知核苷酸的类型，找到 exons(E) 和 introns(I) 序列的拼接点 (5) 的位置。<br>E, 5, I 是三个隐状态 state，ACGT是可观测空间状态，概率转移图如下。</p>
+<p><img src="transform.jpg" alt=""></p>
+<p>要计算的是 $\max_z P(x,z|\lambda)$  </p>
+<p>解决方法： <a target="_blank" rel="noopener" href="https://baileyswu.github.io/2018/09/hidden-markov-model/#Viterbi%E7%AE%97%E6%B3%95">Viterbi 算法</a></p>
+<p>问题：</p>
+<ol>
+<li><p>viterbi算法只能找到概率最大的隐序列，其他的隐序列是怎么算出来的呢？<br>由于 5 只能表现为 G，A，取其中一个 G，在 $t_1$ 时刻， $t_1$ 之前DP的过程中只保留了最大概率的路径，到达 $t_1$ 时，不取 $t_1$ 层的概率最大值，只取 G ，再以此为起点继续往后算最大概率的路径。</p>
+</li>
+<li><p>当 $P(x,z_1|\lambda)$ 与 $P(x,z_2|\lambda)$ 非常接近时，怎样描述 confidence？<br>由于本序列的特殊性，所有的 $z$ 可以算出 $P(x,z|\lambda)$ 因此归一化计算某一序列的确信度。验算了一下，作者确实是这样算的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">log_value = [-<span class="number">41.22</span>, -<span class="number">43.90</span>, -<span class="number">43.45</span>, -<span class="number">43.94</span>, -<span class="number">42.58</span>, -<span class="number">41.71</span>]</span><br><span class="line">value = []</span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> log_value:</span><br><span class="line">    value.append(math.exp(x))</span><br><span class="line">normalization(value)</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[0.47365226171675695,</span><br><span class="line">0.03247509303560841,</span><br><span class="line">0.05093108413267137,</span><br><span class="line">0.031201726424101746,</span><br><span class="line">0.1215679574980319,</span><br><span class="line">0.29017187719282955]</span><br></pre></td></tr></table></figure>
+<p>稍微差了一点点是因为作者只标出了6个数据，其余的几个很小就没给。<br>不过，不取 log 不就能体现出概率的不同了嘛，其实 $e^{-41.22}$ 与 $e^{-41.71}$ 差得挺多的。</p>
+</li>
+</ol>
+<h2 id="发现"><a href="#发现" class="headerlink" title="发现"></a>发现</h2><p>在这个例子中状态转移图特别像一个带了概率的自动机，如果对于序列有什么要求，都可以加在状态图里。这令人，又想起了学编译原理的苦逼岁月。<br>还有对于 Viterbi 的改造，可以说也是相当自然的，或者说这是个 Conditional Viterbi，因为要求了必经某个点作为一个条件。<br>另外，这个例子实在有点特别吧，刚好就只有 14 个序列，真实情况下不可能算出所有情况归一化的，一般就除掉分母 $P(x,\lambda)$ 不就好了嘛。<br>还有一点思考就是，计算出一个最有可能的状态序列以后，需不需要验算一下它的转移概率，发射概率，到底和给定的参数差多少呢？这种差异要不要再反馈回去呢？</p>
+<p>OK，有啥讨论的欢迎在下面留言（并没有评论区）。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/HMM/"># HMM</a>
+                    
+                        <a href="/tag/%E5%9F%BA%E5%9B%A0%E6%A3%80%E6%B5%8B/"># 基因检测</a>
+                    
+                        <a href="/tag/%E7%94%9F%E7%89%A9/"># 生物</a>
+                    
+                        <a href="/tag/Viterbi/"># Viterbi</a>
+                    
+                        <a href="/tag/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/"># 论文阅读</a>
+                    
+                        <a href="/tag/Nature/"># Nature</a>
+                    
+                        <a href="/tag/%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/"># 序列模型</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2018/10/D-separation/">D-separation</a>
+            
+            
+            <a class="next" rel="next" href="/2018/09/hidden-markov-model/">隐马尔可夫模型（HMM）</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+
+    <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.2/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<div id="gitalk-container"></div>
+<script type="text/javascript">
+      var gitalk = new Gitalk({
+        clientID: '7ac4af6b2ef79db6191b',
+        clientSecret: 'b5cf578803e18f2c9c3203761db3988e9073361d',
+        repo: 'Baileyswu.github.io',
+        owner: 'Baileyswu',
+        admin: 'Baileyswu',
+        id: location.pathname,
+        labels: 'comments'.split(',').filter(l => l),
+        perPage: 15,
+        pagerDirection: 'first',
+        createIssueManually: true,
+        distractionFreeMode: false
+      })
+      gitalk.render('gitalk-container')
+</script>
+
+
+    <div id="valine-container"></div>
+    <div id="valine_container" class="valine_thread"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    var GUEST_INFO = ['nick','mail','link'];
+    var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+        return GUEST_INFO.indexOf(item) > -1
+    });
+    var valine = new Valine();
+    valine.init({
+        el: '#valine_container',
+        appId: "0Fj98eQg9XCdRJPI2p1yxYCN-gzGzoHsz",
+        appKey: "Qsrhj224GhWhBgFDfnfmuRCD",
+        placeholder: "Listen to Me",
+        pageSize: '10',
+        avatar: 'https://avatars3.githubusercontent.com/u/13285397?s=460&amp;v=4',
+        lang: 'zh-cn',
+        visitor: true
+    })
+</script>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Baileyswu | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>
