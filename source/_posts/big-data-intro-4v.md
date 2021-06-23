@@ -3,7 +3,7 @@ title: 大数据学习——4V
 date: 2021-06-22 22:53:06
 categories: 技术
 tags:
-- “大数据”
+- 大数据
 - 4V
 photos:
 author:
